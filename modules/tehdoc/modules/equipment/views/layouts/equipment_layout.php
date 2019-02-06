@@ -7,10 +7,13 @@ use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
 use app\modules\tehdoc\asset\TehdocAsset;
+use app\modules\tehdoc\modules\equipment\asset\MdeAsset;
 
 AppAsset::register($this);    // регистрация ресурсов всего приложения
 TehdocAsset::register($this);       // регистрация ресурсов модуля
 \app\modules\tehdoc\modules\equipment\asset\EquipmentAsset::register($this);
+MdeAsset::register($this);
+
 ?>
 
 <?php $this->beginPage() ?>

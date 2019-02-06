@@ -123,174 +123,43 @@ $eq_title_hint = 'Обязательное! Необходимо для отоб
         </div>
       </div>
 
-      <div class="padding-v-md">
-        <div class="line line-dashed"></div>
-      </div>
-
-      <?php DynamicFormWidget::begin([
-        'widgetContainer' => 'dynamicform_wrapper', // required: only alphanumeric characters plus "_" [A-Za-z0-9_]
-        'widgetBody' => '.container-items', // required: css class selector
-        'widgetItem' => '.item', // required: css class
-        'limit' => 12, // the maximum times, an element can be cloned (default 999)
-        'min' => 0, // 0 or 1 (default 1)
-        'insertButton' => '.add-item', // css class
-        'deleteButton' => '.remove-item', // css class
-        'model' => $modelsTool[0],
-        'formId' => 'dynamic-form',
-        'formFields' => [
-          'id',
-          'category_id',
-          'eq_title',
-          'eq_manufact',
-          'eq_model',
-          'eq_serial',
-          'eq_factdate',
-          'place_id',
-          'quantity',
-          'imageFiles'
-        ],
-      ]); ?>
-
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <i class="fa fa-random"></i>
-          <button type="button" class="pull-right add-item btn btn-success btn-xs">Добавить</button>
-          <div class="clearfix"></div>
-        </div>
-
-        <div class="panel-body container-items"><!-- widgetContainer -->
-
-          <?php foreach ($modelsTool as $index => $model): ?>
-
-            <div class="item panel panel-default"><!-- widgetBody -->
-              <div class="panel-heading">
-                <span class="panel-title-address"></span>
-                <button type="button" class="pull-right remove-item btn btn-danger btn-xs">Удалить</button>
-                <div class="clearfix"></div>
-              </div>
-              <div class="panel-body">
-                <?php
-                // necessary for update action.
-                if (!$model->isNewRecord) {
-                  echo Html::activeHiddenInput($model, "[{$index}]id");
-                }
-                ?>
-                <div class="row">
-                  <div class="col-sm-6">
-                    <?= $form->field($model, "[{$index}]category_id", [
-                      'template' => '{label} <sup class="h-title fa fa-info-circle req" aria-hidden="true"
-                data-toggle="tooltip" data-placement="top" title="' . $cat_tool_hint . '"></sup>{input}{hint}'])
-                      ->dropDownList($model->toolCategoryList, ['data-name' => 'vks_type', 'prompt' => ['text' => 'Выберите',
-                        'options' => [
-                          'value' => 'none',
-                          'disabled' => 'true',
-                          'selected' => 'true'
-                        ]]])->hint('Выберите категорию', ['class' => ' w3-label-under']); ?>
-                  </div>
-                  <div class="col-sm-6">
-                    <?= $form->field($model, "[{$index}]eq_title", [
-                      'template' => '{label} <sup class="h-title fa fa-info-circle req" aria-hidden="true"
-                data-toggle="tooltip" data-placement="top" title="' . $title_tool_hint . '"></sup>{input}{hint}'])
-                      ->textInput()->hint('Например: Коммутатор с автоопределителем', ['class' => ' w3-label-under']); ?>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6 col-lg-6">
-                    <?= $form->field($model, "[{$index}]eq_manufact")->textInput(['id' => 'manufact'])
-                      ->hint('Например: HP, ACER', ['class' => ' w3-label-under']); ?>
-                  </div>
-                  <div class="col-md-6 col-lg-6">
-                    <?= $form->field($model, "[{$index}]eq_model")->textInput(['id' => 'models'])
-                      ->hint('Например: LJ 1022', ['class' => ' w3-label-under']); ?>
-                  </div>
-                </div><!-- end:row -->
-                <div class="row">
-                  <div class="form-group col-md-6 col-lg-6">
-                    <?= $form->field($model, "[{$index}]eq_serial", [
-                      'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
-                data-toggle="tooltip" data-placement="top" title="' . $serial_hint . '"></sup>{input}{hint}'
-                    ])->textInput()->hint('Например: HRUEO139UI92', ['class' => ' w3-label-under']); ?>
-
-                  </div>
-                  <div class="form-group col-md-6 col-lg-6">
-                    <?= $form->field($model, "[{$index}]eq_factdate", [
-                      'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
-                data-toggle="tooltip" data-placement="top" title="' . $date_hint . '"></sup>{input}{hint}'
-                    ])->textInput([
-                      'class' => 'fact-date form-control'
-                    ])->hint('Выберите дату', ['class' => ' w3-label-under']); ?>
-                  </div>
-
-                </div>
-                <div class="row">
-                  <div class="col-md-8">
-                    <?php
-                    echo $form->field($model, "[{$index}]place_id", [
-                      'template' => '{label} <sup class="h-title fa fa-info-circle req" aria-hidden="true"
-                data-toggle="tooltip" data-placement="top" title="' . $place_hint . '"></sup>{input}{hint}'
-                    ])->dropDownList($model->toolPlacesList, ['data-name' => 'vks_type', 'class' => 'form-control placement',
-                      'prompt' => ['text' => 'Выберите',
-                        'options' => [
-                          'value' => 'none',
-                          'disabled' => 'true',
-                          'selected' => 'true'
-                        ]]])->hint('Выберите место нахождения оборудования', ['class' => ' w3-label-under']);
-                    ?>
-                  </div>
-                  <div class="col-md-4">
-                    <?= $form->field($model, "[{$index}]quantity", [
-                      'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
-                data-toggle="tooltip" data-placement="top" title="' . $quantity_hint . '"></sup>{input}{hint}'
-                    ])->textInput(['class' => 'form-control quantity-input'])->hint('Введите количество',
-                      ['class' => ' w3-label-under']); ?>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="form-group col-md-12 col-lg-12">
-                    <?php
-                    if (!empty($model->photos)) {
-                      $allImages = null;
-                      foreach ($model->photos as $photo) {
-                        $allImages[$index][] = "<img src='" . $photo->getImageUrl() . "' class='file-preview-image' 
+      <?php
+      if (!empty($modelComplex->photos)) {
+        foreach ($modelComplex->photos as $k => $photo) {
+          $allImages[] = "<img src='" . $photo->getImageUrl() . "' class='file-preview-image' 
                           style='max-width:100%;max-height:100%'>";
-                        $previewImagesConfig[$index][] = [
-                          'url' => Url::toRoute(ArrayHelper::merge(['/site/delete-image'], ['id' => $photo->id])),
-                          'key' => $photo->id
-                        ];
-                      }
-                    } else {
-                      $previewImagesConfig[$index] = false;
-                      $allImages[$index] = false;
-                    } ?>
-                    <?= $form->field($fupload, "[{$index}]imageFiles[]")->widget(FileInput::class, [
-                      'language' => 'ru',
-                      'options' => ['multiple' => true],
-                      'pluginOptions' => [
-                        'previewFileType' => 'any',
-                        'initialPreview' => $allImages[$index],
-                        'initialPreviewConfig' => $previewImagesConfig[$index],
-                        'overwriteInitial' => false,
-                        'showUpload' => false,
-                        'showRemove' => false,
-                        'uploadUrl' => Url::to(['/site/file-upload/'])
-                      ]
-                    ]); ?>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-12 col-lg-12">
-                    <?= $form->field($model, "[{$index}]eq_comments")->textArea(array('style' => 'resize:vertical', 'rows' => '2')) ?>
-                  </div>
-                </div>
-              </div>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      </div>
-      <?php DynamicFormWidget::end(); ?>
+          $previewImagesConfig[] = [
+            'url' => Url::toRoute(ArrayHelper::merge(['/tehdoc/kernel/tools/remove-image'], [
+              'id' => $photo->id,
+              '_csrf' => Html::csrfMetaTags()
+            ])),
+            'key' => $photo->id
+          ];
+        }
+      } else {
+        $previewImagesConfig = false;
+        $allImages = false;
+      }
+      ?>
       <div class="row">
         <div class="form-group col-md-12 col-lg-12">
-          <?= $form->field($model, 'eq_comments')->textArea(array('style' => 'resize:vertical', 'rows' => '2')) ?>
+          <?= $form->field($fupload, "imageFiles[]")->widget(FileInput::class, [
+            'language' => 'ru',
+            'options' => ['multiple' => true],
+            'pluginOptions' => [
+              'previewFileType' => 'any',
+              'initialPreview' => $allImages,
+              'initialPreviewConfig' => $previewImagesConfig,
+              'overwriteInitial' => false,
+              'showUpload' => false
+            ],
+          ]); ?>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group col-md-12 col-lg-12">
+          <?= $form->field($modelComplex, 'complex_comments')->textArea(array('style' => 'resize:vertical', 'rows' => '2')) ?>
         </div>
       </div>
 
@@ -350,7 +219,7 @@ $eq_title_hint = 'Обязательное! Необходимо для отоб
   $(document).ready(function () {
     $.ajax({
       type: 'get',
-      url: '/admin/interface/manufact',
+      url: '/tehdoc/control/interface/manufact',
       autoFocus: true,
       success: function (data) {
         manufact = $.parseJSON(data);
@@ -369,7 +238,7 @@ $eq_title_hint = 'Обязательное! Необходимо для отоб
   $(document).ready(function () {
     $.ajax({
       type: 'get',
-      url: '/admin/interface/models',
+      url: '/tehdoc/control/interface/models',
       autoFocus: true,
       success: function (data) {
         models = $.parseJSON(data);

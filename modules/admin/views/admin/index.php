@@ -12,6 +12,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $about = "Панель администрирования";
 
+Yii::$app->cache->flush();
+
 ?>
 <style>
 

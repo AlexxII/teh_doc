@@ -43,10 +43,6 @@ $config = [
     ],
     'sysi' => [
       'class' => 'app\modules\sysi\SysiModule',
-    ],
-    'treemanager' => [
-      'class' => '\kartik\tree\Module',
-      // other module settings, refer detailed documentation
     ]
   ],
   'components' => [

@@ -7,10 +7,9 @@ use app\base\NestedSetsTreeBehavior;
 
 class ComplexEx extends Complex
 {
-
   public static function tableName()
   {
-    return 'teh_complex_test_tbl';
+    return 'teh_c_test_tbl';
   }
 
   public function behaviors() {
@@ -23,7 +22,8 @@ class ComplexEx extends Complex
         'depthAttribute' => 'lvl',
       ],
       'htmlTree'=>[
-        'class' => NestedSetsTreeBehavior::className()
+        'class' => NestedSetsTreeBehavior::className(),
+        'depthAttribute' => 'lvl'
       ]
     ];
   }

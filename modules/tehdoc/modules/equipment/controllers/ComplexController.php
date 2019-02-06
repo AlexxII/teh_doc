@@ -8,6 +8,7 @@ use app\modules\tehdoc\modules\equipment\models\Complex;
 use app\modules\tehdoc\modules\equipment\models\ComplexEx;
 use app\modules\tehdoc\modules\equipment\models\SSP;
 use app\modules\tehdoc\modules\equipment\models\Tools;
+use app\modules\tehdoc\modules\equipment\models\Wiki;
 use yii\base\DynamicModel;
 use yii\web\Controller;
 use Yii;
@@ -23,240 +24,7 @@ class ComplexController extends Controller
     return $this->render('index');
   }
 
-  public function actionCreate()
-  {
-    $modelComplex = new Complex;
-    $modelsTool = [new Tools];
-    $fUpLoad = new Images;
-    $modelComplex->quantity = 1;                             // По умолчанию, кол-во оборудования - 1.php
-    if ($modelComplex->load(Yii::$app->request->post())) {
-      $modelsTool = Model::createMultiple(Tools::class);
-      Model::loadMultiple($modelsTool, Yii::$app->request->post());
-      $modelComplex->parent_id = 0;
-      $modelComplex->id_complex = mt_rand();
-      $valid = $modelComplex->validate();
-      $valid = Model::loadRandom($modelsTool);
-//      return var_dump($valid);
-      $valid = Model::validateMultiple($modelsTool) && $valid;
-      if ($valid) {
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-          if ($flag = $modelComplex->save(false)) {
-            foreach ($modelsTool as $index => $modelTool) {
-              $modelTool->parent_id = $modelComplex->id_complex;          //  наследует от родителя
-              if (!($flag = $modelTool->save(false))) {
-                $transaction->rollBack();
-                Yii::$app->session->setFlash('esrror', 'Оборудование не добавлено');
-                break;
-              }
-              if (!empty(Yii::$app->request->post('Images', []))) {
-                $fUpLoad = new Images();
-                $fUpLoad->imageFiles = UploadedFile::getInstances($fUpLoad, "[{$index}]imageFiles");
-                if ($fUpLoad->uploadImage($modelTool->id_eq)) {
-                  Yii::$app->session->setFlash('succes', 'Оборудование добавлено');
-                } else {
-                  Yii::$app->session->setFlash('error', 'Оборудование добавлено, но не загружены изображения');
-                }
-              } else {
-                Yii::$app->session->setFlash('success', 'Оборудование добавлено');
-              }
-            }
-          }
-          if ($flag) {
-            $transaction->commit();
-            return $this->redirect(['view', 'id' => $modelComplex->id]);
-          }
-        } catch (Exception $e) {
-          Yii::$app->session->setFlash('error', 'Оборудование не добавлено');
-          $transaction->rollBack();
-        }
-      } else {
-        Yii::$app->session->setFlash('error', 'Что-то с валидностью данных');
-      }
-    }
-    return $this->render('create', [
-      'modelComplex' => $modelComplex,
-      'modelsTool' => (empty($modelsTool)) ? [new Tools] : $modelsTool,
-      'fUpload' => (empty($fUpLoad)) ? new Images : $fUpLoad
-    ]);
-  }
-
-  public function actionUpdate($id)
-  {
-    $modelComplex = $this->findModel($id);
-    $modelsTool = $modelComplex->tools;
-    $fUpLoad = new Images();
-//    $fUpLoad = new DynSamicModel(['imageFiles']);
-    if ($modelComplex->load(Yii::$app->request->post())) {
-      $oldIDs = ArrayHelper::map($modelsTool, 'id', 'id');
-      $modelsTool = Model::createMultiple(Tools::class, $modelsTool);
-      $t = ModelEx::loadMultiple($modelsTool, Yii::$app->request->post());
-      $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsTool, 'id', 'id')));
-      // validate all models
-      $valid = $modelComplex->validate();
-
-      //TODO id_eq - для новых tools, но не затронуть старые!!!!!!
-
-      $valid = Model::validateMultiple($modelsTool) && $valid;
-      if ($valid) {
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-          if ($flag = $modelComplex->save(false)) {
-            if (!empty($deletedIDs)) {
-              Tools::deleteAll(['id' => $deletedIDs]);
-            }
-            foreach ($modelsTool as $index => $modelTool) {
-              $modelTool->parent_id = $modelComplex->id_complex;          //  наследует от родителя
-              if (!($flag = $modelTool->save(false))) {
-                $transaction->rollBack();
-                Yii::$app->session->setFlash('error', 'Оборудование не добавлено');
-                break;
-              }
-              if (!empty(Yii::$app->request->post('Images', []))) {
-                $fUpLoad = new Images();
-                $fUpLoad->imageFiles = UploadedFile::getInstances($fUpLoad, "[{$index}]imageFiles");
-                if ($fUpLoad->uploadImage($modelTool->id_eq)) {
-                  Yii::$app->session->setFlash('succes', 'Оборудование добавлено');
-                } else {
-                  Yii::$app->session->setFlash('error', 'Оборудование добавлено, но не загружены изображения');
-                }
-              } else {
-                Yii::$app->session->setFlash('success', 'Оборудование добавлено');
-              }
-            }
-          }
-          if ($flag) {
-            $transaction->commit();
-            return $this->redirect(['view', 'id' => $modelComplex->id]);
-          }
-        } catch (Exception $e) {
-          $transaction->rollBack();
-          Yii::$app->session->setFlash('error', 'Оборудование не добавлено');
-        }
-      }
-      Yii::$app->session->setFlash('error', 'Валидацияяяяяяяяяяяяяяяяяяяяяяяя');
-    }
-    return $this->render('update', [
-      'modelComplex' => $modelComplex,
-      'modelsTool' => (empty($modelsTool)) ? [new Tools] : $modelsTool,
-      'fUpload' => $fUpLoad,
-    ]);
-  }
-
-  public function actionView($id)
-  {
-    $model = $this->findModel($id);
-    $modelsTool = $model->tools;
-    return $this->render('view', [
-      'modelComplex' => $model,
-      'modelsTool' => $modelsTool,
-    ]);
-  }
-
-  public function actionDelete()
-  {
-    $report = true;
-    foreach ($_POST['jsonData'] as $d) {
-      $model = $this->findModel($d);
-      foreach ($model->tools as $tool) {
-        $photos = $tool->photos;
-        foreach ($photos as $photo) {
-          $fName = \Yii::$app->params['uploadPath'] . $photo->image_path;
-          if (file_exists($fName)) {
-            unlink($fName);
-          }
-          $photo->delete();
-        }
-//          Photo::deleteAll(['eq_id' => $tool->id]);
-        $tool->delete();
-      }
-      $report = $model->delete();
-    }
-    if ($report) {
-      return true;
-    }
-    return false;
-  }
-
-  public function actionDeleteSingle($id)
-  {
-    $model = $this->findModel($id);
-    $photos = $model->photos;
-    if ($model->delete()) {
-      Yii::$app->session->setFlash('success', 'Оборудование удалено');
-      return $this->redirect(['index']);
-    }
-    Yii::$app->session->setFlash('error', 'Удалить оборудование не удалось');
-    return $this->redirect(['index']);
-  }
-
-  protected function findModel($id)
-  {
-    if (($model = Complex::findOne( $id)) !== null) {
-      return $model;
-    } else {
-      throw new NotFoundHttpException('Запрошенная страница не существует.');
-    }
-  }
-
-  public function actionServerSide()
-  {
-    $table = 'teh_complex_tbl';
-    $primaryKey = 'id';
-    $columns = array(
-      array('db' => 'id', 'dt' => 0),
-      array('db' => 'complex_title', 'dt' => 1),
-      array('db' => 'complex_manufact', 'dt' => 2),
-      array('db' => 'complex_model', 'dt' => 3),
-      array('db' => 'complex_serial', 'dt' => 4),
-      array(
-        'db' => 'complex_factdate',
-        'dt' => 5,
-        'formatter' => function ($d, $row) { //TODO разобраться с форматом отображения даты
-          if ($d != null) {
-            return date('jS M y', strtotime($d));
-          } else {
-            return '-';
-          }
-        }
-      ),
-      array(
-        'db' => 'quantity',
-        'dt' => 6,
-        'formatter' => function ($d, $row) { //TODO
-          return $d . ' шт.';
-        }
-      )
-    );
-
-    $sql_details = \Yii::$app->params['sql_details'];
-
-    if (isset($_GET['lft'])) {
-      if ($_GET['lft']) {
-        $lft = (int)$_GET['lft'];
-        $rgt = (int)$_GET['rgt'];
-        $root = (int)$_GET['root'];
-        $table_ex = (string)$_GET['db_tbl'];
-        $identifier = (string)$_GET['identifier'];
-        $where = ' ' . $identifier . ' in (SELECT id
-    FROM ' . $table_ex . '
-      WHERE ' . $table_ex . '.lft >= ' . $lft .
-          ' AND ' . $table_ex . '.rgt <= ' . $rgt .
-          ' AND ' . $table_ex . '.root = ' . $root . ')';
-        return json_encode(
-          SSP::complex($_GET, $sql_details, $table, $primaryKey, $columns, NULL, $where)
-        );
-      }
-    }
-    return json_encode(
-      SSP::simple($_GET, $sql_details, $table, $primaryKey, $columns)
-    );
-  }
-
-
-  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-  public function actionComplexEx()
+  public function actionComplexes()
   {
     $id = ComplexEx::find()->select('id, rgt, lft, root')->all();
     if (!$id) {
@@ -268,43 +36,108 @@ class ComplexController extends Controller
     return json_encode($roots);
   }
 
-  public function actionComplexExCreate($parentTitle, $title)
+  public function actionCreate($parentId, $title)
   {
     $data = [];
-    $category = ComplexEx::findOne(['name' => $parentTitle]);
-    $newTool = new ComplexEx(['name' => $title]);
-    $newTool->parent_id = $category->id;
-    $newTool->complex_title = $title;
-    $newTool->id_complex = mt_rand();
-    $newTool->category_id = 0;
-    $newTool->place_id = 0;
-    $newTool->appendTo($category);
-    $data['acceptedTitle'] = $title;
+    $date = date('Y-m-d H:i:s');
+    $parentOrder = ComplexEx::findOne($parentId);
+    $newComplex = new ComplexEx(['name' => $title]);
+    $newComplex->parent_id = $parentOrder->ref;
+    $newComplex->ref = mt_rand();
+    $newComplex->key = $newComplex->ref;
+    $newComplex->complex_title = $title;
+
+    $newWiki = new Wiki();
+    $newWiki->eq_ref = $newComplex->ref;
+    $newWiki->wiki_title = 'Home';
+    $newWiki->wiki_record_create = $date;
+    $newWiki->wiki_record_update = $date;
+    $newWiki->wiki_created_user = Yii::$app->user->identity->ref;
+
+    if ($newComplex->appendTo($parentOrder)){
+      $newWiki->save();
+      $data['acceptedTitle'] = $title;
+      $data['acceptedId'] = $newComplex->id;
+      $data['acceptedRef'] = $newComplex->ref;
+      return json_encode($data);
+    }
+    $data = $newComplex->getErrors();
     return json_encode($data);
   }
 
-  public function actionCreateRoot($title)
+  public function actionUpdate($id, $title)
   {
-    $newRoot = new ComplexEx(['name' => $title]);
-    $result = $newRoot->makeRoot();
-    if ($result) {
+    $order = ComplexEx::findOne(['ref' => $id]);
+    $order->name = $title;
+    if ($order->save()) {
       $data['acceptedTitle'] = $title;
       return json_encode($data);
-    } else {
-      return var_dump('0');
     }
+    return false;
   }
 
-  public function actionUpdateNode($id, $title)
+  public function actionUpdateC($id)
   {
-    $category = ComplexEx::findOne(['id' => $id]);
-    $category->name = $title;
-    $category->complex_title = $title;
-    $category->save();
-    return true;
+    $model = $this->findModel($id);
+    $fUpload = new Images();
+
+    if ($model->load(Yii::$app->request->post())) {
+      if ($model->save(false)) {                                    // TODO Разобраться с валидацией, при вкл - не сохраняет
+        if ($fUpload->load(Yii::$app->request->post())) {
+          $fUpload->imageFiles = UploadedFile::getInstances($fUpload, 'imageFiles');
+          if ($fUpload->uploadImage($model->ref)) {
+            Yii::$app->session->setFlash('success', 'Изменения внесены');
+          }
+        } else {
+          Yii::$app->session->setFlash('success', 'Изменения внесены!!');
+        }
+        return $this->redirect(['view', 'id' => $model->ref]);
+      } else {
+        Yii::$app->session->setFlash('error', 'Изменения НЕ внесены');
+      }
+    }
+    return $this->render('update', [
+      'model' => $model,
+      'fupload' => $fUpload,
+    ]);
   }
 
-  public function actionMove($item, $action, $second, $parent)
+  public function actionCreateC($id)
+  {
+    $modelComplex = new ComplexEx();
+    $fUpload = new Images();
+    $modelComplex->quantity = 1;                             // По умолчанию, кол-во оборудования - 1.php
+
+    if ($modelComplex->load(Yii::$app->request->post())) {
+      $modelComplex->ref = mt_rand();
+      $modelComplex->parent_id = 0;
+      if ($modelComplex->save()) {
+        if ($fUpload->load(Yii::$app->request->post())) {
+          $fUpload->imageFiles = UploadedFile::getInstances($fUpload, 'imageFiles');
+          if ($fUpload->uploadImage($modelComplex->ref)) {
+            Yii::$app->session->setFlash('success', 'Оборудование добавлено');
+          } else {
+            Yii::$app->session->setFlash('success', 'Оборудование добавлено, <strong>НО</strong> не загружены изображения');
+          }
+        } else {
+          Yii::$app->session->setFlash('success', 'Оборудование добавлено');
+        }
+        if (isset($_POST['stay'])) {
+          return $this->redirect(['create']);
+        }
+        return $this->redirect(['view', 'id' => $modelComplex->ref]);
+      } else {
+        Yii::$app->session->setFlash('error', 'Ошибка валидации');
+      }
+    }
+    return $this->render('create', [
+      'modelComplex' => $modelComplex,
+      'fupload' => $fUpload
+    ]);
+  }
+
+
+  public function actionMove($item, $action, $second, $parentId)
   {
     $item_model = ComplexEx::findOne($item);
     $second_model = ComplexEx::findOne($second);
@@ -319,15 +152,15 @@ class ComplexController extends Controller
         $item_model->appendTo($second_model);
         break;
     }
-    $parent = ComplexEx::findOne(['name' => $parent]);
-    $item_model->parent_id = $parent->id;
+    $parent = ComplexEx::findOne($parentId);
+    $item_model->parent_id = $parent->ref;
     if ($item_model->save()) {
       return true;
     }
     return false;
   }
 
-  public function actionDeleteNode()
+  public function actionDelete()
   {
     if (!empty($_POST)) {
       // TODO: удаление или невидимый !!!!!!!
@@ -346,51 +179,58 @@ class ComplexController extends Controller
     $root->deleteWithChildren();
   }
 
-  public function actionSurnames($id)
-  {
-    $model = ComplexEx::findOne(['id' => $id]);
-    return json_encode($model->surnames);
-  }
-
-  public function actionSurnamesSave()
+  public function actionInfo()
   {
     if (!empty($_POST)) {
       $id = $_POST['id'];
-      $model = ComplexEx::findOne(['id' => $id]);
-      $model->surnames = $_POST['Data'];
-      if ($model->save()) {
-        return true;
-      }
-      return false;
+      return $this->renderPartial('info/view', [
+        'model' => $this->findModel($id),
+      ]);
     }
+    return false;
   }
-
-  public function actionMain()
-  {
-    $model = new Tools();
-    $fUpload = new Images();
-    return $this->renderPartial('_form_update', [
-      'model' => $model,
-      'fUpload' => $fUpload
-    ]);
-  }
-
 
   public function actionFiles()
   {
-    return 'Files';
+    if (!empty($_POST)) {
+      $id = $_POST['id'];
+      return $this->renderPartial('files/index', [
+        'model' => $this->findModel($id),
+      ]);
+    }
+    return false;
   }
 
   public function actionWiki()
   {
-    return 'Wiki';
+    if (!empty($_POST)) {
+      $id = $_POST['id'];
+      return $this->renderPartial('wiki/index', [
+        'model' => $this->findModel($id),
+      ]);
+    }
+    return false;
   }
 
   public function actionLog()
   {
-    return 'Лог';
+    if (!empty($_POST)) {
+      $id = $_POST['id'];
+      return $this->renderPartial('log/index', [
+        'model' => $this->findModel($id),
+      ]);
+    }
+    return false;
   }
 
-
+  protected function findModel($id)
+  {
+    if (($model = ComplexEx::find()->where(['ref' => $id])->limit(1)->all()) !== null) {
+      if (!empty($model)) {
+        return $model[0];
+      }
+    }
+    throw new NotFoundHttpException('The requested page does not exist.');
+  }
 
 }

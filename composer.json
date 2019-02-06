@@ -22,7 +22,9 @@
         "bower-asset/fancytree": "^2.30",
         "kartik-v/yii2-widget-fileinput": "dev-master",
         "creocoder/yii2-nested-sets": "0.9.*",
-        "wokster/yii2-nested-sets-tree-behavior": "*"
+        "wokster/yii2-nested-sets-tree-behavior": "*",
+        "asinfotrack/yii2-wiki": "dev-master",
+        "bower-asset/simplemde": "^1.11"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

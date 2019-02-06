@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 <div class="row">
-  <div class="col-lg-3 col-md-4 col-sm-6 placeholder about" style="cursor: pointer" data-url="tehdoc/equipment/tools">
+  <div class="col-lg-3 col-md-4 col-sm-6 placeholder about" style="cursor: pointer" data-url="tehdoc/equipment/complex">
     <h2>Оборудование</h2>
     <i class="fa fa-microchip" aria-hidden="true" style="font-size: 120px"></i>
     <div class="text-muted" style="font-size: 20px">Перечень оборудования</div>
