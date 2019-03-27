@@ -136,7 +136,7 @@ require 'to_array.php';
     var table = $('#main-table').DataTable({
       "columnDefs": [
         {"visible": false, "targets": 1},
-        {"visible": false, "targets": 4},
+        {"visible": false, "targets": 4}
       ],
       orderFixed: [[4, 'desc']],
       order: [[1, 'desc']],
