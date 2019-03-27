@@ -1,8 +1,2 @@
-
-console.php
-db.php
-params.php
-sql_details.php
-test.php
-test_db.php
-web.php
+*
+!.gitignore

@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
   </div>
 
   <?= $this->render('index', [
-    'photos' => $photos
+    'photoModels' => $photoModels
   ]) ?>
 
 </div>

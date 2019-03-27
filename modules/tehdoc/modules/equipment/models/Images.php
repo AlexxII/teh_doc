@@ -34,7 +34,7 @@ class Images extends ActiveRecord        // модель для добавлен
       [['image_path', 'eq_id'], 'safe'],
       [['imageFiles'], 'file',
         'extensions' => 'jpg, gif, png, jpeg',
-        'maxFiles' => 10,
+        'maxFiles' => 10
       ]
     ];
   }
@@ -52,8 +52,7 @@ class Images extends ActiveRecord        // модель для добавлен
       $ext = $image->extension;
       $image_path = \Yii::$app->security->generateRandomString() . ".{$ext}";   // для сохранения в БД
       $path = \Yii::$app->params['uploadImg'] . $image_path;
-      $result = $image->saveAs($path, false);
-      if ($result) {
+      if ($image->saveAs($path, false)) {
         $model = new Images();
         $model->eq_id = $id;
         $model->image_path = $image_path;
@@ -63,8 +62,8 @@ class Images extends ActiveRecord        // модель для добавлен
         $model->save();
         $flag = true;
       }
-      return $flag;
     }
+    return $flag;
   }
 
   public function getImageFile()
@@ -81,6 +80,13 @@ class Images extends ActiveRecord        // модель для добавлен
   public static function getDefaultPhotoUrl()
   {
     return \Yii::$app->params['uploadUrlImg'] . '/' . 'image_not_found.jpg';
+  }
+
+  public function getUploadDate()
+  {
+    if ($this->upload_time){
+      return strftime("%e %b %G", strtotime($this->upload_time));
+    }
   }
 
 }

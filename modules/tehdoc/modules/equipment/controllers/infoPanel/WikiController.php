@@ -132,15 +132,33 @@ class WikiController extends Controller
     return false;
   }
 
+
+  public function actionDeletePage()
+  {
+    if ($_GET['id']){
+      $id = $_GET['id'];
+      $model = $this->findModel($id);
+      if ($model->delete()) {
+        Yii::$app->session->setFlash('success', 'Страница удалена');
+        return $this->redirect(['index']);
+      }
+      Yii::$app->session->setFlash('error', 'Удалить страницу не удалось');
+      return $this->redirect(['index']);
+
+    }
+    return false;
+  }
+
+
   protected function findModel($id)
   {
     // TODO не ососбо правильный метод поиска
     if (($model = Wiki::find()->where(['id' => $id])->limit(1)->all()) !== null) {
       if (!empty($model)) {
-        return $model[0];
+        return $model;
       }
     }
-    throw new NotFoundHttpException('The requested page does not exist.');
+    throw new NotFoundHttpException('К сожалению страница не найдена.');
   }
 
 }

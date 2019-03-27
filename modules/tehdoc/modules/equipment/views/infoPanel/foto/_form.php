@@ -18,17 +18,16 @@ use kartik\file\FileInput;
     ]); ?>
     <div class="row">
       <div class="col-md-12 col-lg-12">
-        <?= $form->field($model, "imageFiles")->widget(FileInput::class, [
+        <?= $form->field($model, "imageFiles[]")->widget(FileInput::class, [
           'language' => 'ru',
-          'options' => ['multiple' => false],
+          'options' => ['multiple' => true],
           'pluginOptions' => [
-            'showPreview' => true,
+            'maxFileCount' => 15,
+            'uploadUrl' => Url::to(['file-upload']),
             'showUpload' => false,
-            'showCaption' => true,
-            'showRemove' => true,
-            'browseLabel' => '',
-            'removeLabel' => '',
-          ]
+            'previewFileType' => 'any',
+            'overwriteInitial' => false
+          ],
         ]); ?>
       </div>
     </div>

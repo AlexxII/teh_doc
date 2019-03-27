@@ -26,6 +26,7 @@ $placeholder = 'Название страницы';
         </div>
       </div>
       <div class="form-group" style="text-align: right">
+        <a id="delete-page" data-id="<?= $model->id ?>" class="btn btn-sm btn-danger">Удалить</a>
         <a onclick="history.back();" class="btn btn-sm btn-primary">Отмена</a>
         <?= Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => 'btn btn-sm btn-success']) ?>
       </div>
@@ -57,5 +58,33 @@ $placeholder = 'Название страницы';
         title: "Справка",
       }]
     });
-  })
+
+    $('#delete-page').on('click', function (e) {
+      e.preventDefault();
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Вы действительно хотите удалить страницу?',
+        type: 'red',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-danger',
+            action: function () {
+              var wikiId = $('#delete-page').data('id');
+              jc.close();
+              window.location.href = 'delete-page?id=' + wikiId;
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
+          }
+        }
+      });
+    })
+  });
+
 </script>
