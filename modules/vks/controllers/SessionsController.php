@@ -94,7 +94,21 @@ class SessionsController extends Controller
     if (empty($index)){
       $index = 0;
     }
-    $where = 'vks_upcoming_session = 1 AND vks_cancel = ' . $index;
+
+    if ($_GET['stDate']){
+      $startDate = $_GET['stDate'];
+    } else {
+      $startDate = "1970-01-01";
+    }
+    if ($_GET['eDate']){
+      $endDate = $_GET['eDate'];
+    } else {
+      $endDate = "2099-12-31";
+    }
+
+
+//    $where = 'vks_upcoming_session = 1 AND vks_cancel = ' . $index;
+    $where = ' ' . $table . '.vks_upcoming_session = 1 AND Date(vks_date) >= "' . $startDate . '" AND Date(vks_date) <= "' . $endDate . '" AND vks_cancel = 0';
 
     return json_encode(
       SSP::complex($_GET, $sql_details, $table, $primaryKey, $columns, NULL, $where)

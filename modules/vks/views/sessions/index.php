@@ -1,6 +1,9 @@
 <?php
 
 use yii\helpers\Html;
+use app\modules\vks\assets\AnalyticsAsset;
+
+AnalyticsAsset::register($this);
 
 $this->title = 'Журнал предстоящих сеансов видеосвязи';
 $this->params['breadcrumbs'][] = ['label' => 'ВКС', 'url' => ['/vks']];
@@ -9,6 +12,7 @@ $this->params['breadcrumbs'][] = "Журнал";
 $about = "Журнал предстоящих сеансов видеосвязи";
 $add_hint = 'Добавить предстоящий сеанс';
 $dell_hint = 'Удалить выделенные сеансы';
+$date_about = "Выберите период";
 
 Yii::$app->cache->flush();
 ?>
@@ -40,7 +44,7 @@ Yii::$app->cache->flush();
 
 <div class="row">
   <div class="">
-    <div class="container-fluid" style="margin-bottom: 20px">
+    <div class="container-fluid" style="margin-bottom: 20px;position: relative">
       <?= Html::a('Добавить',
         ['create-up-session'], [
           'class' => 'btn btn-success btn-sm',
@@ -57,10 +61,20 @@ Yii::$app->cache->flush();
           'data-placement' => "top",
           'title' => $dell_hint,
         ]) ?>
+      <div style="position: absolute;top:0px;right: 15px;width:185px">
+        <label class="h-title fa fa-info-circle" data-toggle="tooltip" data-placement="left"
+               title="<?php echo $date_about ?>"
+               style="position: absolute;top:13px;right:190px"></label>
+        <input class="form-control input-sm" id="vks-dates" style="margin-top:5px;po" type="text" data-range="true"
+               data-multiple-dates-separator=" - " placeholder="Выберите период"/>
+      </div>
     </div>
   </div>
 
   <div class="container-fluid">
+    <input class="start-date" style="display: none">
+    <input class="end-date" style="display: none">
+
     <?php
 
     echo '
@@ -91,9 +105,22 @@ Yii::$app->cache->flush();
 
 
 <script>
-  // $(document).ready(function () {
-  //     $('[data-toggle="tooltip"]').tooltip();
-  // });
+
+  $(document).ready(function () {
+      $('#vks-dates').datepicker({
+          clearButton: true,
+          onHide: function (dp, animationCompleted) {
+              if (animationCompleted) {
+                  var range = $('#vks-dates').val();
+                  var stDate = range.substring(6, 10) + '-' + range.substring(3, 5) + '-' + range.substring(0, 2);
+                  var eDate = range.substring(19, 24) + '-' + range.substring(16, 18) + '-' + range.substring(13, 15);
+                  $(".start-date").val(stDate);
+                  $(".end-date").val(eDate);
+                  $("#main-table").DataTable().clearPipeline().draw();
+              }
+          }
+      });
+  });
 
   // ************************* Работа таблицы **************************************
 
@@ -201,11 +228,30 @@ Yii::$app->cache->flush();
           $('td', nRow).css('background-color', '#dff0d8');
         }
       },
-      "ajax": $.fn.dataTable.pipeline({
-        url: '/vks/sessions/server-side?index=0',
-        pages: 2 // number of pages to cache
-      }),
+        "ajax": $.fn.dataTable.pipeline({
+            url: '/vks/sessions/server-side?index=0',
+            pages: 2, // number of pages to cache
+            data: function () {
+                var stDt = $(".start-date").val();
+                var eDt = $(".end-date").val();
+                if (stDt != '--') {
+                    var startDate = stDt;
+                } else {
+                    var startDate = '1970-01-01';
+                }
+                if (eDt != '--') {
+                    var endDate = eDt;
+                } else {
+                    var endDate = '2099-12-31';
+                }
+                return {
+                    'stDate': startDate,
+                    'eDate': endDate
+                }
+            }
+        }),
       orderFixed: [2, 'asc'],
+      order: [3, 'asc'],
       rowGroup: {
         dataSrc: 2
       },

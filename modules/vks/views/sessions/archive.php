@@ -185,7 +185,7 @@ $dell_hint = 'Удалить выделенные сеансы';
         url: '/vks/sessions/server-side-ex?index=0',
         pages: 2 // number of pages to cache
       }),
-      orderFixed: [2, 'asc'],
+      orderFixed: [2, 'desc'],
       rowGroup: {
         dataSrc: 2
       },

@@ -3,8 +3,8 @@
 return [
     'class' => 'yii\db\Connection',
     'dsn' => 'mysql:host=localhost;dbname=tehdoc',
-    'username' => 'user',
-    'password' => '16PkjVzk:tk',
+    'username' => 'tehuser',
+    'password' => '65<tcVeh',
     'charset' => 'utf8',
     'enableSchemaCache' => true,
   // Продолжительность кеширования схемы.
