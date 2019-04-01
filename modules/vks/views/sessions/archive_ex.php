@@ -8,7 +8,7 @@ $this->title = 'Архив удаленных сеансов видеосвяз�
 $this->params['breadcrumbs'][] = ['label' => 'ВКС', 'url' => ['/vks']];
 $this->params['breadcrumbs'][] = "Архив";
 
-$about = "Архив сеансов видеосвязи, которые были удалены из архива";
+$about = "Перечань сеансов видеосвязи, которые были удалены из архива журнала ВКС";
 $add_hint = 'Добавить сеанс';
 $dell_hint = 'Удалить выделенные сеансы';
 $return_hint = 'Восстановить удаленные сеансы';
@@ -283,10 +283,9 @@ $return_hint = 'Восстановить удаленные сеансы';
             btnClass: 'btn-danger',
             action: function () {
               jc.close();
-              if (remoteProcess(url)) {
-                $('#return').attr('disabled', true);
-                $('#delete').attr('disabled', true);
-              }
+              remoteProcess(url)
+              $('#return').attr('disabled', true);
+              $('#delete').attr('disabled', true);
             }
           },
           cancel: {
@@ -299,7 +298,7 @@ $return_hint = 'Восстановить удаленные сеансы';
     });
 
     $('#return').click(function (event) {
-      var url = "/vks/sessions/restore23";
+      var url = "/vks/sessions/restore";
       event.preventDefault();
       if ($(this).attr('disabled')) {
         return;
@@ -316,10 +315,9 @@ $return_hint = 'Восстановить удаленные сеансы';
             btnClass: 'btn-info',
             action: function () {
               jc.close();
-              if (remoteProcess(url)) {
-                $('#return').attr('disabled', true);
-                $('#delete').attr('disabled', true);
-              }
+              remoteProcess(url)
+              $('#return').attr('disabled', true);
+              $('#delete').attr('disabled', true);
             }
           },
           cancel: {
@@ -372,6 +370,8 @@ $return_hint = 'Восстановить удаленные сеансы';
                 action: function () {
                   $("#main-table").DataTable().clearPipeline().draw();
                   $('.hiddendel').hide();
+                  $('#return').attr('disabled', true);
+                  $('#delete').attr('disabled', true);
                 }
               }
             }

@@ -61,7 +61,7 @@ class VksSessions extends \yii\db\ActiveRecord
       'vks_duration_teh', 'vks_duration_work',
       'vks_order', 'vks_order_text',
       'vks_employee_receive_msg', 'vks_receive_msg_datetime', 'vks_employee_send_msg',
-      'vks_comments', 'vks_record_create', 'vks_record_update'
+      'vks_comments', 'vks_record_create', 'vks_record_update', 'combined'
     ];
     $scenarios[self::SCENARIO_CONFIRM] = [
       'vks_date',
@@ -76,7 +76,7 @@ class VksSessions extends \yii\db\ActiveRecord
       'vks_employee',
       'vks_employee_receive_msg', 'vks_receive_msg_datetime', 'vks_employee_send_msg_text',
       'vks_subscriber_reg_office', 'vks_subscriber_reg_office_text',
-      'vks_record_create', 'vks_record_update'
+      'vks_record_create', 'vks_record_update', 'combined'
     ];
     return $scenarios;
   }
@@ -96,7 +96,7 @@ class VksSessions extends \yii\db\ActiveRecord
         'vks_place',
         'vks_equipment',
         'vks_employee',
-        'vks_subscriber_reg_office',
+        'vks_subscriber_reg_office', 'combined'
       ], 'required', 'on' => self::SCENARIO_CONFIRM],
       ['vks_remarks', 'trim'],
       [['vks_date', 'vks_place', 'vks_teh_time_start', 'vks_teh_time_end',
@@ -106,7 +106,7 @@ class VksSessions extends \yii\db\ActiveRecord
         'vks_duration_teh', 'vks_duration_work',
         'vks_order', 'vks_order_number', 'vks_order_date', 'vks_equipment',
         'vks_type_text', 'vks_place_text', 'vks_order_text', 'vks_subscriber_office_text',
-        'vks_subscriber_reg_office_text', 'vks_employee_send_msg_text'], 'safe'],
+        'vks_subscriber_reg_office_text', 'vks_employee_send_msg_text', 'combined'], 'safe'],
     ];
   }
 
@@ -141,7 +141,8 @@ class VksSessions extends \yii\db\ActiveRecord
       'vks_employee_send_msg' => 'Передавший сообщение:',
       'vks_comments' => 'Примечание:',
       'vks_record_create' => 'Запись создана:',
-      'vks_record_update' => 'Запись обновлена:'
+      'vks_record_update' => 'Запись обновлена:',
+      'combined' => 'Важность'
     ];
   }
 

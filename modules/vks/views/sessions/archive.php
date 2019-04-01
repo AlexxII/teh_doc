@@ -279,9 +279,7 @@ $dell_hint = 'Удалить выделенные сеансы';
             btnClass: 'btn-danger',
             action: function () {
               jc.close();
-              if (deleteProcess(url)) {
-                $('#delete').attr('disabled', true);
-              }
+              deleteProcess(url)
             }
           },
           cancel: {
@@ -333,7 +331,7 @@ $dell_hint = 'Удалить выделенные сеансы';
                 btnClass: 'btn-success',
                 action: function () {
                   $("#main-table").DataTable().clearPipeline().draw();
-                  $('.hiddendel').hide();
+                  $('#delete').attr('disabled', true);
                 }
               }
             }

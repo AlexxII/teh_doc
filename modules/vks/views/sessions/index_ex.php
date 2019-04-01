@@ -295,7 +295,7 @@ $return_hint = 'Восстановить удаленные сеансы';
   });
 
 
-  //********************** Удаление записей ***********************************
+  //********************** Удаление и восстановление записей ***********************************
 
   $(document).ready(function () {
     $('#delete').click(function (event) {
@@ -349,10 +349,7 @@ $return_hint = 'Восстановить удаленные сеансы';
             btnClass: 'btn-info',
             action: function () {
               jc.close();
-              if (remoteProcess(url)) {
-                $('#return').attr('disabled', true);
-                $('#delete').attr('disabled', true);
-              }
+              remoteProcess(url)
             }
           },
           cancel: {
@@ -363,7 +360,6 @@ $return_hint = 'Восстановить удаленные сеансы';
         }
       })
     });
-
 
     function remoteProcess(url) {
       var csrf = $('meta[name=csrf-token]').attr("content");
@@ -404,7 +400,8 @@ $return_hint = 'Восстановить удаленные сеансы';
                 btnClass: 'btn-success',
                 action: function () {
                   $("#main-table").DataTable().clearPipeline().draw();
-                  return true;
+                  $('#return').attr('disabled', true);
+                  $('#delete').attr('disabled', true);
                 }
               }
             }
