@@ -219,13 +219,23 @@ Yii::$app->cache->flush();
       "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
         var today = new Date();
         var date = aData[1];
+        var important = aData[10];
         var pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
         var dt = new Date(date.replace(pattern, '$3-$2-$1'));
+        if (important == 1) {
+          $(nRow.cells[0]).css('color', 'red');
+          $(nRow.cells[0]).css('font-weight', '600');
+          // $(nRow.cells[0]).css('background-image', 'url("/lib/_warning.webp")');
+          // $(nRow.cells[0]).css('background-repeat', 'no-repeat');
+          // $(nRow.cells[0]).css('background-size', '20px 20px');
+          // $(nRow.cells[0]).css('background-position', '90% 5%');
+
+        }
         if (moment().isAfter(dt, 'day')) {
-          $('td', nRow).css('background-color', '#f2dede');
+          $('td', nRow).css('background-color', '#faeeec');
         }
         else if (moment().isSame(dt, 'day')) {
-          $('td', nRow).css('background-color', '#dff0d8');
+          $('td', nRow).css('background-color', '#e4f0dc');
         }
       },
         "ajax": $.fn.dataTable.pipeline({
@@ -265,7 +275,7 @@ Yii::$app->cache->flush();
             "<a href='#' class='fa fa-edit edit' style='padding-right: 5px' title='Обновить' data-placement='top' data-toggle='tooltip'></a>" +
             "<a href='#' class='fa fa-info view' title='Подробности' style='padding-right: 5px'></a>" +
             "<a href='#' class='fa fa-calendar-check-o confirm' title='Подтвердить сеанс' style='padding-right: 5px'></a>"
-            // "<a href='#' class='fa fa-calendar-minus-o abort' title='Отменить сеанс'></a>"
+          // "<a href='#' class='fa fa-calendar-minus-o abort' title='Отменить сеанс'></a>"
         }, {
           "orderable": false,
           "className": 'select-checkbox',
@@ -337,6 +347,7 @@ Yii::$app->cache->flush();
     });
     table.on('deselect', function (e, dt, type, indexes) {
       if (type === 'row') {
+        if (table.rows({selected: true}).count() > 0) return;
         $('.hiddendel').hide();
       }
     });
@@ -348,6 +359,36 @@ Yii::$app->cache->flush();
   $(document).ready(function () {
     $('.hiddendel').click(function (event) {
       event.preventDefault();
+      var url = "/vks/sessions/delete";
+      if ($(this).attr('disabled')) {
+        return;
+      }
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Вы действительно хотите удалить выделенное?',
+        type: 'red',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-danger',
+            action: function () {
+              jc.close();
+              deleteProcess(url);
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
+          }
+        }
+      });
+    });
+
+
+    function deleteProcess(url) {
       var csrf = $('meta[name=csrf-token]').attr("content");
       var table = $('#main-table').DataTable();
       var data = table.rows({selected: true}).data();
@@ -356,29 +397,85 @@ Yii::$app->cache->flush();
       for (var i = 0; i < count; i++) {
         ar[i] = data[i][0];
       }
-      if (confirm('Вы действительно хотите удалить выделенные сеансы? Выделено ' + data.length + '!!!  ')) {
-        $(".modal").modal("show");
-        $.ajax({
-          url: "/vks/sessions/delete",
-          type: "post",
-          dataType: "JSON",
-          data: {jsonData: ar, _csrf: csrf},
-          success: function (result) {
-            $("#main-table").DataTable().clearPipeline().draw();
-            $(".modal").modal('hide');
-            $('.hiddendel').hide();
-          },
-          error: function () {
-            alert('Ошибка! Обратитесь к разработчику.');
-            $(".modal").modal('hide');
+      jc = $.confirm({
+        icon: 'fa fa-cog fa-spin',
+        title: 'Подождите!',
+        content: 'Ваш запрос выполняется!',
+        buttons: false,
+        closeIcon: false,
+        confirmButtonClass: 'hide'
+      });
+      $.ajax({
+        url: url,
+        method: 'post',
+        dataType: "JSON",
+        data: {jsonData: ar, _csrf: csrf},
+      }).done(function (response) {
+        if (response != false) {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-thumbs-up',
+            title: 'Успех!',
+            content: 'Ваш запрос выполнен.',
+            type: 'green',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-success',
+                action: function () {
+                  $("#main-table").DataTable().clearPipeline().draw();
+                  $('.hiddendel').hide();
+                }
+              }
+            }
+          });
+        } else {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-exclamation-triangle',
+            title: 'Неудача!',
+            content: 'Запрос не выполнен. Что-то пошло не так.',
+            type: 'red',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-danger',
+                action: function () {
+                }
+              }
+            }
+          });
+        }
+      }).fail(function () {
+        jc.close();
+        jc = $.confirm({
+          icon: 'fa fa-exclamation-triangle',
+          title: 'Неудача!',
+          content: 'Запрос не выполнен. Что-то пошло не так.',
+          type: 'red',
+          buttons: false,
+          closeIcon: false,
+          autoClose: 'ok|4000',
+          confirmButtonClass: 'hide',
+          buttons: {
+            ok: {
+              btnClass: 'btn-danger',
+              action: function () {
+              }
+            }
           }
         });
-      }
-    })
-  });
+      });
+    }
 
-  $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
+
   });
 
-</script>
+  </script>

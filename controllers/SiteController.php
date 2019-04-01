@@ -154,6 +154,14 @@ class SiteController extends Controller
     echo 'Роли добавлены и унаследованы';
   }
 
+  public function actionTest($id)
+  {
+    return $this->render('test', [
+      'a' => $id
+    ]);
+  }
+
+
 //  public function actionTestt()
 //  {
 //    $user = User::find()->where(['login' => 'Boss'])->one();

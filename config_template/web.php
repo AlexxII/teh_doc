@@ -43,10 +43,6 @@ $config = [
     ],
     'sysi' => [
       'class' => 'app\modules\sysi\SysiModule',
-    ],
-    'treemanager' => [
-      'class' => '\kartik\tree\Module',
-      // other module settings, refer detailed documentation
     ]
   ],
   'components' => [
@@ -75,7 +71,7 @@ $config = [
       'bundles' => [
 //                'yii\web\JqueryAsset' => false,
 //                'yii\web\YiiAsset' => false,
-//                'linkAssets' => true,   // TODO Возможно операционная система сервера не разрешит ссылки!
+//                'linkAssets' => true,             // TODO Возможно операционная система сервера не разрешит ссылки!
       ]
     ],
     'mailer' => [
@@ -97,6 +93,29 @@ $config = [
       'showScriptName' => false,
       'baseUrl' => '',
       'rules' => [
+        [
+          'pattern' => 'tehdoc/equipment/tool/<id:\d+>/<controller:(info)>/<action>',
+          'route' => 'tehdoc/equipment/infoPanel/info/info',
+          'defaults' => ['id' => 1122334455],
+        ],
+        [
+          'pattern' => 'tehdoc/equipment/tools',
+          'route' => 'tehdoc/equipment/infoPanel/info/index',
+        ],
+        [
+          'pattern' => 'tehdoc/equipment/tool/<id:\d+>/<controller>/<action>',
+          'route' => 'tehdoc/equipment/infoPanel/<controller>/<action>',
+          'defaults' => ['id' => 1122334455],
+        ],
+        [
+          'pattern' => 'tehdoc/equipment/control-panel',
+          'route' => 'tehdoc/equipment/controlPanel/info/meeting',
+        ],
+        [
+          'pattern' => 'tehdoc/equipment/control-panel/<id:\d+>/<controller>/<action>',
+          'route' => 'tehdoc/equipment/controlPanel/<controller>/<action>',
+          'defaults' => ['id' => 1122334455],
+        ]
       ],
     ],
   ],
@@ -109,14 +128,14 @@ if (YII_ENV_DEV) {
   $config['modules']['debug'] = [
     'class' => 'yii\debug\Module',
     // uncomment the following to add your IP if you are not connecting from localhost.
-    'allowedIPs' => ['', '::1'],
+    'allowedIPs' => ['192.168.56.1', '::1'],
   ];
 
   $config['bootstrap'][] = 'gii';
   $config['modules']['gii'] = [
     'class' => 'yii\gii\Module',
     // uncomment the following to add your IP if you are not connecting from localhost.
-    'allowedIPs' => ['192.168.56.102', '::1'],
+    'allowedIPs' => ['192.168.56.1', '::1'],
   ];
 }
 

@@ -9,7 +9,8 @@ $this->params['breadcrumbs'][] = ['label' => 'ВКС', 'url' => ['/vks']];
 $this->params['breadcrumbs'][] = "Журнал";
 
 $about = "Журнал сеансов видеосвязи, которые были удалены из таблицы предстоящих сеансов ВКС";
-$dell_hint = 'Удалить выделенные сеансы';
+$dell_hint = 'Удалить выделенные сеансы окончательно';
+$return_hint = 'Восстановить удаленные сеансы';
 
 ?>
 
@@ -41,14 +42,11 @@ $dell_hint = 'Удалить выделенные сеансы';
 <div class="row">
   <div class="">
     <div class="container-fluid" style="margin-bottom: 20px">
-      <?= Html::a('Удалить',
-        [''], [
-          'class' => 'btn btn-danger btn-sm hiddendel',
-          'style' => ['margin-top' => '5px', 'display' => 'none'],
-          'data-toggle' => "tooltip",
-          'data-placement' => "top",
-          'title' => $dell_hint,
-        ]) ?>
+      <a href="#" class="btn btn-sm btn-danger"
+         data-toggle="tooltip" data-placement="top" title="<?= $dell_hint ?>" id="delete" disabled="true">Удалить</a>
+      <a href="#" class="btn btn-sm btn-info"
+         data-toggle="tooltip" data-placement="top" title="<?= $return_hint ?>" id="return"
+         disabled="true">Восстановить</a>
     </div>
   </div>
 
@@ -184,13 +182,18 @@ $dell_hint = 'Удалить выделенные сеансы';
       "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
         var today = new Date();
         var date = aData[1];
+        var important = aData[10];
         var pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
         var dt = new Date(date.replace(pattern, '$3-$2-$1'));
+        if (important == 1) {
+          $(nRow.cells[0]).css('color', 'red');
+          $(nRow.cells[0]).css('font-weight', '600');
+        }
         if (moment().isAfter(dt, 'day')) {
-          $('td', nRow).css('background-color', '#f2dede');
+          $('td', nRow).css('background-color', '#faeeec');
         }
         else if (moment().isSame(dt, 'day')) {
-          $('td', nRow).css('background-color', '#dff0d8');
+          $('td', nRow).css('background-color', '#e4f0dc');
         }
       },
       "ajax": $.fn.dataTable.pipeline({
@@ -278,12 +281,15 @@ $dell_hint = 'Удалить выделенные сеансы';
     var table = $('#main-table').DataTable();
     table.on('select', function (e, dt, type, indexes) {
       if (type === 'row') {
-        $('.hiddendel').show();
+        $('#return').removeAttr('disabled');
+        $('#delete').removeAttr('disabled');
       }
     });
     table.on('deselect', function (e, dt, type, indexes) {
       if (type === 'row') {
-        $('.hiddendel').hide();
+        if (table.rows({selected: true}).count() > 0) return;
+        $('#return').attr('disabled', true);
+        $('#delete').attr('disabled', true);
       }
     });
   });
@@ -292,8 +298,74 @@ $dell_hint = 'Удалить выделенные сеансы';
   //********************** Удаление записей ***********************************
 
   $(document).ready(function () {
-    $('.hiddendel').click(function (event) {
+    $('#delete').click(function (event) {
+      var url = "/vks/sessions/delete-completely";
       event.preventDefault();
+      if ($(this).attr('disabled')) {
+        return;
+      }
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Вы действительно хотите удалить выделенное безвозвратно?',
+        type: 'red',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-danger',
+            action: function () {
+              jc.close();
+              if (remoteProcess(url)) {
+                $('#return').attr('disabled', true);
+                $('#delete').attr('disabled', true);
+              }
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
+          }
+        }
+      })
+    });
+
+    $('#return').click(function (event) {
+      var url = "/vks/sessions/restore";
+      event.preventDefault();
+      if ($(this).attr('disabled')) {
+        return;
+      }
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Восстановить удаленные записи?',
+        type: 'blue',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-info',
+            action: function () {
+              jc.close();
+              if (remoteProcess(url)) {
+                $('#return').attr('disabled', true);
+                $('#delete').attr('disabled', true);
+              }
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
+          }
+        }
+      })
+    });
+
+
+    function remoteProcess(url) {
       var csrf = $('meta[name=csrf-token]').attr("content");
       var table = $('#main-table').DataTable();
       var data = table.rows({selected: true}).data();
@@ -302,29 +374,85 @@ $dell_hint = 'Удалить выделенные сеансы';
       for (var i = 0; i < count; i++) {
         ar[i] = data[i][0];
       }
-      if (confirm('Вы действительно хотите удалить выделенные сеансы? Выделено ' + data.length + '!!!  ')) {
-        $(".modal").modal("show");
-        $.ajax({
-          url: "/vks/sessions/delete-completely",
-          type: "post",
-          dataType: "JSON",
-          data: {jsonData: ar, _csrf: csrf},
-          success: function (result) {
-            $("#main-table").DataTable().clearPipeline().draw();
-            $(".modal").modal('hide');
-            $('.hiddendel').hide();
-          },
-          error: function () {
-            alert('Ошибка! Обратитесь к разработчику.');
-            $(".modal").modal('hide');
+      jc = $.confirm({
+        icon: 'fa fa-cog fa-spin',
+        title: 'Подождите!',
+        content: 'Ваш запрос выполняется!',
+        buttons: false,
+        closeIcon: false,
+        confirmButtonClass: 'hide'
+      });
+      $.ajax({
+        url: url,
+        method: 'post',
+        dataType: "JSON",
+        data: {jsonData: ar, _csrf: csrf},
+      }).done(function (response) {
+        if (response != false) {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-thumbs-up',
+            title: 'Успех!',
+            content: 'Ваш запрос выполнен.',
+            type: 'green',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-success',
+                action: function () {
+                  $("#main-table").DataTable().clearPipeline().draw();
+                  return true;
+                }
+              }
+            }
+          });
+        } else {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-exclamation-triangle',
+            title: 'Неудача!',
+            content: 'Запрос не выполнен. Что-то пошло не так.',
+            type: 'red',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-danger',
+                action: function () {
+                }
+              }
+            }
+          });
+        }
+      }).fail(function () {
+        jc.close();
+        jc = $.confirm({
+          icon: 'fa fa-exclamation-triangle',
+          title: 'Неудача!',
+          content: 'Запрос не выполнен. Что-то пошло не так.',
+          type: 'red',
+          buttons: false,
+          closeIcon: false,
+          autoClose: 'ok|4000',
+          confirmButtonClass: 'hide',
+          buttons: {
+            ok: {
+              btnClass: 'btn-danger',
+              action: function () {
+              }
+            }
           }
         });
-      }
-    })
-  });
+      });
+    }
 
-  $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
+
   });
 
 </script>

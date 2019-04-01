@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 <div class="row">
-  <div class="col-lg-3 col-md-4 col-sm-6 placeholder about" style="cursor: pointer" data-url="tehdoc/equipment/complex">
+  <div class="col-lg-3 col-md-4 col-sm-6 placeholder about" style="cursor: pointer" data-url="tehdoc/equipment/tools">
     <h2>Оборудование</h2>
     <i class="fa fa-microchip" aria-hidden="true" style="font-size: 120px"></i>
     <div class="text-muted" style="font-size: 20px">Перечень оборудования</div>
@@ -43,14 +43,20 @@ $this->params['breadcrumbs'][] = $this->title;
        data-toggle="tooltip" title="Раздел находится в разработке">
     <h2>Документация</h2>
     <i class="fa fa-file-text-o" aria-hidden="true" style="font-size: 120px"></i>
-    <div class="text-muted" style="font-size: 20px">Перечень документации</div>
+    <div class="text-muted" style="font-size: 20px">Перечень документов</div>
+  </div>
+
+  <div class="col-lg-3 col-md-4 col-sm-6 placeholder about" style="cursor: pointer" data-url="tehdoc/to/schedule/index">
+  <h2>ТО</h2>
+    <i class="fa fa-recycle" aria-hidden="true" style="font-size: 120px;"></i>
+    <div class="text-muted" style="font-size: 20px">Техническое обслуживание</div>
   </div>
 
   <div class="col-lg-3 col-md-4 col-sm-6 placeholder about" style="cursor: pointer"
        data-toggle="tooltip" title="Раздел находится в разработке">
-  <h2>ТО</h2>
-    <i class="fa fa-recycle" aria-hidden="true" style="font-size: 120px;"></i>
-    <div class="text-muted" style="font-size: 20px">Техническое обслуживание</div>
+  <h2>Инвентаризация</h2>
+    <i class="fa fa-compress" aria-hidden="true" style="font-size: 120px;"></i>
+    <div class="text-muted" style="font-size: 20px">Инвентаризация мат.ценностей и драг.металлов</div>
   </div>
 
 </div>

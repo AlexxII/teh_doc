@@ -41,7 +41,6 @@ class VksOrderController extends Controller
 
   public function actionCreateRoot($title)
   {
-    \Yii::$app->db->schema->refresh();
     $newRoot = new VksOrders(['name' => $title]);
     $result = $newRoot->makeRoot();
     if ($result) {

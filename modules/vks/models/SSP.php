@@ -8,7 +8,7 @@ namespace app\modules\vks\models;
  * The static functions in this class are just helper functions to help build
  * the SQL used in the DataTables demo server-side processing scripts. These
  * functions obviously do not represent all that can be done with server-side
- * processing, they are intentionally simple to show how it works. More complex
+ * processing, they are intentionally simple to show how it works. More tools
  * server-side processing operations will likely require a custom script.
  *
  * See http://datatables.net/usage/server-side for full details on the server-

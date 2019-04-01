@@ -12,13 +12,9 @@ use app\modules\tehdoc\asset\TehFormAsset;
 
 ?>
 
-
 <style>
-  .fa {
-    font-size: 15px;
-    color: #FF0000;
-  }
   .nonreq {
+    font-size: 15px;
     color: #1e6887;
   }
   .select-selected {
@@ -34,6 +30,8 @@ $cat_hint = 'Обязательное! Необходима для класси�
 $title_hint = 'Обязательное! Необходимо для отображения в таблице.';
 $serial_hint = 'Укажите серийный номер (s/n), на некоторых моделях оборудования указывается только производственный номер (p/n), 
                   тогда укажите его.';
+$invent_hint = 'Укажите инвентарный номер.';
+$oTime_hint = 'Если известно, укажите наработку в часах на день занесения.';
 $place_hint = 'Обязательное! Укажите точное размещение оборудования.';
 $date_hint = 'Если не известен месяц, выберите январь известного года.';
 $quantity_hint = 'Внимание! Указывайте отличную от 1 цифру 
@@ -46,11 +44,12 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
   <div class="col-lg-8 col-md-9" style="border-radius:2px;padding-top:10px">
     <div class="customer-form">
       <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data', 'class' => '']]); ?>
+      <?= Html::hiddenInput('eqId', $model->tempId); ?>
       <div class="row">
         <div class="col-md-6 col-lg-6">
           <?php
           echo $form->field($model, 'category_id', [
-            'template' => '{label} <sup class="h-title fa fa-info-circle" aria-hidden="true"
+            'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
                 data-toggle="tooltip" data-placement="top" title="' . $cat_hint . '"></sup>{input}{hint}'])
             ->dropDownList($model->toolCategoryList, ['data-name' => 'vks_type', 'prompt' => ['text' => 'Выберите',
               'options' => [
@@ -62,7 +61,7 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
         </div>
         <div class="col-md-6 col-lg-6">
           <?= $form->field($model, 'eq_title', [
-            'template' => '{label} <sup class="h-title fa fa-info-circle" aria-hidden="true"
+            'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
                 data-toggle="tooltip" data-placement="top" title="' . $title_hint . '"></sup>{input}{hint}'])
             ->textInput()->hint('Например: Коммутатор с автоопределителем', ['class' => ' w3-label-under']); ?>
         </div>
@@ -83,22 +82,35 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
             'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
                 data-toggle="tooltip" data-placement="top" title="' . $serial_hint . '"></sup>{input}{hint}'
           ])->textInput()->hint('Например: HRUEO139UI92', ['class' => ' w3-label-under']); ?>
-
         </div>
-        <div class="form-group col-md-6 col-lg-6">
+        <div class="col-md-6 col-lg-6">
+          <?= $form->field($model, 'invent_number', [
+            'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
+                data-toggle="tooltip" data-placement="top" title="' . $invent_hint . '"></sup>{input}{hint}'
+          ])->textInput()->hint('Например: 20205147', ['class' => ' w3-label-under']); ?>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 col-lg-6">
           <?= $form->field($model, 'eq_factdate', [
             'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
                 data-toggle="tooltip" data-placement="top" title="' . $date_hint . '"></sup>{input}{hint}'
           ])->textInput([
             'class' => 'fact-date form-control'
-          ])->hint('Выберите дату', ['class' => ' w3-label-under']); ?>
+          ])->hint('Введите или выберите дату', ['class' => ' w3-label-under']); ?>
+        </div>
+        <div class="form-group col-md-6 col-lg-6">
+          <?= $form->field($model, 'eq_operating_time', [
+            'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
+                data-toggle="tooltip" data-placement="top" title="' . $oTime_hint . '"></sup>{input}{hint}'
+          ])->textInput()->hint('Например: 124948', ['class' => ' w3-label-under']); ?>
         </div>
       </div>
       <div class="row">
         <div class="col-md-8">
           <?php
           echo $form->field($model, 'place_id', [
-            'template' => '{label} <sup class="h-title fa fa-info-circle" aria-hidden="true"
+            'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
                 data-toggle="tooltip" data-placement="top" title="' . $place_hint . '"></sup>{input}{hint}'
           ])->dropDownList($model->toolPlacesList, ['data-name' => 'vks_type', 'prompt' => ['text' => 'Выберите',
             'options' => [
@@ -117,9 +129,9 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
       </div>
 
       <?php
-      if (!empty($model->photos)) {
-        foreach ($model->photos as $k => $photo) {
-          $allImages[] = "<img src='" . $photo->getImageUrl() . "' class='file-preview-image' 
+      if (!empty($model->images)) {
+        foreach ($model->images as $k => $photo) {
+          $allImages[] = "<img src='" . $photo->getImageUrl() . "' class='file-preview-image'
                           style='max-width:100%;max-height:100%'>";
           $previewImagesConfig[] = [
             'url' => Url::toRoute(ArrayHelper::merge(['/tehdoc/kernel/tools/remove-image'], [
@@ -140,11 +152,16 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
             'language' => 'ru',
             'options' => ['multiple' => true],
             'pluginOptions' => [
+              'maxFileCount' => 15,
+              'uploadUrl' => Url::to(['file-upload']),
+              'uploadExtraData' => [
+                'eqId' => $model->tempId,
+              ],
+              'showUpload' => false,
               'previewFileType' => 'any',
               'initialPreview' => $allImages,
               'initialPreviewConfig' => $previewImagesConfig,
               'overwriteInitial' => false,
-              'showUpload' => false
             ],
           ]); ?>
         </div>
@@ -155,12 +172,24 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
         </div>
       </div>
 
-      <div class="form-group">
-        <div class="form-group col-md-12 col-lg-12">
-
+      <div class="row">
+        <div class="form-group col-md-4 col-lg-4">
           <label style="font-size:18px"><input type="checkbox" name="stay" style="width:20px;height:20px">
             Остаться в форме</label>
         </div>
+        <?php if (!$model->isNewRecord) : ?>
+        <div class="form-group col-md-8 col-lg-8">
+          <li class="list-group-item" style="margin-bottom: 15px">
+            <div class="form-checkbox js-complex-option">
+              <input class="ch" id="consolidated-feature" type="checkbox" data-check='consolidated-check'
+                     data-id="<?= $model->ref ?>" <?php if ($model->settings->eq_task) echo 'checked' ?> >
+              <label for="consolidated-feature" style="font-weight: 500">В задании на обновление</label>
+              <span class="status-indicator" id="consolidated-check"></span>
+            </div>
+          </li>
+        </div>
+        <?php endif; ?>
+
       </div>
       <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Добавить' : 'Обновить', ['class' => 'btn btn-primary']) ?>
@@ -195,14 +224,6 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
     })
   });
 
-  $(document).ready(function () {
-    if ($('.fact-date').val()) {
-      var date = new Date($('.fact-date').val());
-      moment.locale('ru');
-      $('.fact-date').datepicker('update', moment(date).format('MMMM YYYY'))
-    }
-  });
-
   //преобразование дат перед отправкой
   $(document).ready(function () {
     $('#w0').submit(function () {
@@ -225,13 +246,13 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
   $(document).ready(function () {
     $.ajax({
       type: 'get',
-      url: '/tehdoc/control/interface/manufact',
+      url: '/tehdoc/settings/interface/manufact',
       autoFocus: true,
       success: function (data) {
         var manufact = $.parseJSON(data);
         $(function () {
           $("#manufact").autocomplete({
-            source: manufact,
+            source: manufact
           });
         });
       },
@@ -244,7 +265,7 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
   $(document).ready(function () {
     $.ajax({
       type: 'get',
-      url: '/tehdoc/control/interface/models',
+      url: '/tehdoc/settings/interface/models',
       autoFocus: true,
       success: function (data) {
         var models = $.parseJSON(data);
@@ -259,6 +280,37 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
       }
     });
   });
+
+  $(document).ready(function () {
+    var successCheck = '<i class="fa fa-check" id="consolidated-check" aria-hidden="true" style="color: #4eb305"></i>';
+    var warningCheck = '<i class="fa fa-times" id="consolidated-check" aria-hidden="true" style="color: #cc0000"></i>';
+    var waiting = '<i class="fa fa-cog fa-spin" aria-hidden="true"></i>';
+    $('.ch').change(function (e) {
+      var checkId = $(this).data('check');
+      var csrf = $('meta[name=csrf-token]').attr("content");
+      $('#' + checkId).html(waiting);
+      var url = '/tehdoc/equipment/control-panel/settings/task-set';
+      var nodeId = $(this).data('id');
+      var result = $(this).is(':checked');
+      console.log(result);
+      $.ajax({
+        url: url,
+        type: "post",
+        data: {
+          toolId: nodeId,
+          _csrf: csrf,
+          bool: result
+        },
+        success: function (data) {
+          $('#' + checkId).html(successCheck);
+        },
+        error: function (data) {
+          $('#' + checkId).html(warningCheck);
+        }
+      });
+    })
+  })
+
 
 </script>
 

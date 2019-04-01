@@ -95,12 +95,12 @@ class SessionsController extends Controller
       $index = 0;
     }
 
-    if ($_GET['stDate']){
+    if (!empty($_GET['stDate'])){
       $startDate = $_GET['stDate'];
     } else {
       $startDate = "1970-01-01";
     }
-    if ($_GET['eDate']){
+    if (!empty($_GET['eDate'])){
       $endDate = $_GET['eDate'];
     } else {
       $endDate = "2099-12-31";
@@ -108,7 +108,7 @@ class SessionsController extends Controller
 
 
 //    $where = 'vks_upcoming_session = 1 AND vks_cancel = ' . $index;
-    $where = ' ' . $table . '.vks_upcoming_session = 1 AND Date(vks_date) >= "' . $startDate . '" AND Date(vks_date) <= "' . $endDate . '" AND vks_cancel = 0';
+    $where = ' ' . $table . '.vks_upcoming_session = 1 AND Date(vks_date) >= "' . $startDate . '" AND Date(vks_date) <= "' . $endDate . '" AND vks_cancel = ' . $index;
 
     return json_encode(
       SSP::complex($_GET, $sql_details, $table, $primaryKey, $columns, NULL, $where)
@@ -430,6 +430,22 @@ class SessionsController extends Controller
   {
     return $this->render('archive_ex');
   }
+
+  public function actionRestore()
+  {
+    $report = true;
+    foreach ($_POST['jsonData'] as $d) {
+      $model = $this->findModel($d);
+      $this->logVks($model->id, "info","Восстановил сеансе ВКС из перечня удаленных.");
+      $model->vks_cancel = 0;
+      $report = $model->save();
+    }
+    if ($report) {
+      return true;
+    }
+    return false;
+  }
+
 
   public function actionDeleteCompletely()
   {

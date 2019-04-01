@@ -19,6 +19,9 @@ class TehdocModule extends \yii\base\Module
         'equipment' => [
             'class' => 'app\modules\tehdoc\modules\equipment\EquipmentModule',
         ],
+        'to' => [
+            'class' => 'app\modules\tehdoc\modules\to\ToModule',
+        ],
     ];
   }
 

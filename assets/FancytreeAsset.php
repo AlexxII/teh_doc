@@ -29,6 +29,10 @@ class FancytreeAsset extends \yii\web\AssetBundle
   {
     $this->setupAssets('css', [$this->skin]);
     $this->setupAssets('js', ['dist/jquery.fancytree-all']);
+//    $this->setupAssets('js', [
+//      '3rd-party/extensions/hotkeys/js/jquery.hotkeys',
+//      '3rd-party/extensions/hotkeys/js/jquery.fancytree.hotkeys'
+//      ]);
     parent::init();
   }
 }

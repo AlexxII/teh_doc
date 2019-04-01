@@ -29,10 +29,8 @@ class m181225_083505_tehdoc_category_tbl extends Migration
     ], $tableOptions);
 
     $rand = mt_rand();
-    $ranD = mt_rand();
     $sql = 'INSERT INTO' . self::TABLE_NAME . '(id, ref, root, lft, rgt, lvl, name, parent_id) 
-                VALUES (1, ' . $rand . ', 1, 1, 2, 0, "Категории всех средств", ' . $rand . '), 
-                (2, ' . $ranD . ', 2, 3, 4, 0, "Категории комплектов", ' . $ranD . ')';
+                VALUES (1, ' . $rand . ', 1, 1, 2, 0, "Категории", ' . $rand . ')';
     \Yii::$app->db->createCommand($sql)->execute();
   }
 

@@ -12,34 +12,25 @@ use yii\filters\AccessControl;
  */
 class AdminController extends Controller
 {
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['@']
-                    ],
-                ],
-            ],
-        ];
-    }
+  public function behaviors()
+  {
+    return [
+      'access' => [
+        'class' => AccessControl::class,
+        'rules' => [
+          [
+            'allow' => true,
+            'roles' => ['@']
+          ],
+        ],
+      ],
+    ];
+  }
 
 
-    public function actionIndex()
-    {
-        return $this->render('index');
-    }
+  public function actionIndex()
+  {
+    return $this->render('index');
+  }
 
-    public function actionPlacement()
-    {
-        return $this->render('places');
-    }
-
-    public function actionTests()
-    {
-        return $this->render('tests');
-    }
 }

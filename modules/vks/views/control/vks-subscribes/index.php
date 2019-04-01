@@ -193,6 +193,7 @@ $del_multi_nodes = 'Удвлить С вложениями';
           });
       }
     });
+
     $('.del-multi-nodes').click(function (event) {
       if (confirm('Вы уверены, что хотите удалить выбраннyю ветку вместе с вложениями?')) {
         event.preventDefault();
@@ -483,7 +484,9 @@ $del_multi_nodes = 'Удвлить С вложениями';
         }
         $(".save-btn").prop("disabled", true);
         var url = surnames_url;
-        $.get(url, {id: id}, function (data) {
+        $.get(url, {
+          id: id
+        }, function (data) {
           if (data) {
             var surnames = JSON.parse(data);
             $("#surnames-control").val(surnames);
@@ -499,6 +502,5 @@ $del_multi_nodes = 'Удвлить С вложениями';
       }
     });
   })
-
 
 </script>

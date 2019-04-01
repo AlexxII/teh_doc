@@ -11,9 +11,11 @@ use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
 use app\assets\TableBaseAsset;
+use app\assets\JConfirmAsset;
 
 AppAsset::register($this);    // регистрация ресурсов всего приложения
 TableBaseAsset::register($this);
+JConfirmAsset::register($this);
 
 ?>
 <?php $this->beginPage() ?>
@@ -158,21 +160,6 @@ TableBaseAsset::register($this);
       'tag' => 'ol',
     ]) ?>
     <?= Alert::widget() ?>
-    <div class="modal fade freeztime" id="Modal" tabindex="-1" role="dialog"
-         data-backdrop="static" data-keyboard="false" aria-labelledby="ModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="ModalLabel">Ожидание ответа от сервера.</h5>
-          </div>
-          <div class="modal-body">
-            Подождите пожалуйста. Ваш запрос обрабатывается.
-          </div>
-          <div class="modal-footer">
-          </div>
-        </div>
-      </div>
-    </div>
     <?= $content ?>
   </div>
 </div>

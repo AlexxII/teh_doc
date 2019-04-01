@@ -131,6 +131,4 @@ class UserController extends Controller
     throw new NotFoundHttpException('Запрашиваемая страница не найдена.');
   }
 
-
-
 }

@@ -17,7 +17,7 @@ class m190203_181636_tehdoc_wiki_tbl extends Migration
     }
     $this->createTable(self::TABLE_NAME, [
       'id' => $this->primaryKey(),
-      'eq_ref' => $this->integer(),
+      'eq_id' => $this->integer(),
       'wiki_title' => $this->string(255),
       'wiki_text' => $this->text(),
       'wiki_record_create' => $this->dateTime(),

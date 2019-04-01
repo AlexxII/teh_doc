@@ -1,0 +1,85 @@
+      <?php
+      if (!empty($model->photos)) {
+        foreach ($model->photos as $k => $photo) {
+          $allImages[] = "<img src='" . $photo->getImageUrl() . "' class='file-preview-image'
+                          style='max-width:100%;max-height:100%'>";
+          $previewImagesConfig[] = [
+            'url' => Url::toRoute(ArrayHelper::merge(['/tehdoc/kernel/tools/remove-image'], [
+              'id' => $photo->id,
+              '_csrf' => Html::csrfMetaTags()
+            ])),
+            'key' => $photo->id
+          ];
+        }
+      } else {
+        $previewImagesConfig = false;
+        $allImages = false;
+      }
+      ?>
+      <div class="row">
+        <div class="col-md-12 col-lg-12">
+          <?= $form->field($fUpload, "imageFiles[]")->widget(FileInput::class, [
+            'language' => 'ru',
+            'options' => ['multiple' => true],
+            'pluginOptions' => [
+              'maxFileCount' => 15,
+              'uploadUrl' => Url::to(['file-upload']),
+              'uploadExtraData' => [
+                'eqId' => $model->tempId,
+              ],
+              'showUpload' => false,
+              'previewFileType' => 'any',
+              'initialPreview' => $allImages,
+              'initialPreviewConfig' => $previewImagesConfig,
+              'overwriteInitial' => false,
+            ],
+          ]); ?>
+        </div>
+      </div>
+
+
+
+
+  static function simpleEx($request, $conn, $table, $primaryKey, $columns, $tableTwo)
+  {
+    $bindings = array();
+    $db = self::db($conn);
+    // Build the SQL query string from the request
+    $limit = self::limit($request, $columns);
+    $order = self::order($request, $columns);
+    $where = self::filter($request, $columns, $bindings);
+    // Main query to actually get the data
+    $data = self::sql_exec($db, $bindings,
+      "SELECT `" . implode("`, `", self::pluck($columns, 'db')) . "`
+			 FROM $table RIGHT JOIN $tableTwo ON $table.id_eq = $tableTwo.eq_id
+			 INNER JOIN teh_category_tbl ON $table.category_id = teh_category_tbl.id
+			 $where
+			 $order
+			 $limit"
+    );
+    // Data set length after filtering
+    $resFilterLength = self::sql_exec($db, $bindings,
+      "SELECT COUNT(`{$primaryKey}`)
+			 FROM   `$table` RIGHT JOIN $tableTwo ON $table.id_eq = $tableTwo.eq_id
+			 $where"
+    );
+    $recordsFiltered = $resFilterLength[0][0];
+    // Total data set length
+    $resTotalLength = self::sql_exec($db,
+      "SELECT COUNT(`{$primaryKey}`)
+			 FROM   `$table`"
+    );
+    $recordsTotal = $resTotalLength[0][0];
+    /*
+     * Output
+     */
+    return array(
+      "draw" => isset ($request['draw']) ?
+        intval($request['draw']) :
+        0,
+      "recordsTotal" => intval($recordsTotal),
+      "recordsFiltered" => intval($recordsFiltered),
+      "data" => self::data_output($columns, $data)
+    );
+  }
+
