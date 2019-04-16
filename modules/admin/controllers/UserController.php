@@ -2,18 +2,16 @@
 
 namespace app\modules\admin\controllers;
 
-use app\modules\admin\models\UserUpdateForm;
 use Yii;
-use app\modules\admin\models\PasswordChangeForm;
-use app\modules\admin\models\SignupForm;
-use app\modules\admin\models\User;
-use yii\base\DynamicModel;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use kartik\file\FileInput;
 use yii\widgets\ActiveForm;
 
+use app\modules\admin\models\User;
+use app\modules\admin\models\SignupForm;
+use app\modules\admin\models\UserUpdateForm;
+use app\modules\admin\models\PasswordChangeForm;
 
 /**
  * CategoryController implements the CRUD actions for Category model.
@@ -39,7 +37,6 @@ class UserController extends Controller
       ],
     ];
   }
-
 
   public function actionIndex()
   {

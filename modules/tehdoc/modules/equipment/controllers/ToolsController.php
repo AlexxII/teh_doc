@@ -2,14 +2,14 @@
 
 namespace app\modules\tehdoc\modules\equipment\controllers;
 
-use app\modules\tehdoc\modules\equipment\models\SSPEx;
-use app\modules\tehdoc\modules\equipment\models\ToolSettings;
 use Yii;
 use yii\web\Controller;
-use app\modules\tehdoc\modules\equipment\models\Tools;
+use yii\web\UploadedFile;
+
 use app\modules\tehdoc\modules\equipment\models\SSP;
 use app\modules\tehdoc\modules\equipment\models\Images;
-use yii\web\UploadedFile;
+use app\modules\tehdoc\modules\equipment\models\Tools;
+use app\modules\tehdoc\modules\equipment\models\ToolSettings;
 
 class ToolsController extends Controller
 {
@@ -24,7 +24,7 @@ class ToolsController extends Controller
       $data = [['title' => 'База данных пуста', 'key' => -999]];
       return json_encode($data);
     }
-    $roots = Tools::findOne($id)->tree();
+    $roots = Tools::findModel($id)->tree();
     return json_encode($roots);
   }
 
@@ -44,20 +44,20 @@ class ToolsController extends Controller
 
     if ($model->load(Yii::$app->request->post())) {
       if (isset($_POST['eqId'])) {
-        $model->ref = $_POST['eqId'];
+        $model->id = $_POST['eqId'];
       } else {
-        $model->ref = $model->tempId;
+        $model->id = $model->tempId;
       }
-      $toolSettings->eq_id = $model->ref;
+      $toolSettings->eq_id = $model->id;
       $model->parent_id = 0;
       $model->name = $model->eq_title;
-      $parentNode = Tools::findOne(2);            // TODO !!!!!!! очень вероятна ошибка
+      $parentNode = Tools::findModel(['name' => 'Необработанное']);
       $model->appendTo($parentNode);
       if ($model->save()) {
-        $toolSettings->save();
+        $toolSettings->save();                                                            // TODO необходима проверка!!!
         if ($fUpload->load(Yii::$app->request->post())) {
           $fUpload->imageFiles = UploadedFile::getInstances($fUpload, 'imageFiles');
-          $result = $fUpload->uploadImage($model->ref);
+          $result = $fUpload->uploadImage($model->id);
           if ($result) {
             Yii::$app->session->setFlash('success', 'Оборудование добавлено');
           } else {
@@ -70,9 +70,8 @@ class ToolsController extends Controller
         if (isset($_POST['stay'])) {
           return $this->redirect(['create']);
         }
-        return $this->redirect(['tool/' . $model->ref . '/info/index']);
+        return $this->redirect(['tool/' . $model->id . '/info/index']);
       } else {
-        return var_dump($model->getErrors());
         Yii::$app->session->setFlash('error', 'Ошибка валидации');
       }
     }
@@ -83,35 +82,8 @@ class ToolsController extends Controller
     ]);
   }
 
-  /*  public function actionUpdate($id)
-    {
-      $model = $this->findModel($id);
-      $fUpload = new Images();
-
-      if ($model->load(Yii::$app->request->post())) {
-        if ($model->save(false)) { // TODO Разобраться с валидацией, при вкл - не сохраняет
-          if ($fUpload->load(Yii::$app->request->post())) {
-            $fUpload->imageFiles = UploadedFile::getInstances($fUpload, 'imageFiles');
-            if ($fUpload->uploadImage($model->id_eq)) {
-              Yii::$app->session->setFlash('success', 'Изменения внесены');
-            }
-          } else {
-            Yii::$app->session->setFlash('success', 'Изменения внесены!!');
-          }
-          return $this->redirect(['view', 'id' => $model->id_eq]);
-        } else {
-          Yii::$app->session->setFlash('error', 'Изменения НЕ внесены');
-        }
-      }
-      return $this->render('update', [
-        'model' => $model,
-        'fupload' => $fUpload,
-      ]);
-    }*/
-
   public function actionFileUpload()
   {
-//    return true;
     $fUpload = new Images();
     if (Yii::$app->request->post()) {
       $eqId = Yii::$app->request->post('eqId');
@@ -125,7 +97,11 @@ class ToolsController extends Controller
 
   public function actionTask()
   {
-    $models = Tools::find()->where(['s.eq_task' => 1])->joinWith('settings s')->all();
+    $models = Tools::find()
+      ->where(['settings_table.eq_task' => 1])
+      ->joinWith('settings settings_table')
+      ->orderBy('lft')
+      ->all();
     return $this->render('task', [
       'models' => $models
     ]);
@@ -133,21 +109,24 @@ class ToolsController extends Controller
 
   public function actionUpdateEx($id)
   {
-    $model = $this->findModel($id);
+    $model = Tools::findModel($id);
     $fUpload = new Images();
-    $model->tempId = $model->ref;
+    $model->tempId = $model->id;
 
     if ($model->load(Yii::$app->request->post())) {
-      if ($model->save(false)) { // TODO Разобраться с валидацией, при вкл - не сохраняет
+      if ($model->save(false)) {                                          // TODO Разобраться с валидацией, при вкл - не сохраняет
         if ($fUpload->load(Yii::$app->request->post())) {
           $fUpload->imageFiles = UploadedFile::getInstances($fUpload, 'imageFiles');
-          if ($fUpload->uploadImage($model->ref)) {
+          if ($fUpload->uploadImage($model->id)) {
             Yii::$app->session->setFlash('success', 'Изменения внесены.');
           }
         } else {
           Yii::$app->session->setFlash('success', 'Изменения внесены.');
         }
-        return $this->redirect(['tool/' . $model->ref . '/info/index']);
+        if (isset($_POST['stay'])) {
+          return $this->redirect(['task']);
+        }
+        return $this->redirect(['tool/' . $model->id . '/info/index']);
       } else {
         Yii::$app->session->setFlash('error', 'Изменения НЕ внесены.');
       }
@@ -156,62 +135,6 @@ class ToolsController extends Controller
       'model' => $model,
       'fupload' => $fUpload,
     ]);
-  }
-
-  /*
-    public function actionCreateEx($id)
-    {
-      $model = $this->findModel($id);
-      $model->scenario = Tools::SCENARIO_UPDATE;
-      $fUpload = new Images();
-      $model->quantity = 1;                             // По умолчанию, кол-во оборудования - 1
-      $model->tempId = mt_rand();
-
-      if ($model->load(Yii::$app->request->post())) {
-        if (isset($_POST['eqId'])) {
-          $model->ref = $_POST['eqId'];
-        } else {
-          $model->ref = $model->tempId;
-        }
-        $model->parent_id = 0;
-        $model->name = $model->eq_title;
-        $model->appendTo($parentNode);
-        if ($model->save()) {
-          if ($fUpload->load(Yii::$app->request->post())) {
-            $fUpload->imageFiles = UploadedFile::getInstances($fUpload, 'imageFiles');
-            if ($fUpload->uploadImage($model->ref)) {
-              Yii::$app->session->setFlash('success', 'Оборудование добавлено');
-            } else {
-              Yii::$app->session->setFlash('success', 'Оборудование добавлено, <strong>НО</strong> не загружены изображения');
-            }
-          } else {
-            Yii::$app->session->setFlash('success', 'Оборудование добавлено');
-          }
-          if (isset($_POST['stay'])) {
-            return $this->redirect(['create']);
-          }
-          return $this->redirect(['tool/' . $model->ref . '/info/index']);
-        } else {
-          return var_dump($model->getErrors());
-          Yii::$app->session->setFlash('error', 'Ошибка валидации');
-        }
-      }
-      return $this->render('create', [
-        'model' => $model,
-        'fupload' => $fUpload
-
-      ]);
-    }
-  */
-
-  protected function findModel($id)
-  {
-    if (($model = Tools::find()->where(['ref' => $id])->limit(1)->all()) !== null) {
-      if (!empty($model)) {
-        return $model[0];
-      }
-    }
-    throw new NotFoundHttpException('The requested page does not exist.');
   }
 
   public function actionCategories()
@@ -234,7 +157,7 @@ class ToolsController extends Controller
     $table = 'teh_equipment_tbl';
     $primaryKey = 'id';
     $columns = array(
-      array('db' => 'ref', 'dt' => 0),
+      array('db' => 'id', 'dt' => 0),
       array('db' => 'eq_title', 'dt' => 1),
       array('db' => 'eq_manufact', 'dt' => 2),
       array('db' => 'eq_model', 'dt' => 3),
@@ -269,7 +192,7 @@ class ToolsController extends Controller
         $root = (int)$_GET['root'];
         $table_ex = (string)$_GET['db_tbl'];
         $identifier = (string)$_GET['identifier'];
-        $where = ' ' . $identifier . ' in (SELECT ref
+        $where = ' ' . $identifier . ' in (SELECT id
     FROM ' . $table_ex . '
       WHERE ' . $table_ex . '.lft >= ' . $lft .
           ' AND ' . $table_ex . '.rgt <= ' . $rgt .
@@ -282,21 +205,14 @@ class ToolsController extends Controller
     }
     if (isset($_GET['index'])) {
       $index = $_GET['index'];
-      $where = ' ref in (SELECT eq_id FROM teh_settings_tbl WHERE ' . $index . '= 1)';
+      $where = ' id in (SELECT eq_id FROM teh_settings_tbl WHERE ' . $index . '= 1)';
     } else {
-      $where = '';
+      $where = ' lvl != 0';
     }
 
     $result = SSP::complex($_GET, $sql_details, $table, $primaryKey, $columns, NULL, $where);
 
     return json_encode($result);
-
-//    return json_encode(
-//      SSP::simple($_GET, $sql_details, $table, $primaryKey, $columns)
-//    );
-//    return var_dump(
-//      SSP::simple($_GET, $sql_details, $table, $primaryKey, $columns)
-//    );
   }
 
   public function actionServerSideOth()
@@ -310,7 +226,7 @@ class ToolsController extends Controller
       array(
         'db' => 'eq_oth_title',
         'dt' => 1,
-        'formatter' => function ($d, $row) { //TODO разобраться с форматом отображения даты
+        'formatter' => function ($d, $row) {                      //TODO разобраться с форматом отображения даты
           if ($row[8] == 1) {
             return $d;
           } else {
@@ -325,7 +241,7 @@ class ToolsController extends Controller
       array(
         'db' => 'eq_factdate',
         'dt' => 6,
-        'formatter' => function ($d, $row) { //TODO разобраться с форматом отображения даты
+        'formatter' => function ($d, $row) {                            //TODO разобраться с форматом отображения даты
           if ($d != null) {
             return date('Y', strtotime($d));
           } else {
@@ -338,7 +254,7 @@ class ToolsController extends Controller
     );
 
 //    $where = '';
-    $where = ' ' . $table . '.valid = 1';
+    $where = '' . $table . '.valid = 1';
 
     $sql_details = \Yii::$app->params['sql_details'];
     $result = SSP::oth($_GET, $sql_details, $table, $primaryKey, $columns, $tableTwo, $where);
@@ -379,6 +295,5 @@ class ToolsController extends Controller
     Yii::$app->session->setFlash('error', 'Удалить оборудование не удалось');
     return $this->redirect(['index']);
   }
-
 
 }

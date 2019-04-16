@@ -2,15 +2,15 @@
 
 namespace app\modules\tehdoc\modules\equipment\controllers\controlPanel;
 
+use Yii;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+
+use app\modules\tehdoc\modules\to\models\ToEquipment;
 use app\modules\tehdoc\modules\equipment\models\Oth;
 use app\modules\tehdoc\modules\equipment\models\Special;
 use app\modules\tehdoc\modules\equipment\models\Tools;
 use app\modules\tehdoc\modules\equipment\models\ToolSettings;
-use app\modules\tehdoc\modules\to\models\ToEquipment;
-use Yii;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use app\modules\tehdoc\modules\equipment\models\ComplexEx;
 
 class SettingsController extends Controller
 {
@@ -21,13 +21,13 @@ class SettingsController extends Controller
   public function actionIndex()
   {
     $id = $_GET['id'];
-    $tool = $this->findTool($id);
-    $toolSettings = $this->findSettings($id);
+    $tool = Tools::findModel($id);
+    $toolSettings = ToolSettings::findModel($id);
     $wikiCount = $tool->countWikiPages;
     $imagesCount = $tool->countImages;
     $docsCount = $tool->countDocs;
     return $this->render('header', [
-      'tool' => $this->findTool($id),
+      'tool' => Tools::findModel($id),
       'toolSettings' => $toolSettings,
       'docsCount' => $docsCount,
       'imagesCount' => $imagesCount,
@@ -39,9 +39,10 @@ class SettingsController extends Controller
   public function actionWrapConfig()
   {
     $id = $_GET['id'];
-    $toolSettings = $this->findSettings($id);
+    $toolSettings = ToolSettings::findModel($id);
+
     return $this->render('wrap_view', [
-      'tool' => $this->findTool($id),
+      'tool' => Tools::findModel($id),
       'toolSettings' => $toolSettings,
     ]);
   }
@@ -51,17 +52,17 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $settings = $this->findSettings($toolId);
+      $toolSettings = ToolSettings::findModel($toolId);
       if (isset($_POST['bool'])) {
         if ($_POST['bool'] === 'true') {
-          $settings->eq_general = 1;
+          $toolSettings->eq_general = 1;
         } else {
-          $settings->eq_general = 0;
+          $toolSettings->eq_general = 0;
         }
       } else {
         return false;
       }
-      if ($settings->save()) {
+      if ($toolSettings->save()) {
         return true;
       }
       return false;
@@ -79,28 +80,27 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $settings = $this->findSettings($toolId);
-      $req = Tools::find()->where(['ref' => $toolId])->limit(1)->all();
-      $model = $req[0];
+      $toolSettings = ToolSettings::findModel($toolId);
+      $model = Tools::findModel($toolId);
       if ($model->oth) {
         $oth = $model->oth;
       } else {
         $oth = new Oth();
-        $oth->eq_id = $model->ref;
+        $oth->eq_id = $model->id;
       }
       if (isset($_POST['bool'])) {
         if ($_POST['bool'] === 'true') {
-          $settings->eq_oth = 1;
+          $toolSettings->eq_oth = 1;
           $oth->valid = 1;
         } else {
-          $settings->eq_oth = 0;
-          $oth->eq_id = $model->ref;
+          $toolSettings->eq_oth = 0;
+          $oth->eq_id = $model->id;
           $oth->valid = 0;
         }
       } else {
         return false;
       }
-      if ($settings->save()) {
+      if ($toolSettings->save()) {
         if ($oth->save()) {
           return true;
         }
@@ -121,8 +121,7 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $req = Tools::find()->where(['ref' => $toolId])->limit(1)->all();
-      $model = $req[0];
+      $model = Tools::findModel($toolId);
       if ($model->oth) {
         $oth = $model->oth;
       } else {
@@ -150,17 +149,17 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $settings = $this->findSettings($toolId);
+      $toolSettings = ToolSettings::findModel($toolId);
       if (isset($_POST['bool'])) {
         if ($_POST['bool'] === 'true') {
-          $settings->eq_complex = 1;
+          $toolSettings->eq_complex = 1;
         } else {
-          $settings->eq_complex = 0;
+          $toolSettings->eq_complex = 0;
         }
       } else {
         return false;
       }
-      if ($settings->save()) {
+      if ($toolSettings->save()) {
         return true;
       }
       return false;
@@ -172,17 +171,20 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $settings = $this->findSettings($toolId);
+      $toolSettings = ToolSettings::findModel($toolId);
+      $toolModel = Tools::findModel($toolId);
       if (isset($_POST['bool'])) {
         if ($_POST['bool'] === 'true') {
-          $settings->eq_wrap = 1;
+          $toolSettings->eq_wrap = 1;
+          $toolModel->icon = 't fa fa-clone';
         } else {
-          $settings->eq_wrap = 0;
+          $toolSettings->eq_wrap = 0;
+          $toolModel->icon = 't fa fa-file-o';
         }
       } else {
         return false;
       }
-      if ($settings->save()) {
+      if ($toolSettings->save() && $toolModel->save()) {
         return true;
       }
       return false;
@@ -194,27 +196,26 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $settings = $this->findSettings($toolId);
-      $req = Tools::find()->where(['ref' => $toolId])->limit(1)->all();
-      $model = $req[0];
+      $toolSettings = ToolSettings::findModel($toolId);
+      $model = Tools::findModel($toolId);
       if ($model->special) {
         $special = $model->special;
       } else {
         $special = new Special();
-        $special->eq_id = $model->ref;
+        $special->eq_id = $model->id;
       }
       if (isset($_POST['bool'])) {
         if ($_POST['bool'] === 'true') {
-          $settings->eq_special = 1;
+          $toolSettings->eq_special = 1;
           $special->valid = 1;
         } else {
-          $settings->eq_special = 0;
+          $toolSettings->eq_special = 0;
           $special->valid = 0;
         }
       } else {
         return false;
       }
-      if ($settings->save()) {
+      if ($toolSettings->save()) {
         if ($special->save()) {
           return true;
         }
@@ -229,8 +230,7 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $req = Tools::find()->where(['ref' => $toolId])->limit(1)->all();
-      $model = $req[0];
+      $model = Tools::findModel($toolId);
       if ($model->special) {
         $special = $model->special;
       } else {
@@ -254,7 +254,7 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $model = $this->findSettings($toolId);
+      $model = ToolSettings::findModel($toolId);
       if (isset($_POST['bool'])) {
         if ($_POST['bool'] === 'true') {
           $model->eq_task = 1;
@@ -284,7 +284,7 @@ class SettingsController extends Controller
       }
       $result = false;
       foreach ($_POST['jsonData'] as $toolId) {
-        $model = $this->findSettings($toolId);
+        $model = ToolSettings::findModel($toolId);
         $model->eq_task = $bool;
         $result = $model->save();
       }
@@ -298,32 +298,30 @@ class SettingsController extends Controller
   {
     if (isset($_POST['toolId'])) {
       $toolId = $_POST['toolId'];
-      $settings = $this->findSettings($toolId);
-      $req = Tools::find()->where(['ref' => $toolId])->limit(1)->all();
-      $model = $req[0];
+      $toolSettings = ToolSettings::findModel($toolId);
+      $model = Tools::findModel($toolId);
       if ($model->to) {
         $to = $model->to;
       } else {
         $to = new ToEquipment();
-        $to->eq_id = $model->ref;
+        $to->eq_id = $model->id;
         $to->name = $model->eq_title;
-        $to->ref = $model->ref;
-        $parent = ToEquipment::findOne(1);            // TODO !!есть вероятность ошибки
-        $to->parent_id = $parent->ref;
+        $parent = ToEquipment::findOne(['lvl' => 0]);            // TODO !!есть вероятность ошибки
+        $to->parent_id = $parent->id;
         $to->appendTo($parent);
       }
       if (isset($_POST['bool'])) {
         if ($_POST['bool'] === 'true') {
-          $settings->eq_to = 1;
+          $toolSettings->eq_to = 1;
           $to->valid = 1;
         } else {
-          $settings->eq_to = 0;
+          $toolSettings->eq_to = 0;
           $to->valid = 0;
         }
       } else {
         return false;
       }
-      if ($settings->save()) {
+      if ($toolSettings->save()) {
         if ($to->save()) {
           return true;
         }
@@ -332,27 +330,6 @@ class SettingsController extends Controller
       return false;
     }
     return false;
-  }
-
-
-  protected function findSettings($id)
-  {
-    if (($model = ToolSettings::find()->where(['eq_id' => $id])->limit(1)->all()) !== null) {
-      if (!empty($model)) {
-        return $model[0];
-      }
-    }
-    throw new NotFoundHttpException('The requested page does not exist.');
-  }
-
-  protected function findTool($id)
-  {
-    if (($model = Tools::find()->where(['ref' => $id])->limit(1)->all()) !== null) {
-      if (!empty($model)) {
-        return $model[0];
-      }
-    }
-    throw new NotFoundHttpException('The requested page does not exist.');
   }
 
 }

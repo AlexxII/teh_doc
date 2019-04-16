@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
       <h2>
         <span style="position: relative">
         <?= Html::encode($model->name);
-        if ($model->special) {
+        if ($model->specialStatus || $model->specialChildrenStatus ) {
           echo '
           <i class="fa fa-shield" aria-hidden="true" style="font-size: 14px;position: absolute;top:-5px;right:-10px"
              title="Проведены Специальные работы"></i>';
@@ -85,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
       </h2>
     </div>
     <div class="text-right" style="padding: 7px 15px 0 0">
-      <a type="button" href="/tehdoc/equipment/control-panel/<?= $model->ref ?>/info/index"
+      <a type="button" href="/tehdoc/equipment/control-panel/<?= $model->id ?>/info/index"
          class="btn-success btn-sm">Control</a>
     </div>
   </div>

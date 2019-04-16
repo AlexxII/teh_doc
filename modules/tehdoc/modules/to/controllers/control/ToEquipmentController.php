@@ -2,12 +2,13 @@
 
 namespace app\modules\tehdoc\modules\to\controllers\control;
 
-use app\modules\tehdoc\modules\equipment\models\ToolSettings;
-use app\modules\tehdoc\modules\to\models\ToEquipment;
 use Yii;
 use yii\web\Controller;
-use app\modules\tehdoc\modules\equipment\models\Tools;
 use yii\helpers\ArrayHelper;
+
+use app\modules\tehdoc\modules\to\models\ToEquipment;
+use app\modules\tehdoc\modules\equipment\models\Tools;
+use app\modules\tehdoc\modules\equipment\models\ToolSettings;
 
 
 class ToEquipmentController extends Controller
@@ -21,7 +22,7 @@ class ToEquipmentController extends Controller
       $data = [['title' => 'База данных пуста', 'key' => -999]];
       return json_encode($data);
     }
-    $roots = ToEquipment::findOne($id)->tree();
+    $roots = ToEquipment::findModel($id)->tree();
     return json_encode($roots);
   }
 
@@ -32,7 +33,7 @@ class ToEquipmentController extends Controller
 
   public function actionToolsSerials($id)
   {
-    $root = Tools::findOne(['ref' => $id]);
+    $root = Tools::findModel($id);
     $children = $root->children()->select(['ref', 'eq_serial', 'name'])
       ->orderby(['lft' => SORT_ASC])
       ->asArray()->all();
@@ -52,7 +53,7 @@ class ToEquipmentController extends Controller
   {
     if (!empty($_POST)) {
       $id = $_POST['id'];
-      $model = ToEquipment::findOne(['id' => $id]);
+      $model = ToEquipment::findModel($id);
       $model->eq_serial = $_POST['serial'];
       if ($model->save()) {
         return true;
@@ -67,7 +68,7 @@ class ToEquipmentController extends Controller
   {
     $parentId = 1;
     $newGroup = new ToEquipment(['name' => $title]);
-    $parentOrder = ToEquipment::findOne($parentId);
+    $parentOrder = ToEquipment::findModel($parentId);
     $newGroup->parent_id = $parentOrder->ref;
     $newGroup->eq_id = 0;
     $newGroup->ref = 0;
@@ -83,7 +84,7 @@ class ToEquipmentController extends Controller
 
   public function actionUpdateNode($id, $title)
   {
-    $tool = ToEquipment::findOne(['id' => $id]);
+    $tool = ToEquipment::findModel($id);
     $tool->name = $title;
     if ($tool->save()) {
       $data['acceptedTitle'] = $title;
@@ -94,8 +95,8 @@ class ToEquipmentController extends Controller
 
   public function actionMoveNode($item, $action, $second, $parentId)
   {
-    $item_model = ToEquipment::findOne($item);
-    $second_model = ToEquipment::findOne($second);
+    $item_model = ToEquipment::findModel($item);
+    $second_model = ToEquipment::findModel($second);
     switch ($action) {
       case 'after':
         $item_model->insertAfter($second_model);
@@ -107,7 +108,7 @@ class ToEquipmentController extends Controller
         $item_model->appendTo($second_model);
         break;
     }
-    $parent = ToEquipment::findOne($parentId);
+    $parent = ToEquipment::findModel($parentId);
     $item_model->parent_id = $parent->ref;
     if ($item_model->save()) {
       return true;
@@ -120,7 +121,7 @@ class ToEquipmentController extends Controller
     if (!empty($_POST)) {
       // TODO: удаление или невидимый !!!!!!!
       $id = $_POST['id'];
-      $category = ToEquipment::findOne(['ref' => $id]);
+      $category = ToEquipment::findModel($id);
       $category->delete();
     }
   }
@@ -129,10 +130,10 @@ class ToEquipmentController extends Controller
   {
     if (!empty($_POST)) {
       $id = $_POST['id'];
-      $root = ToEquipment::findOne(['id' => $id]);
+      $root = ToEquipment::findModel($id);
       $children = $root->children()->all();
       foreach ($children as $child){
-        $settings = ToolSettings::findOne(['eq_id' => $child->ref]);
+        $settings = ToolSettings::findModel($child->ref);
         $settings->eq_to = 0;
       }
       if ($root->deleteWithChildren()){
@@ -142,7 +143,5 @@ class ToEquipmentController extends Controller
     }
     return false;
   }
-
-
 
 }

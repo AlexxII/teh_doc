@@ -2,12 +2,13 @@
 
 namespace app\modules\tehdoc\modules\equipment\controllers\controlPanel;
 
-use app\modules\tehdoc\modules\equipment\models\ToolSettings;
-use yii\web\Controller;
-use app\modules\tehdoc\modules\equipment\models\Tools;
 use Yii;
+use yii\web\Controller;
 use yii\web\UploadedFile;
 use yii\helpers\ArrayHelper;
+
+use app\modules\tehdoc\modules\equipment\models\Tools;
+use app\modules\tehdoc\modules\equipment\models\ToolSettings;
 
 
 class InfoController extends Controller
@@ -30,14 +31,15 @@ class InfoController extends Controller
     } else if ($id == 5544332211) {
       return $this->render('meeting_waiting');
     }
-    $tool = $this->findTool($id);
+    $tool = Tools::findModel($id);
     $wikiCount = $tool->countWikiPages;
     $imagesCount = $tool->countImages;
     $docsCount = $tool->countDocs;
     $tool->scenario = Tools::SCENARIO_UPDATE;
     if ($tool->load(Yii::$app->request->post())) {
+
       if ($tool->save()) {
-        return $this->redirect(['control-panel/' . $tool->ref . '/info/index']);
+        return $this->redirect(['control-panel/' . $tool->id . '/info/index']);
       } else {
         Yii::$app->session->setFlash('error', 'Изменения НЕ внесены');
       }
@@ -50,15 +52,8 @@ class InfoController extends Controller
     ]);
   }
 
-  protected function findTool($id)
-  {
-    if (($model = Tools::find()->where(['ref' => $id])->limit(1)->all()) !== null) {
-      if (!empty($model)) {
-        return $model[0];
-      }
-    }
-    throw new NotFoundHttpException('The requested page does not exist.');
-  }
+
+
 
   //=============================================== working with tree =================================================
 
@@ -66,28 +61,28 @@ class InfoController extends Controller
   {
     $data = [];
     $date = date('Y-m-d H:i:s');
-    $parentOrder = Tools::findOne($parentId);
-    $newTool = new Tools(['name' => $title]);
+    $parentOrder = Tools::findModel($parentId);
+    $newTool = new Tools();
+    $newTool->name = $title;
     $toolSettings = new ToolSettings();
-    $newTool->parent_id = $parentOrder->ref;
-    $newTool->ref = mt_rand();
+    $newTool->parent_id = $parentOrder->id;
     $newTool->eq_title = $title;
     if ($newTool->appendTo($parentOrder)) {
-      $toolSettings->eq_id = $newTool->ref;
+      $toolSettings->eq_id = $newTool->id;
       $toolSettings->save();
       $data['acceptedTitle'] = $title;
       $data['acceptedId'] = $newTool->id;
-      $data['acceptedRef'] = $newTool->ref;
       return json_encode($data);
     }
     $data = $newTool->getErrors();
     return json_encode($data);
   }
 
-  public function actionUpdateNode($ref, $title)
+  public function actionUpdateNode($nodeId, $title)
   {
-    $tool = Tools::findOne(['ref' => $ref]);
+    $tool = Tools::findModel($nodeId);
     $tool->name = $title;
+    $tool->eq_title = $tool->name;
     if ($tool->save()) {
       $data['acceptedTitle'] = $title;
       return json_encode($data);
@@ -97,8 +92,8 @@ class InfoController extends Controller
 
   public function actionMoveNode($item, $action, $second, $parentId)
   {
-    $item_model = Tools::findOne($item);
-    $second_model = Tools::findOne($second);
+    $item_model = Tools::findModel($item);
+    $second_model = Tools::findModel($second);
     switch ($action) {
       case 'after':
         $item_model->insertAfter($second_model);
@@ -110,8 +105,8 @@ class InfoController extends Controller
         $item_model->appendTo($second_model);
         break;
     }
-    $parent = Tools::findOne($parentId);
-    $item_model->parent_id = $parent->ref;
+    $parent = Tools::findModel($parentId);
+    $item_model->parent_id = $parent->id;
     if ($item_model->save()) {
       return true;
     }
@@ -120,21 +115,31 @@ class InfoController extends Controller
 
   public function actionDeleteNode()
   {
+    usleep(400*1000);
     if (!empty($_POST)) {
       // TODO: удаление или невидимый !!!!!!!
-      $id = $_POST['id'];
-      $category = Tools::findOne(['ref' => $id]);
-      $category->delete();
+      $id = $_POST['nodeId'];
+      $category = Tools::findModel($id);
+      if ($category->delete()) {
+        return true;
+      }
+      return false;
     }
+    return false;
   }
 
   public function actionDeleteRoot()
   {
+    usleep(400*1000);
     if (!empty($_POST)) {
-      $id = $_POST['id'];
-      $root = Tools::findOne(['ref' => $id]);
+      $id = $_POST['nodeId'];
+      $root = Tools::findModel($id);
+      if ($root->deleteWithChildren()) {
+        return true;
+      }
+      return false;
     }
-    $root->deleteWithChildren();
+    return false;
   }
 
 }

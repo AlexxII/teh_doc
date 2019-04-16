@@ -2,12 +2,13 @@
 
 namespace app\modules\tehdoc\modules\equipment\controllers\infoPanel;
 
-use app\modules\tehdoc\modules\equipment\models\ComplexEx;
-use app\modules\tehdoc\modules\equipment\models\Tools;
-use app\modules\tehdoc\modules\equipment\models\Wiki;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+
+use app\modules\tehdoc\modules\equipment\models\Tools;
+use app\modules\tehdoc\modules\equipment\models\Wiki;
+
 
 class WikiController extends Controller
 {
@@ -19,8 +20,7 @@ class WikiController extends Controller
     $id = $_GET['id'];
     $model = Wiki::find()->where(['eq_id' => $id])->orderBy('wiki_title')->limit(1)->all();
     $list = Wiki::find()->where(['eq_id' => $id])->orderBy('wiki_title')->asArray()->all();
-    $request = Tools::find()->where(['ref' => $id])->limit(1)->all();
-    $toolModel = $request[0];
+    $toolModel = Tools::findModel($id);
     $wikiCount = $toolModel->countWikiPages;
     $imagesCount = $toolModel->countImages;
     $docsCount = $toolModel->countDocs;
@@ -45,8 +45,7 @@ class WikiController extends Controller
   {
     $model = new Wiki();
     $id = $_GET['id'];
-    $request = Tools::find()->where(['ref' => $id])->limit(1)->all();
-    $toolModel = $request[0];
+    $toolModel = Tools::findModel($id);
     $wikiCount = $toolModel->countWikiPages;
     $imagesCount = $toolModel->countImages;
     $docsCount = $toolModel->countDocs;
@@ -56,7 +55,7 @@ class WikiController extends Controller
       $model->eq_id = $_GET['id'];
       $model->wiki_record_create = $date;
       $model->wiki_record_update = $date;
-      $model->wiki_created_user = Yii::$app->user->identity->ref;
+      $model->wiki_created_user = Yii::$app->user->identity->id;
       if ($model->save()) {
         $id = $_GET['id'];
         $list = Wiki::find()->where(['eq_id' => $id])->orderBy('wiki_title')->asArray()->all();
@@ -79,10 +78,9 @@ class WikiController extends Controller
 
   public function actionUpdate($page)
   {
-    $model = $this->findModel($page);
+    $model = Wiki::findModel($page);
     $id = $_GET['id'];
-    $request = Tools::find()->where(['ref' => $id])->limit(1)->all();
-    $toolModel = $request[0];
+    $toolModel = Tools::findModel($id);
     $wikiCount = $toolModel->countWikiPages;
     $imagesCount = $toolModel->countImages;
     $docsCount = $toolModel->countDocs;
@@ -112,10 +110,9 @@ class WikiController extends Controller
 
   public function actionView($page)
   {
-    if ($page){
+    if ($page) {
       $id = $_GET['id'];
-      $request = Tools::find()->where(['ref' => $id])->limit(1)->all();
-      $toolModel = $request[0];
+      $toolModel = Tools::findModel($id);
       $wikiCount = $toolModel->countWikiPages;
       $imagesCount = $toolModel->countImages;
       $docsCount = $toolModel->countDocs;
@@ -136,9 +133,9 @@ class WikiController extends Controller
   public function actionDeletePage($page)
   {
     $toolId = $_GET['id'];
-    if ($page){
-      $model = $this->findModel($page);
-      if ($model->delete()) {
+    if ($page) {
+      $wiki = Wiki::findModel($page);
+      if ($wiki->delete()) {
         Yii::$app->session->setFlash('success', 'Страница удалена');
         return $this->redirect(['tool/' . $toolId . '/wiki/index']);
       }
@@ -150,15 +147,5 @@ class WikiController extends Controller
   }
 
 
-  protected function findModel($id)
-  {
-    // TODO не ососбо правильный метод поиска
-    if (($model = Wiki::find()->where(['id' => $id])->limit(1)->all()) !== null) {
-      if (!empty($model)) {
-        return $model[0];
-      }
-    }
-    throw new NotFoundHttpException('К сожалению страница не найдена.');
-  }
 
 }

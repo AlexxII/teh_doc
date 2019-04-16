@@ -2,16 +2,22 @@
 
 namespace app\modules\tehdoc\modules\equipment\controllers\infoPanel;
 
-use app\modules\tehdoc\modules\equipment\models\Tools;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 
+use app\modules\tehdoc\modules\equipment\models\Tools;
+
 class InfoController extends Controller
 {
 
   public $layout = '@app/modules/tehdoc/modules/equipment/views/layouts/equipment_layout_info.php';
+
+  public function actionWrap()
+  {
+    return $this->render('meeting');
+  }
 
   public function actionIndex()
   {
@@ -20,14 +26,13 @@ class InfoController extends Controller
 
   public function actionInfo()
   {
-    $id = $_GET['id'];
-    $request = Tools::find()->where(['ref' => $id])->limit(1)->all();
-    $model = $request[0];
+    $id = $_GET['id'];                                // TODO справить возможную ошибку
+    $model = Tools::findModel($id);
     $children = $model->children(1)->all();
     $wikiCount = $model->countWikiPages;
     $imagesCount = $model->countImages;
     $docsCount = $model->countDocs;
-    if ($model->complex){
+    if ($model->complex) {
       $view = 'view_complex';
     } else {
       $view = 'view_single';
@@ -35,21 +40,20 @@ class InfoController extends Controller
     return $this->render('header', [
       'model' => $model,
       'view' => $view,
-       'children' => $children,
+      'children' => $children,
       'docsCount' => $docsCount,
       'imagesCount' => $imagesCount,
       'wikiCount' => $wikiCount,
     ]);
   }
 
-  protected function findModel($id)
+  public function actionTest()
   {
-    if (($model = Tools::find()->where(['ref' => $id])->limit(1)->all()) !== null) {
-      if (!empty($model)) {
-        return $model[0];
-      }
-    }
-    throw new NotFoundHttpException('The requested page does not exist.');
+    $id = $_GET['id'];                              // TODO исправить возможную ошибку
+    $model = Tools::findModel($id);
+    return $this->render('test', [
+      'ar' => $model->children()->all()
+    ]);
   }
 
 }

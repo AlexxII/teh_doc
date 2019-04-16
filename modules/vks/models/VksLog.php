@@ -2,8 +2,10 @@
 
 namespace app\modules\vks\models;
 
-use app\modules\admin\models\User;
 use Yii;
+
+use app\modules\admin\models\User;
+use app\base\MHelper;
 
 /**
  * This is the model class for table "vks_log_tbl".
@@ -16,50 +18,55 @@ use Yii;
  */
 class VksLog extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'vks_log_tbl';
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public static function tableName()
+  {
+    return 'vks_log_tbl';
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['session_id', 'valid'], 'integer'],
-            [['log_time'], 'safe'],
-            [['log_text'], 'string', 'max' => 255],
-        ];
-    }
+  public function __construct()
+  {
+    $this->id = MHelper::generateId();
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'session_id' => 'Сеанс',
-            'log_text' => 'Текст',
-            'log_time' => 'Время',
-            'valid' => 'Valid',
-        ];
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function rules()
+  {
+    return [
+      [['session_id', 'valid'], 'integer'],
+      [['log_time'], 'safe'],
+      [['log_text'], 'string', 'max' => 255],
+    ];
+  }
 
-    public function getUserName()
-    {
-      if($this->user){
-        return $this->user->username;
-      }
-      return '-';
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function attributeLabels()
+  {
+    return [
+      'id' => 'ID',
+      'session_id' => 'Сеанс',
+      'log_text' => 'Текст',
+      'log_time' => 'Время',
+      'valid' => 'Valid',
+    ];
+  }
 
-    public function getUser()
-    {
-      return $this->hasOne(User::class, ['ref' => 'user_id']);
+  public function getUserName()
+  {
+    if ($this->user) {
+      return $this->user->username;
     }
+    return '-';
+  }
+
+  public function getUser()
+  {
+    return $this->hasOne(User::class, ['id' => 'user_id']);
+  }
 }

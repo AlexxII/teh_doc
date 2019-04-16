@@ -16,47 +16,35 @@ class VksToolsController extends Controller
 
   public function actionTools()
   {
-    $id = VksTools::find()->select('id, rgt, lft, root')->where(['=', 'lvl', 0])->all();
+    $id = VksTools::find()->select('id')->where(['=', 'lvl', 0])->all();
     if (!$id) {
       $data = array();
       $data = [['title' => 'База данных пуста', 'key' => -999]];
       return json_encode($data);
     }
-    $roots = VksTools::findOne($id)->tree();
+    $roots = VksTools::findModel($id)->tree();
     return json_encode($roots);
   }
 
   public function actionVksToolsCreate($parentId, $title)
   {
     $data = [];
-    $parentTool = VksTools::findOne($parentId);
-    $newTool = new VksTools(['name' => $title]);
-    $newTool->parent_id = $parentTool->ref;
-    $newTool->ref = mt_rand();
+    $parentTool = VksTools::findModel($parentId);
+    $newTool = new VksTools();
+    $newTool->name = $title;
+    $newTool->parent_id = $parentTool->id;
     $newTool->appendTo($parentTool);
     $data['acceptedTitle'] = $title;
     $data['acceptedId'] = $newTool->id;
+    $data['lvl'] = $newTool->lvl;
     return json_encode($data);
-  }
-
-  public function actionCreateRoot($title)
-  {
-    \Yii::$app->db->schema->refresh();
-    $newRoot = new VksTools(['name' => $title]);
-    $result = $newRoot->makeRoot();
-    if ($result) {
-      $data['acceptedTitle'] = $title;
-      return json_encode($data);
-    } else {
-      return var_dump('0');
-    }
   }
 
   public function actionUpdate($id, $title)
   {
-    $tool = VksTools::findOne(['id' => $id]);
+    $tool = VksTools::findModel($id);
     $tool->name = $title;
-    if ($tool->save()){
+    if ($tool->save()) {
       $data['acceptedTitle'] = $title;
       return json_encode($data);
     }
@@ -65,8 +53,8 @@ class VksToolsController extends Controller
 
   public function actionMove($item, $action, $second, $parentId)
   {
-    $item_model = VksTools::findOne($item);
-    $second_model = VksTools::findOne($second);
+    $item_model = VksTools::findModel($item);
+    $second_model = VksTools::findModel($second);
     switch ($action) {
       case 'after':
         $item_model->insertAfter($second_model);
@@ -78,8 +66,8 @@ class VksToolsController extends Controller
         $item_model->appendTo($second_model);
         break;
     }
-    $parent = VksTools::findOne($parentId);
-    $item_model->parent_id = $parent->ref;
+    $parent = VksTools::findModel($parentId);
+    $item_model->parent_id = $parent->id;
     if ($item_model->save()) {
       return true;
     }
@@ -91,28 +79,31 @@ class VksToolsController extends Controller
     if (!empty($_POST)) {
       // TODO: удаление или невидимый !!!!!!!
       $id = $_POST['id'];
-      $tool = VksTools::findOne(['id' => $id]);
-      $tool->delete();
+      $tool = VksTools::findModel($id);
+      if ($tool->delete()) {
+        return true;
+      }
+      return false;
     }
+    return false;
   }
 
   public function actionDeleteRoot()
   {
     if (!empty($_POST)) {
       $id = $_POST['id'];
-      $root = VksTools::findOne(['id' => $id]);
+      $root = VksTools::findModel($id);
+      if ($root->deleteWithChildren()) {
+        return true;
+      }
+      return false;
     }
-    $root->deleteWithChildren();
-  }
-
-  public function actionComplex()
-  {
-
+    return false;
   }
 
   public function actionSurnames($id)
   {
-    $model = VksTools::findOne(['id' => $id]);
+    $model = VksTools::findModel($id);
     return json_encode($model->surnames);
   }
 
@@ -120,13 +111,14 @@ class VksToolsController extends Controller
   {
     if (!empty($_POST)) {
       $id = $_POST['id'];
-      $model = VksTools::findOne(['id' => $id]);
+      $model = VksTools::findModel($id);
       $model->surnames = $_POST['Data'];
       if ($model->save()) {
         return true;
       }
       return false;
     }
+    return false;
   }
 
   public function actionTool()

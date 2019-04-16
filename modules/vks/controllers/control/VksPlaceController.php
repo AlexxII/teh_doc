@@ -16,45 +16,34 @@ class VksPlaceController extends Controller
 
   public function actionPlaces()
   {
-    $id = VksPlaces::find()->select('id, rgt, lft, root')->where(['=', 'lvl', 0])->all();
+    $id = VksPlaces::find()->select('id')->where(['=', 'lvl', 0])->all();
     if (!$id) {
       $data = array();
       $data = [['title' => 'База данных пуста', 'key' => -999]];
       return json_encode($data);
     }
-    $roots = VksPlaces::findOne($id)->tree();
+    $roots = VksPlaces::findModel($id)->tree();
     return json_encode($roots);
   }
 
   public function actionVksPlaceCreate($parentId, $title)
   {
     $data = [];
-    $parentPlace = VksPlaces::findOne($parentId);
-    $newPlace = new VksPlaces(['name' => $title]);
-    $newPlace->parent_id = $parentPlace->ref;
-    $newPlace->ref = mt_rand();
+    $parentPlace = VksPlaces::findModel($parentId);
+    $newPlace = new VksPlaces();
+    $newPlace->name = $title;
+    $newPlace->parent_id = $parentPlace->id;
     $newPlace->appendTo($parentPlace);
     $data['acceptedTitle'] = $title;
     $data['acceptedId'] = $newPlace->id;
+    $data['lvl'] = $newPlace->lvl;
     return json_encode($data);
   }
 
-  public function actionCreateRoot($title)
-  {
-    \Yii::$app->db->schema->refresh();
-    $newRoot = new VksPlaces(['name' => $title]);
-    $result = $newRoot->makeRoot();
-    if ($result) {
-      $data['acceptedTitle'] = $title;
-      return json_encode($data);
-    } else {
-      return var_dump('0');
-    }
-  }
 
   public function actionUpdate($id, $title)
   {
-    $place = VksPlaces::findOne(['id' => $id]);
+    $place = VksPlaces::findModel($id);
     $place->name = $title;
     if ($place->save()){
       $data['acceptedTitle'] = $title;
@@ -65,8 +54,8 @@ class VksPlaceController extends Controller
 
   public function actionMove($item, $action, $second, $parentId)
   {
-    $item_model = VksPlaces::findOne($item);
-    $second_model = VksPlaces::findOne($second);
+    $item_model = VksPlaces::findModel($item);
+    $second_model = VksPlaces::findModel($second);
     switch ($action) {
       case 'after':
         $item_model->insertAfter($second_model);
@@ -79,7 +68,7 @@ class VksPlaceController extends Controller
         break;
     }
     $parent = VksPlaces::findOne($parentId);
-    $item_model->parent_id = $parent->ref;
+    $item_model->parent_id = $parent->id;
     if ($item_model->save()) {
       return true;
     }
@@ -92,8 +81,12 @@ class VksPlaceController extends Controller
       // TODO: удаление или невидимый !!!!!!!
       $id = $_POST['id'];
       $place = VksPlaces::findOne(['id' => $id]);
-      $place->delete();
+      if ($place->delete()) {
+        return true;
+      }
+      return false;
     }
+    return false;
   }
 
   public function actionDeleteRoot()
@@ -101,8 +94,12 @@ class VksPlaceController extends Controller
     if (!empty($_POST)) {
       $id = $_POST['id'];
       $root = VksPlaces::findOne(['id' => $id]);
+      if ($root->deleteWithChildren()) {
+        return true;
+      }
+      return false;
     }
-    $root->deleteWithChildren();
+    return false;
   }
 
 }

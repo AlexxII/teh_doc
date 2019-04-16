@@ -16,45 +16,33 @@ class VksTypeController extends Controller
 
   public function actionTypes()
   {
-    $id = VksTypes::find()->select('id, rgt, lft, root')->where(['=', 'lvl', 0])->all();
+    $id = VksTypes::find()->select('id')->where(['=', 'lvl', 0])->all();
     if (!$id) {
       $data = array();
       $data = [['title' => 'База данных пуста', 'key' => -999]];
       return json_encode($data);
     }
-    $roots = VksTypes::findOne($id)->tree();
+    $roots = VksTypes::findModel($id)->tree();
     return json_encode($roots);
   }
 
   public function actionVksTypeCreate($parentId, $title)
   {
     $data = [];
-    $parentType = VksTypes::findOne($parentId);
-    $newType = new VksTypes(['name' => $title]);
-    $newType->parent_id = $parentType->ref;
-    $newType->ref = mt_rand();                              // генерация случайного числа
+    $parentType = VksTypes::findModel($parentId);
+    $newType = new VksTypes();
+    $newType->name = $title;
+    $newType->parent_id = $parentType->id;
     $newType->appendTo($parentType);
     $data['acceptedTitle'] = $title;
     $data['acceptedId'] = $newType->id;
+    $data['lvl'] = $newType->lvl;
     return json_encode($data);
-  }
-
-  public function actionCreateRoot($title)
-  {
-    \Yii::$app->db->schema->refresh();
-    $newRoot = new VksTypes(['name' => $title]);
-    $result = $newRoot->makeRoot();
-    if ($result) {
-      $data['acceptedTitle'] = $title;
-      return json_encode($data);
-    } else {
-      return var_dump('0');
-    }
   }
 
   public function actionUpdate($id, $title)
   {
-    $type = VksTypes::findOne(['id' => $id]);
+    $type = VksTypes::findModel($id);
     $type->name = $title;
     if ($type->save()){
       $data['acceptedTitle'] = $title;
@@ -65,8 +53,8 @@ class VksTypeController extends Controller
 
   public function actionMove($item, $action, $second, $parentId)
   {
-    $item_model = VksTypes::findOne($item);
-    $second_model = VksTypes::findOne($second);
+    $item_model = VksTypes::findModel($item);
+    $second_model = VksTypes::findModel($second);
     switch ($action) {
       case 'after':
         $item_model->insertAfter($second_model);
@@ -78,8 +66,8 @@ class VksTypeController extends Controller
         $item_model->appendTo($second_model);
         break;
     }
-    $parent = VksTypes::findOne($parentId);
-    $item_model->parent_id = $parent->ref;
+    $parent = VksTypes::findModel($parentId);
+    $item_model->parent_id = $parent->id;
     if ($item_model->save()) {
       return true;
     }
@@ -91,18 +79,26 @@ class VksTypeController extends Controller
     if (!empty($_POST)) {
       // TODO: удаление или невидимый !!!!!!!
       $id = $_POST['id'];
-      $type = VksTypes::findOne(['id' => $id]);
-      $type->delete();
+      $type = VksTypes::findModel($id);
+      if ($type->delete()) {
+        return true;
+      }
+      return false;
     }
+    return false;
   }
 
   public function actionDeleteRoot()
   {
     if (!empty($_POST)) {
       $id = $_POST['id'];
-      $root = VksTypes::findOne(['id' => $id]);
+      $root = VksTypes::findModel($id);
+      if ($root->deleteWithChildren()) {
+        return true;
+      }
+      return false;
     }
-    $root->deleteWithChildren();
+    return false;
   }
 
 }

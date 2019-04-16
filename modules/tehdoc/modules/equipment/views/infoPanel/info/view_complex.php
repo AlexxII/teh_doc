@@ -52,7 +52,7 @@ $attributes = [
     echo '<h3>
         <span style="position: relative">';
     echo Html::encode($child->name);
-    if ($child->special) {
+    if ($child->specialChildrenStatus || $child->specialStatus) {
       echo '<i class="fa fa-shield" aria-hidden="true" style="font-size: 14px; position: absolute;top:-5px;right:-15px"
              title="Проведены Специальные работы"></i>';
     }

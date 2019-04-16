@@ -3,10 +3,12 @@
 
 namespace app\modules\tehdoc\modules\equipment\models;
 
+use \Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\web\UploadedFile;
-use \Yii;
+
+use app\base\MHelper;
 
 class Images extends ActiveRecord        // модель для добавления загрузки изображений
   // и добавления путей в БД с привязкой к id оборудования
@@ -17,6 +19,12 @@ class Images extends ActiveRecord        // модель для добавлен
   {
     return 'teh_image_tbl';
   }
+
+  public function __construct()
+  {
+    $this->id = MHelper::generateId();
+  }
+
 
   public function attributeLabels()
   {
@@ -48,7 +56,7 @@ class Images extends ActiveRecord        // модель для добавлен
     // store the source file name
     foreach ($this->imageFiles as $image) {
       $date = date('Y-m-d H:i:s');
-      $userId = Yii::$app->user->identity->ref;
+      $userId = Yii::$app->user->identity->id;
       $ext = $image->extension;
       $image_path = \Yii::$app->security->generateRandomString() . ".{$ext}";   // для сохранения в БД
       $path = \Yii::$app->params['uploadImg'] . $image_path;
@@ -87,6 +95,14 @@ class Images extends ActiveRecord        // модель для добавлен
     if ($this->upload_time){
       return strftime("%e %b %G", strtotime($this->upload_time));
     }
+  }
+  
+  public static function findModel($id)
+  {
+    if (($model = Images::findOne($id)) !== null) {
+      return $model;
+    }
+    throw new NotFoundHttpException('Запрошенная страница не найдена.');
   }
 
 }

@@ -172,7 +172,7 @@ $task_hint = 'Добавить выделенные элементы в зада
   });
 
   $(document).ready(function () {
-    var settings = 'eq_general';
+    var settings = 'eq_general';                      // SSP index !!!
     var table = $('#main-table').DataTable({
       "processing": true,
       "serverSide": true,

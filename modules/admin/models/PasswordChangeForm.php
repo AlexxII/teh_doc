@@ -2,9 +2,10 @@
 
 namespace app\modules\admin\models;
 
-use app\modules\admin\models\User;
 use Yii;
 use yii\base\Model;
+
+use app\modules\admin\models\User;
 
 /**
  * Password reset form

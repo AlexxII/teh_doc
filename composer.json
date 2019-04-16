@@ -26,7 +26,8 @@
         "asinfotrack/yii2-wiki": "dev-master",
         "bower-asset/simplemde": "^1.11",
         "bower-asset/photoswipe": "^4.1",
-        "bower-asset/jquery-confirm2": "^3.3"
+        "bower-asset/jquery-confirm2": "^3.3",
+        "ramsey/uuid": "^3.8"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

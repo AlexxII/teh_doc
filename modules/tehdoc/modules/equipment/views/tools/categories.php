@@ -688,12 +688,14 @@ $classif_hint = 'Присвоить выделенному оборудован�
     };
   })(jQuery);
 
+  ///////////// -============================ tree ======================================
+  
   jQuery(function ($) {
-    var main_url = '/tehdoc/settings/category/categories';
+    var main_url = '/tehdoc/control/category/categories';
 
     $("#fancyree_w0").fancytree({
       source: {
-        url: main_url,
+        url: main_url
       },
       extensions: ['filter'],
       quicksearch: true,

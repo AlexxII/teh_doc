@@ -2,8 +2,11 @@
 
 namespace app\modules\vks\models;
 
-use creocoder\nestedsets\NestedSetsBehavior;
 use Yii;
+use creocoder\nestedsets\NestedSetsBehavior;
+use yii\web\NotFoundHttpException;
+
+use app\base\MHelper;
 use app\base\NestedSetsTreeBehavior;
 
 /**
@@ -35,6 +38,11 @@ class VksPlaces extends \yii\db\ActiveRecord
     ];
   }
 
+  public function __construct()
+  {
+    $this->id = MHelper::generateId();
+  }
+
   public function transactions()
   {
     return [
@@ -50,6 +58,14 @@ class VksPlaces extends \yii\db\ActiveRecord
   public static function find()
   {
     return new VksQuery(get_called_class());
+  }
+
+  public static function findModel($id)
+  {
+    if (($model = VksPlaces::findOne($id)) !== null) {
+      return $model;
+    }
+    throw new NotFoundHttpException('Запрашиваемая страница не существует.');
   }
 
 }

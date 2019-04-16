@@ -29,33 +29,22 @@ class VksOrderController extends Controller
   public function actionVksOrderCreate($parentId, $title)
   {
     $data = [];
-    $parentOrder = VksOrders::findOne($parentId);
-    $newOrder = new VksOrders(['name' => $title]);
-    $newOrder->parent_id = $parentOrder->ref;
-    $newOrder->ref = mt_rand();
+    $parentOrder = VksOrders::findModel($parentId);
+    $newOrder = new VksOrders();
+    $newOrder->name = $title;
+    $newOrder->parent_id = $parentOrder->id;
     $newOrder->appendTo($parentOrder);
     $data['acceptedTitle'] = $title;
     $data['acceptedId'] = $newOrder->id;
+    $data['lvl'] = $newOrder->lvl;
     return json_encode($data);
-  }
-
-  public function actionCreateRoot($title)
-  {
-    $newRoot = new VksOrders(['name' => $title]);
-    $result = $newRoot->makeRoot();
-    if ($result) {
-      $data['acceptedTitle'] = $title;
-      return json_encode($data);
-    } else {
-      return var_dump('0');
-    }
   }
 
   public function actionUpdate($id, $title)
   {
-    $order = VksOrders::findOne(['id' => $id]);
+    $order = VksOrders::findModel($id);
     $order->name = $title;
-    if ($order->save()){
+    if ($order->save()) {
       $data['acceptedTitle'] = $title;
       return json_encode($data);
     }
@@ -64,8 +53,8 @@ class VksOrderController extends Controller
 
   public function actionMove($item, $action, $second, $parentId)
   {
-    $item_model = VksOrders::findOne($item);
-    $second_model = VksOrders::findOne($second);
+    $item_model = VksOrders::findModel($item);
+    $second_model = VksOrders::findModel($second);
     switch ($action) {
       case 'after':
         $item_model->insertAfter($second_model);
@@ -77,8 +66,8 @@ class VksOrderController extends Controller
         $item_model->appendTo($second_model);
         break;
     }
-    $parent = VksOrders::findOne($parentId);
-    $item_model->parent_id = $parent->ref;
+    $parent = VksOrders::findModel($parentId);
+    $item_model->parent_id = $parent->id;
     if ($item_model->save()) {
       return true;
     }
@@ -90,18 +79,26 @@ class VksOrderController extends Controller
     if (!empty($_POST)) {
       // TODO: удаление или невидимый !!!!!!!
       $id = $_POST['id'];
-      $order = VksOrders::findOne(['id' => $id]);
-      $order->delete();
+      $order = VksOrders::findModel($id);
+      if ($order->delete()) {
+        return true;
+      }
+      return false;
     }
+    return false;
   }
 
   public function actionDeleteRoot()
   {
     if (!empty($_POST)) {
       $id = $_POST['id'];
-      $root = VksOrders::findOne(['id' => $id]);
+      $root = VksOrders::findModel($id);
+      if ($root->deleteWithChildren()) {
+        return true;
+      }
+      return false;
     }
-    $root->deleteWithChildren();
+    return false;
   }
 
 }

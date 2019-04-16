@@ -2,15 +2,17 @@
 
 namespace app\modules\vks\controllers;
 
+use Yii;
+use yii\web\Controller;
+use yii\filters\AccessControl;
+use yii\web\NotFoundHttpException;
+
+use app\modules\vks\models\VksLog;
 use app\modules\vks\models\SSP;
 use app\modules\vks\models\VksPlaces;
 use app\modules\vks\models\VksSessions;
 use app\modules\vks\models\VksSubscribes;
 use app\modules\vks\models\VksTypes;
-use Yii;
-use yii\web\Controller;
-use app\modules\vks\models\VksLog;
-use yii\filters\AccessControl;
 
 
 class SessionsController extends Controller
@@ -88,7 +90,7 @@ class SessionsController extends Controller
       array('db' => 'vks_subscriber_office_text', 'dt' => 7),
       array('db' => 'vks_subscriber_name', 'dt' => 8),
       array('db' => 'vks_order_text', 'dt' => 9),
-      array('db' => 'combined', 'dt' => 10)
+      array('db' => 'important', 'dt' => 10)
     );
     $sql_details = \Yii::$app->params['sql_details'];
     if (empty($index)){
@@ -181,29 +183,29 @@ class SessionsController extends Controller
       $model->vks_record_create = $date;
       $model->vks_record_update = $date;
       $model->vks_upcoming_session = 1;
-      $result = $model->save();
+      $result = $model->save();                                                             // TODO нет проверки на ошибки!
       $this->logVks($model->id, "info", "Добавил запись о предстоящем сеансе ВКС");
       if (!empty($_POST['test-type'])) {
         foreach ($_POST['test-type'] as $key => $item) {
           $newModel = new VksSessions(['scenario' => VksSessions::SCENARIO_CREATE]);
           $newModel->load(Yii::$app->request->post());
           $newModel->vks_type = $item;
-          $typeModel = VksTypes::findOne(['ref' => $item]);
+          $typeModel = VksTypes::findModel($item);
           $newModel->vks_type_text = $typeModel->name;
           if (!empty($_POST['test-place'][$key])) {
             $placeId = $_POST['test-place'][$key];
             $newModel->vks_place = $placeId;
-            $placeModel = VksPlaces::findOne(['ref' => $placeId]);
+            $placeModel = VksPlaces::findModel($placeId);
             $newModel->vks_place_text = $placeModel->name;
           }
           $newModel->vks_record_create = $date;
           $newModel->vks_record_update = $date;
           $newModel->vks_upcoming_session = 1;
-          $newModel->combined = 1;
+          $newModel->important = 1;
           $result = $newModel->save();
           $this->logVks($newModel->id, "info","Добавил запись о предстоящем сеансе ВКС");
         }
-        $model->combined = 1;
+        $model->important = 1;
         $result = $model->save();
       }
       if ($result) {
@@ -304,7 +306,8 @@ class SessionsController extends Controller
 
   public function actionSubscribersMsk()
   {
-    $sql = "SELECT ref as value, surnames as label FROM vks_subscribes_tbl where surnames IS NOT NULL and surnames != '' AND root = 1";
+    $sql = "SELECT id as value, surnames as label 
+              FROM vks_subscribes_tbl where surnames IS NOT NULL and surnames != '' AND list = 1";
     $arrayOfNames = VksSubscribes::findBySql($sql)->asArray()->all();
     $newArrayOfNames = [];
     $tempArrayOfNames = [];
@@ -323,7 +326,8 @@ class SessionsController extends Controller
 
   public function actionSubscribersRegion()
   {
-    $sql = "SELECT ref as value, surnames as label FROM vks_subscribes_tbl where surnames IS NOT NULL and surnames != '' AND root = 2";
+    $sql = "SELECT id as value, surnames as label 
+              FROM vks_subscribes_tbl where surnames IS NOT NULL and surnames != '' AND list = 2";
     $arrayOfNames = VksSubscribes::findBySql($sql)->asArray()->all();
     $newArrayOfNames = [];
     $tempArrayOfNames = [];
@@ -342,7 +346,7 @@ class SessionsController extends Controller
 
   public function actionViewUpSession($id)
   {
-    $logs = VksLog::find()->where(['=', 'session_id', $id])->all();
+    $logs = VksLog::find()->where(['=', 'session_id', $id])->orderBy('log_time')->all();
     return $this->render('view_up_session', [
       'model' => $this->findModel($id),
       'logs' => $logs
@@ -351,7 +355,7 @@ class SessionsController extends Controller
 
   public function actionViewSession($id)
   {
-    $logs = VksLog::find()->where(['=', 'session_id', $id])->all();
+    $logs = VksLog::find()->where(['=', 'session_id', $id])->orderBy('log_time')->all();
     return $this->render('view_session', [
       'model' => $this->findModel($id),
       'logs' => $logs
@@ -374,17 +378,19 @@ class SessionsController extends Controller
     return false;
   }
 
-  public function actionDeleteSingle($id)
+  public function actionDeleteSingle()
   {
-    $model = $this->findModel($id);
-    $model->vks_cancel = 1;
-    if ($model->save()) {
-      $this->logVks($model->id, "danger", " Удалил запись о сеансе ВКС.");
-      Yii::$app->session->setFlash('success', 'Запись удалена');
-      return $this->redirect(['index']);
+    if (!empty($_POST)) {
+      $id = $_POST['id'];
+      $model = $this->findModel($id);
+      $model->vks_cancel = 1;
+      if ($model->save()) {
+        $this->logVks($model->id, "danger", " Удалил запись о сеансе ВКС.");
+        return true;
+      }
+      return false;
     }
-    Yii::$app->session->setFlash('error', 'Удалить запись не удалось');
-    return $this->redirect(['index']);
+    return false;
   }
 
   public function actionArchive()
@@ -408,8 +414,7 @@ class SessionsController extends Controller
 
   protected function logVks($sessionId, $status, $text)
   {
-    $userId = Yii::$app->user->identity->ref;
-
+    $userId = Yii::$app->user->identity->id;
     $log = new VksLog();
     $log->status = $status;
     $log->session_id = $sessionId;
@@ -418,60 +423,5 @@ class SessionsController extends Controller
     $log->log_time = date("Y-m-d H:i:s", time());;
     $log->save();
   }
-
-// ============================= admin ===========================================
-
-  public function actionSessionsEx()
-  {
-    return $this->render('index_ex');
-  }
-
-  public function actionArchiveEx()
-  {
-    return $this->render('archive_ex');
-  }
-
-  public function actionRestore()
-  {
-    $report = true;
-    foreach ($_POST['jsonData'] as $d) {
-      $model = $this->findModel($d);
-      $this->logVks($model->id, "info","Восстановил сеансе ВКС из перечня удаленных.");
-      $model->vks_cancel = 0;
-      $report = $model->save();
-    }
-    if ($report) {
-      return true;
-    }
-    return false;
-  }
-
-
-  public function actionDeleteCompletely()
-  {
-    $report = true;
-    foreach ($_POST['jsonData'] as $d) {
-      $model = $this->findModel($d);
-      $this->logVks($model->id, "danger", "Удалил запись о сеансе ВКС.");
-      $report = $model->delete();
-    }
-    if ($report) {
-      return true;
-    }
-    return false;
-  }
-
-  public function actionDeleteSingleCompletely($id)
-  {
-    $model = $this->findModel($id);
-    if ($model->delete()) {
-      $this->logVks($model->id, "danger", "Удалил запись о сеансе ВКС.");
-      Yii::$app->session->setFlash('success', 'Запись удалена');
-      return $this->redirect(['index']);
-    }
-    Yii::$app->session->setFlash('error', 'Удалить запись не удалось');
-    return $this->redirect(['index']);
-  }
-
 
 }

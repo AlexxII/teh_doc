@@ -4,6 +4,7 @@ namespace app\modules\admin\models;
 
 use Yii;
 use yii\base\Model;
+
 use app\modules\admin\models\User;
 
 class SignupForm extends Model
@@ -57,7 +58,7 @@ class SignupForm extends Model
     $user->username = $this->username;
     $user->setPassword($this->password);
     $user->email = $this->login . '@localhost.ru';
-    $user->ref = mt_rand();
+//    $user->ref = mt_rand();
     $user->generateAuthKey();
     return $user->save() ? $user : null;
   }

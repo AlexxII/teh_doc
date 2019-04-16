@@ -15,8 +15,7 @@ class m180830_105442_create_user_table extends Migration
     }
 
     $this->createTable(self::TABLE_NAME, [
-      'id' => $this->primaryKey(),
-      'ref' => $this->integer(),
+      'id' => $this->bigInteger()->notNull(),
       'username' => $this->string()->notNull()->unique(),
       'login' => $this->string(64),
       'auth_key' => $this->string(32)->notNull(),
@@ -27,6 +26,9 @@ class m180830_105442_create_user_table extends Migration
       'created_at' => $this->integer()->notNull(),
       'updated_at' => $this->integer()->notNull(),
     ], $tableOptions);
+
+    $this->addPrimaryKey('id', self::TABLE_NAME, 'id');
+
   }
 
   public function down()

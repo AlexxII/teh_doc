@@ -143,23 +143,6 @@ $del_multi_nodes = 'Удвлить С вложениями';
   });
 
   $(document).ready(function () {
-    $('.add-category').click(function (event) {
-      event.preventDefault();
-      var tree = $(".ui-draggable-handle").fancytree("getTree");
-      $.ajax({
-        url: "/vks/control/vks-subscribes/create-root",
-        data: {title: 'Новое Ведомство'}
-      })
-        .done(function () {
-          tree.reload();
-        })
-        .fail(function () {
-          alert("Что-то пошло не так. Перезагрузите форму с помошью клавиши.");
-        });
-    });
-  });
-
-  $(document).ready(function () {
     $('.refresh').click(function (event) {
       event.preventDefault();
       var tree = $(".ui-draggable-handle").fancytree("getTree");
@@ -174,52 +157,140 @@ $del_multi_nodes = 'Удвлить С вложениями';
 
   $(document).ready(function () {
     $('.del-node').click(function (event) {
-      if (confirm('Вы уверены, что хотите удалить выбранный элемент?')) {
-        event.preventDefault();
-        var csrf = $('meta[name=csrf-token]').attr("content");
-        var node = $(".ui-draggable-handle").fancytree("getActiveNode");
-        $.ajax({
-          url: "/vks/control/vks-subscribes/delete",
-          type: "post",
-          data: {id: node.data.id, _csrf: csrf}
-        })
-          .done(function () {
-            node.remove();
-            $('.about-info').html('');
-            $('.del-node').hide();
-          })
-          .fail(function () {
-            alert("Что-то пошло не так. Перезагрузите форму с помошью клавиши.");
-          });
-      }
+      var url = "/vks/control/vks-subscribes/delete";
+      event.preventDefault();
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Вы действительно хотите удалить выделенное?',
+        type: 'red',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-danger',
+            action: function () {
+              var node = $(".ui-draggable-handle").fancytree("getActiveNode");
+              jc.close();
+              deleteProcess(url, node);
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
+          }
+        }
+      });
     });
 
     $('.del-multi-nodes').click(function (event) {
-      if (confirm('Вы уверены, что хотите удалить выбраннyю ветку вместе с вложениями?')) {
-        event.preventDefault();
-        var csrf = $('meta[name=csrf-token]').attr("content");
-        var node = $(".ui-draggable-handle").fancytree("getActiveNode");
-        if (!node) {
-          alert('Выберите узел');
-          return;
+      var url = "/vks/control/vks-subscribes/delete-root";
+      event.preventDefault();
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Вы действительно хотите удалить выделенное С вложениями?',
+        type: 'red',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-danger',
+            action: function () {
+              var node = $(".ui-draggable-handle").fancytree("getActiveNode");
+              jc.close();
+              deleteProcess(url, node);
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
+          }
         }
-        $.ajax({
-          url: "/vks/control/vks-subscribes/delete-root",
-          type: "post",
-          data: {id: node.data.id, _csrf: csrf}
-        })
-          .done(function () {
-            node.remove();
-            $('.about-info').html('');
-            $('.del-multi-nodes').hide();
-            $('.del-node').hide();
+      });
+    });
 
-          })
-          .fail(function () {
-            alert("Что-то пошло не так. Перезагрузите форму с помошью клавиши.");
+    function deleteProcess(url, node) {
+      var csrf = $('meta[name=csrf-token]').attr("content");
+      jc = $.confirm({
+        icon: 'fa fa-cog fa-spin',
+        title: 'Подождите!',
+        content: 'Ваш запрос выполняется!',
+        buttons: false,
+        closeIcon: false,
+        confirmButtonClass: 'hide'
+      });
+      $.ajax({
+        url: url,
+        type: "post",
+        data: {id: node.data.id, _csrf: csrf}
+      }).done(function (response) {
+        if (response != false) {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-thumbs-up',
+            title: 'Успех!',
+            content: 'Ваш запрос выполнен.',
+            type: 'green',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-success',
+                action: function () {
+                  node.remove();
+                  $('.about-info').html('');
+                  $('.del-node').hide();
+                  $(".del-multi-nodes").hide();
+                }
+              }
+            }
           });
-      }
-    })
+        } else {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-exclamation-triangle',
+            title: 'Неудача!',
+            content: 'Запрос не выполнен. Что-то пошло не так.',
+            type: 'red',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-danger',
+                action: function () {
+                }
+              }
+            }
+          });
+        }
+      }).fail(function () {
+        jc.close();
+        jc = $.confirm({
+          icon: 'fa fa-exclamation-triangle',
+          title: 'Неудача!',
+          content: 'Запрос не вы!!!полнен. Что-то пошло не так.',
+          type: 'red',
+          buttons: false,
+          closeIcon: false,
+          autoClose: 'ok|4000',
+          confirmButtonClass: 'hide',
+          buttons: {
+            ok: {
+              btnClass: 'btn-danger',
+              action: function () {
+              }
+            }
+          }
+        });
+      });
+    }
   });
 
 
@@ -340,6 +411,9 @@ $del_multi_nodes = 'Удвлить С вложениями';
         preventRecursiveMoves: true,
         autoCollapse: true,
         dragStart: function (node, data) {
+          if (data.node.data.lvl == 0) {
+            return false;
+          }
           return true;
         },
         dragEnter: function (node, data) {
@@ -404,6 +478,7 @@ $del_multi_nodes = 'Удвлить С вложениями';
                 result = JSON.parse(result);
                 node.data.id = result.acceptedId;
                 node.setTitle(result.acceptedTitle);
+                node.data.lvl = result.lvl;
                 $('.about-info').hide().html(goodAlert('Запись успешно сохранена в БД.')).fadeIn('slow');
               } else {
                 node.setTitle(data.orgTitle);

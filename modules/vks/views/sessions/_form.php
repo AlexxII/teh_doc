@@ -80,7 +80,7 @@ $vks_add_combined = "Добавить совмещенный сеанс";
               'labelOptions' => ['font-size' => '28px'],
               'template' => '{label}{input}   ',
             ];
-            echo $form->field($model, 'combined', $template)->checkbox(); ?>
+            echo $form->field($model, 'important', $template)->checkbox(); ?>
             <span style="font-size: 12px">Сеансы ВКС, которые имеют особое значение</span>
           </div>
         </div>

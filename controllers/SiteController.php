@@ -114,7 +114,7 @@ class SiteController extends Controller
       $user->login = 'sAdmin';
       $user->setPassword('vinegar');
       $user->email = 'super@admin.ru';
-      $user->ref = mt_rand();
+//      $user->ref = mt_rand();
       $user->generateAuthKey();
       if ($user->save()) {
         echo 'СуперАдмин создан';

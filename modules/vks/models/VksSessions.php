@@ -2,10 +2,12 @@
 
 namespace app\modules\vks\models;
 
-use app\modules\admin\models\User;
-use Faker\Provider\DateTime;
 use Yii;
 use yii\helpers\ArrayHelper;
+use Faker\Provider\DateTime;
+
+use app\modules\admin\models\User;
+use app\base\MHelper;
 
 /**
  * This is the model class for table "vks_sessions_tbl".
@@ -61,7 +63,7 @@ class VksSessions extends \yii\db\ActiveRecord
       'vks_duration_teh', 'vks_duration_work',
       'vks_order', 'vks_order_text',
       'vks_employee_receive_msg', 'vks_receive_msg_datetime', 'vks_employee_send_msg',
-      'vks_comments', 'vks_record_create', 'vks_record_update', 'combined'
+      'vks_comments', 'vks_record_create', 'vks_record_update', 'important'
     ];
     $scenarios[self::SCENARIO_CONFIRM] = [
       'vks_date',
@@ -76,7 +78,7 @@ class VksSessions extends \yii\db\ActiveRecord
       'vks_employee',
       'vks_employee_receive_msg', 'vks_receive_msg_datetime', 'vks_employee_send_msg_text',
       'vks_subscriber_reg_office', 'vks_subscriber_reg_office_text',
-      'vks_record_create', 'vks_record_update', 'combined'
+      'vks_record_create', 'vks_record_update'
     ];
     return $scenarios;
   }
@@ -96,7 +98,7 @@ class VksSessions extends \yii\db\ActiveRecord
         'vks_place',
         'vks_equipment',
         'vks_employee',
-        'vks_subscriber_reg_office', 'combined'
+        'vks_subscriber_reg_office', 'important'
       ], 'required', 'on' => self::SCENARIO_CONFIRM],
       ['vks_remarks', 'trim'],
       [['vks_date', 'vks_place', 'vks_teh_time_start', 'vks_teh_time_end',
@@ -106,7 +108,7 @@ class VksSessions extends \yii\db\ActiveRecord
         'vks_duration_teh', 'vks_duration_work',
         'vks_order', 'vks_order_number', 'vks_order_date', 'vks_equipment',
         'vks_type_text', 'vks_place_text', 'vks_order_text', 'vks_subscriber_office_text',
-        'vks_subscriber_reg_office_text', 'vks_employee_send_msg_text', 'combined'], 'safe'],
+        'vks_subscriber_reg_office_text', 'vks_employee_send_msg_text', 'important'], 'safe'],
     ];
   }
 
@@ -142,99 +144,99 @@ class VksSessions extends \yii\db\ActiveRecord
       'vks_comments' => 'Примечание:',
       'vks_record_create' => 'Запись создана:',
       'vks_record_update' => 'Запись обновлена:',
-      'combined' => 'Важность'
+      'important' => 'Важность'
     ];
   }
 
   public function getVksTypesList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from vks_types_tbl C1 LEFT JOIN 
-        vks_types_tbl C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from vks_types_tbl C1 LEFT JOIN 
+        vks_types_tbl C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getVksPlacesList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from vks_places_tbl C1 LEFT JOIN 
-        vks_places_tbl C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from vks_places_tbl C1 LEFT JOIN 
+        vks_places_tbl C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getVksMskSubscribesList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from vks_subscribes_tbl C1 LEFT JOIN 
-        vks_subscribes_tbl C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 AND C1.root = 1 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from vks_subscribes_tbl C1 LEFT JOIN 
+        vks_subscribes_tbl C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 AND C1.list = 1 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getVksRegionSubscribesList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from vks_subscribes_tbl C1 LEFT JOIN 
-        vks_subscribes_tbl C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 AND C1.root = 2 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from vks_subscribes_tbl C1 LEFT JOIN 
+        vks_subscribes_tbl C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 AND C1.list = 2 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getVksOrdersList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from vks_orders_tbl C1 LEFT JOIN 
-        vks_orders_tbl C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from vks_orders_tbl C1 LEFT JOIN 
+        vks_orders_tbl C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getVksEmployeesList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from vks_employees_tbl C1 LEFT JOIN 
-        vks_employees_tbl C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 AND C1.root = 2 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from vks_employees_tbl C1 LEFT JOIN 
+        vks_employees_tbl C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 AND C1.list = 2 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getVksEmployees4List()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from vks_employees_tbl C1 LEFT JOIN 
-        vks_employees_tbl C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 AND C1.root = 1 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from vks_employees_tbl C1 LEFT JOIN 
+        vks_employees_tbl C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 AND C1.list = 1 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getVksToolsList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from vks_tools_tbl C1 LEFT JOIN 
-        vks_tools_tbl C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from vks_tools_tbl C1 LEFT JOIN 
+        vks_tools_tbl C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getVksType()
   {
-      return $this->hasOne(VksTypes::class, ['ref' => 'vks_type']);
+      return $this->hasOne(VksTypes::class, ['id' => 'vks_type']);
   }
 
   public function getVksPlace()
   {
-    return $this->hasOne(VksPlaces::class, ['ref' => 'vks_place']);
+    return $this->hasOne(VksPlaces::class, ['id' => 'vks_place']);
   }
 
   public function getVksSubscriber()
   {
-    return $this->hasOne(VksSubscribes::class, ['ref' => 'vks_subscriber_office']);
+    return $this->hasOne(VksSubscribes::class, ['id' => 'vks_subscriber_office']);
   }
 
   public function getVksSubscriberReg()
   {
-    return $this->hasOne(VksSubscribes::class, ['ref' => 'vks_subscriber_reg_office']);
+    return $this->hasOne(VksSubscribes::class, ['id' => 'vks_subscriber_reg_office']);
   }
 
   public function getVksOrder()
   {
-    return $this->hasOne(VksOrders::class, ['ref' => 'vks_order']);
+    return $this->hasOne(VksOrders::class, ['id' => 'vks_order']);
   }
 
   public function getVksSendMsg()
   {
-    return $this->hasOne(VksEmployees::class, ['ref' => 'vks_employee_send_msg']);
+    return $this->hasOne(VksEmployees::class, ['id' => 'vks_employee_send_msg']);
   }
 
   public function getVksEmployee()
   {
-    return $this->hasOne(VksEmployees::class, ['ref' => 'vks_employee']);
+    return $this->hasOne(VksEmployees::class, ['id' => 'vks_employee']);
   }
 
   public function getType()

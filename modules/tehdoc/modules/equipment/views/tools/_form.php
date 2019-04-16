@@ -62,8 +62,9 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
         <div class="col-md-6 col-lg-6">
           <?= $form->field($model, 'eq_title', [
             'template' => '{label} <sup class="h-title fa fa-info-circle nonreq" aria-hidden="true"
-                data-toggle="tooltip" data-placement="top" title="' . $title_hint . '"></sup>{input}{hint}'])
-            ->textInput()->hint('Например: Коммутатор с автоопределителем', ['class' => ' w3-label-under']); ?>
+                data-toggle="tooltip"  
+                data-placement="top" title="' . $title_hint . '"></sup>{input}{hint}'])
+            ->textInput(['data-name' => $model->eq_title])->hint('Например: Коммутатор с автоопределителем', ['class' => ' w3-label-under']); ?>
         </div>
       </div>
       <div class="row">
@@ -178,16 +179,16 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
             Остаться в форме</label>
         </div>
         <?php if (!$model->isNewRecord) : ?>
-        <div class="form-group col-md-8 col-lg-8">
-          <li class="list-group-item" style="margin-bottom: 15px">
-            <div class="form-checkbox js-complex-option">
-              <input class="ch" id="consolidated-feature" type="checkbox" data-check='consolidated-check'
-                     data-id="<?= $model->ref ?>" <?php if ($model->settings->eq_task) echo 'checked' ?> >
-              <label for="consolidated-feature" style="font-weight: 500">В задании на обновление</label>
-              <span class="status-indicator" id="consolidated-check"></span>
-            </div>
-          </li>
-        </div>
+          <div class="form-group col-md-8 col-lg-8">
+            <li class="list-group-item" style="margin-bottom: 15px">
+              <div class="form-checkbox js-complex-option">
+                <input class="ch" id="consolidated-feature" type="checkbox" data-check='consolidated-check'
+                       data-id="<?= $model->id ?>" <?php if ($model->settings->eq_task) echo 'checked' ?> >
+                <label for="consolidated-feature" style="font-weight: 500">В задании на обновление</label>
+                <span class="status-indicator" id="consolidated-check"></span>
+              </div>
+            </li>
+          </div>
         <?php endif; ?>
 
       </div>
@@ -202,14 +203,16 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
 
 <script>
 
-
   $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
 
     $('#tools-category_id').on('change', function (e) {
       var text = $("#tools-category_id option:selected").text();
-      $('#tools-eq_title').val(text);
+      if ($('#tools-eq_title').data('name') === undefined) {
+        $('#tools-eq_title').val(text);
+      }
     });
+
   });
 
 
@@ -246,7 +249,7 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
   $(document).ready(function () {
     $.ajax({
       type: 'get',
-      url: '/tehdoc/settings/interface/manufact',
+      url: '/tehdoc/control/interface/manufact',
       autoFocus: true,
       success: function (data) {
         var manufact = $.parseJSON(data);
@@ -265,13 +268,13 @@ $quantity_hint = 'Внимание! Указывайте отличную от 1
   $(document).ready(function () {
     $.ajax({
       type: 'get',
-      url: '/tehdoc/settings/interface/models',
+      url: '/tehdoc/control/interface/models',
       autoFocus: true,
       success: function (data) {
         var models = $.parseJSON(data);
         $(function () {
           $("#models").autocomplete({
-            source: models,
+            source: models
           });
         });
       },

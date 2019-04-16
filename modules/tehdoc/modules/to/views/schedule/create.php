@@ -4,7 +4,7 @@ use yii\helpers\Html;
 
 $this->title = 'Добавить график ТО';
 $this->params['breadcrumbs'][] = ['label' => 'Тех.документация', 'url' => ['/tehdoc']];
-$this->params['breadcrumbs'][] = ['label' => 'ТО', 'url' => ['/tehdoc/to/schedule']];
+$this->params['breadcrumbs'][] = ['label' => 'ТО', 'url' => ['/tehdoc/to']];
 $this->params['breadcrumbs'][] = $this->title;
 
 $about = "График технического обслуживания.";

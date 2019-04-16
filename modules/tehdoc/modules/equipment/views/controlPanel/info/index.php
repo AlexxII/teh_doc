@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
       <h3><?= Html::encode($model->name) ?></h3>
     </div>
     <div class="text-right" style="padding: 7px 15px 0 5px">
-      <a type="button" href="/tehdoc/equipment/tool/<?= $model->ref?>/info/index"
+      <a type="button" href="/tehdoc/equipment/tool/<?= $model->id?>/info/index"
          class="btn-primary btn-sm">Info</a>
     </div>
   </div>

@@ -2,12 +2,13 @@
 
 namespace app\modules\tehdoc\modules\equipment\controllers\infoPanel;
 
-use app\modules\tehdoc\modules\equipment\models\Docs;
-use app\modules\tehdoc\modules\equipment\models\Tools;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
+
+use app\modules\tehdoc\modules\equipment\models\Docs;
+use app\modules\tehdoc\modules\equipment\models\Tools;
 
 
 class DocsController extends Controller
@@ -19,8 +20,7 @@ class DocsController extends Controller
   {
     $id = $_GET['id'];
     if ($id != 1122334455) {
-      $request = Tools::find()->where(['ref' => $id])->limit(1)->all();
-      $model = $request[0];
+      $model = Tools::findModel($id);
       $selectYear = 0;
       if (!empty($_GET['year'])){
         $year = $_GET['year'];
@@ -48,8 +48,7 @@ class DocsController extends Controller
   public function actionCreate()
   {
     $toolId = $_GET['id'];
-    $request = Tools::find()->where(['ref' => $toolId])->limit(1)->all();
-    $model = $request[0];
+    $model = Tools::findModel($toolId);
     $docModel = new Docs();
     $wikiCount = $model->countWikiPages;
     $imagesCount = $model->countImages;
@@ -82,7 +81,7 @@ class DocsController extends Controller
     if (!empty($_POST['docsArray'])){
       $counter = 0;
       foreach ($_POST['docsArray'] as $docId){
-        $doc = $this->findModel($docId);
+        $doc = Docs::findModel($docId);
         if (unlink(\Yii::$app->params['uploadDocs'] . $doc->doc_path)){
           $doc->delete();
           $counter++ ;
@@ -93,11 +92,4 @@ class DocsController extends Controller
     return false;
   }
 
-  protected function findModel($id)
-  {
-    if (($model = Docs::findOne($id)) !== null) {
-        return $model;
-    }
-    throw new NotFoundHttpException('The requested page does not exist.');
-  }
 }

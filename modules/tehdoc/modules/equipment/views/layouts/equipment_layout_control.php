@@ -87,9 +87,13 @@ $del_multi_nodes = 'Удвлить С вложениями';
   .fancytree-custom-icon {
     color: #1e6887;
     font-size: 18px;
+    cursor: pointer;
   }
   .t {
     font-size: 14px;
+  }
+  span.fancytree-title {
+    cursor: default;
   }
 </style>
 
@@ -244,9 +248,9 @@ $del_multi_nodes = 'Удвлить С вложениями';
           </div>
         </div>
       </div>
-
       <div id="complex-info" class="col-lg-8 col-md-8" style="height: 100%">
-        <?= $content ?>
+        <div id="status-info"></div>
+        <div id="content-info"><?= $content ?></div>
       </div>
     </div>
   </div>
@@ -264,7 +268,7 @@ $del_multi_nodes = 'Удвлить С вложениями';
 
   function goodAlert(text) {
     var div = '' +
-      '<div id="w3-success-0" class="alert-success alert fade in">' +
+      '<div id="w3-success-0" class="alert-success alert fade in" style="margin-bottom: 10px">' +
       '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' +
       text +
       '</div>';
@@ -292,60 +296,145 @@ $del_multi_nodes = 'Удвлить С вложениями';
     })
   });
 
+
   $(document).ready(function () {
     $('.del-node').click(function (event) {
-      if (confirm('Вы уверены, что хотите удалить выбранный классификатор?')) {
-        event.preventDefault();
-        var csrf = $('meta[name=csrf-token]').attr("content");
-        var node = $(".ui-draggable-handle").fancytree("getActiveNode");
-        $.ajax({
-          url: "/tehdoc/equipment/control-panel/info/delete-node",
-          type: "post",
-          data: {
-            id: node.data.ref,
-            _csrf: csrf
+      var url = '/tehdoc/equipment/control-panel/info/delete-node';
+      event.preventDefault();
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Вы действительно хотите удалить выделенное?',
+        type: 'red',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-danger',
+            action: function () {
+              var node = $(".ui-draggable-handle").fancytree("getActiveNode");
+              jc.close();
+              deleteProcess(url, node);
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
           }
-        })
-          .done(function () {
-            node.remove();
-            $('.about-info').html('');
-            $('.del-node').hide();
-          })
-          .fail(function () {
-            alert("Что-то пошло не так. Перезагрузите форму с помошью клавиши.");
-          });
-      }
+        }
+      });
     });
 
     $('.del-multi-nodes').click(function (event) {
-      if (confirm('Вы уверены, что хотите удалить выбранный классификатор вместе с вложениями?')) {
-        event.preventDefault();
-        var csrf = $('meta[name=csrf-token]').attr("content");
-        var node = $(".ui-draggable-handle").fancytree("getActiveNode");
-        if (!node) {
-          alert('Выберите узел');
-          return;
-        }
-        $.ajax({
-          url: "/tehdoc/equipment/control-panel/control/delete-root",
-          type: "post",
-          data: {
-            id: getNodeId(),
-            _csrf: csrf
+      event.preventDefault();
+      var url = "/tehdoc/equipment/control-panel/info/delete-root";
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Вы действительно хотите удалить выделенное С вложениями?',
+        type: 'red',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-danger',
+            action: function () {
+              var node = $(".ui-draggable-handle").fancytree("getActiveNode");
+              jc.close();
+              deleteProcess(url, node);
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
           }
-        })
-          .done(function () {
-            node.remove();
-            $('.about-info').html('');
-            $('.del-multi-nodes').hide();
-            $('.del-node').hide();
+        }
+      });
+    });
 
-          })
-          .fail(function () {
-            alert("Что-то пошло не так. Перезагрузите форму с помошью клавиши.");
+
+    function deleteProcess(url, node) {
+      var csrf = $('meta[name=csrf-token]').attr("content");
+      jc = $.confirm({
+        icon: 'fa fa-cog fa-spin',
+        title: 'Подождите!',
+        content: 'Ваш запрос выполняется!',
+        buttons: false,
+        closeIcon: false,
+        confirmButtonClass: 'hide'
+      });
+      $.ajax({
+        url: url,
+        type: "post",
+        data: {nodeId: getNodeId(), _csrf: csrf}
+      }).done(function (response) {
+        if (response != false) {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-thumbs-up',
+            title: 'Успех!',
+            content: 'Ваш запрос выполнен.',
+            type: 'green',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-success',
+                action: function () {
+                  node.remove();
+                  $('#status-info').html('');
+                  $('.del-node').hide();
+                  $(".del-multi-nodes").hide();
+                  $('#content-info').html('');
+                }
+              }
+            }
           });
-      }
-    })
+        } else {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-exclamation-triangle',
+            title: 'Неудача!',
+            content: 'Запрос не выполнен. Что-то пошло не так.',
+            type: 'red',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-danger',
+                action: function () {
+                }
+              }
+            }
+          });
+        }
+      }).fail(function () {
+        jc.close();
+        jc = $.confirm({
+          icon: 'fa fa-exclamation-triangle',
+          title: 'Неудача!',
+          content: 'Запрос не выполнен. Что-то пошло не так.',
+          type: 'red',
+          buttons: false,
+          closeIcon: false,
+          autoClose: 'ok|4000',
+          confirmButtonClass: 'hide',
+          buttons: {
+            ok: {
+              btnClass: 'btn-danger',
+              action: function () {
+              }
+            }
+          }
+        });
+      });
+    }
   });
 
 
@@ -409,6 +498,10 @@ $del_multi_nodes = 'Удвлить С вложениями';
       source: {
         url: main_url,
       },
+      expandParents: true,
+      noAnimation: false,
+      scrollIntoView: true,
+      topNode: null,
       extensions: ['dnd', 'edit', 'filter'],
       quicksearch: true,
       minExpandLevel: 2,
@@ -424,7 +517,6 @@ $del_multi_nodes = 'Удвлить С вложениями';
         preventRecursiveMoves: true,
         autoCollapse: true,
         dragStart: function (node, data) {
-
           return true;
         },
         dragEnter: function (node, data) {
@@ -443,7 +535,6 @@ $del_multi_nodes = 'Удвлить С вложениями';
             parentId: pId
           }, function () {
             data.otherNode.moveTo(node, data.hitMode);
-
           })
         }
       },
@@ -466,9 +557,10 @@ $del_multi_nodes = 'Удвлить С вложениями';
         triggerStart: ['clickActive', 'dbclick', 'f2', 'mac+enter', 'shift+click'],
         beforeEdit: function (event, data) {
           var node = data.node;
-          if (node.key == 1122334455 || node.key == 5544332211) {
+          if (node.data.lvl == 0) {
             return false;
           }
+          node.icon = 't fa fa-file-o';
           return true;
         },
         edit: function (event, data) {
@@ -492,18 +584,17 @@ $del_multi_nodes = 'Удвлить С вложениями';
                 parent.folder = true;
                 result = JSON.parse(result);
                 node.data.id = result.acceptedId;
-                node.data.ref = result.acceptedRef;
-                node.key = result.acceptedRef;
+                node.key = result.acceptedId;
                 node.setTitle(result.acceptedTitle);
-                $('.about-info').hide().html(goodAlert('Запись успешно сохранена в БД.')).fadeIn('slow');
+                $('#status-info').hide().html(goodAlert('Запись успешно сохранена в БД.')).fadeIn('slow');
               } else {
                 node.setTitle(data.orgTitle);
-                $('.about-info').hide().html(badAlert('Запись не сохранена в БД. Попробуйте перезагрузить страницу и попробовать' +
+                $('#status-info').hide().html(badAlert('Запись не сохранена в БД. Попробуйте перезагрузить страницу и попробовать' +
                   ' снова. При повторных ошибках обратитесь к разработчику.')).fadeIn('slow');
               }
             }).fail(function (result) {
               node.setTitle(data.orgTitle);
-              $('.about-info').hide().html(badAlert('Запись не сохранена в БД. Попробуйте перезагрузить страницу и попробовать' +
+              $('#status-info').hide().html(badAlert('Запись не сохранена в БД. Попробуйте перезагрузить страницу и попробовать' +
                 ' снова. При повторных ошибках обратитесь к разработчику.')).fadeIn('slow');
             }).always(function () {
               // data.input.removeClass("pending")
@@ -512,21 +603,21 @@ $del_multi_nodes = 'Удвлить С вложениями';
             $.ajax({
               url: update_url,
               data: {
-                ref: getNodeId(),
+                nodeId: getNodeId(),
                 title: data.input.val()
               }
             }).done(function (result) {
               if (result) {
                 result = JSON.parse(result);
                 node.setTitle(result.acceptedTitle);
-                $('.about-info').hide().html(goodAlert('Запись успешно изменена в БД.')).fadeIn('slow');
+                $('#status-info').hide().html(goodAlert('Запись успешно изменена в БД.')).fadeIn('slow');
               } else {
                 node.setTitle(data.orgTitle);
-                $('.about-info').hide().html(badAlert('Запись не сохранена в БД. Попробуйте перезагрузить страницу и попробовать' +
+                $('#status-info').hide().html(badAlert('Запись не сохранена в БД. Попробуйте перезагрузить страницу и попробовать' +
                   ' снова. При повторных ошибках обратитесь к разработчику.')).fadeIn('slow');
               }
             }).fail(function (result) {
-              $('.about-info').hide().html(badAlert('Запись не сохранена в БД. Попробуйте перезагрузить страницу и попробовать' +
+              $('#status-info').hide().html(badAlert('Запись не сохранена в БД. Попробуйте перезагрузить страницу и попробовать' +
                 ' снова. При повторных ошибках обратитесь к разработчику.')).fadeIn('slow');
               node.setTitle(data.orgTitle);
             }).always(function () {
@@ -543,7 +634,7 @@ $del_multi_nodes = 'Удвлить С вложениями';
         }
       },
       activate: function (node, data) {
-        $('.about-info').html('');
+        $('#status-info').html('');
         var node = data.node;
         var lvl = node.data.lvl;
         if (node.key == -999) {
@@ -566,7 +657,10 @@ $del_multi_nodes = 'Удвлить С вложениями';
       },
       click: function (event, data) {
         var target = $.ui.fancytree.getEventTargetType(event.originalEvent);
-        if (target === 'title' || target === 'icon') {
+        if (target === 'title') {
+          $('#content-info').html('');
+        }
+        if (target === 'icon') {
           var node = data.node;
           var prefix = '/tehdoc/equipment/control-panel/';
           if (!match) {
@@ -577,54 +671,57 @@ $del_multi_nodes = 'Удвлить С вложениями';
           if (node.data.eq_wrap == 1) {
             var url = prefix + node.key + '/settings/wrap-config';
             window.location.href = url;
-          } else if (node.key != 1122334455 && node.key != 5544332211) {
+          } else if (node.data.lvl != 0) {
             window.location.href = url;
           }
         }
       },
       dblclick: function (event, data) {
-        var node = data.node;
-        var prefix = '/tehdoc/equipment/control-panel/';
-        if (!match) {
-          var url = prefix + node.key + '/info/index';
-        } else {
-          var url = prefix + node.key + '/' + match[2] + '/index';
+        var target = $.ui.fancytree.getEventTargetType(event.originalEvent);
+        if (target === 'title') {
+          $('#content-info').html('');
         }
-        if (node.data.eq_wrap == 1) {
-          var url = prefix + node.key + '/settings/wrap-config';
-          window.location.href = url;
-        } else if (node.key != 1122334455 && node.key != 5544332211) {
-          window.location.href = url;
+        if (target === 'icon') {
+          var node = data.node;
+          var prefix = '/tehdoc/equipment/control-panel/';
+          if (!match) {
+            var url = prefix + node.key + '/info/index';
+          } else {
+            var url = prefix + node.key + '/' + match[2] + '/index';
+          }
+          if (node.data.eq_wrap == 1) {
+            var url = prefix + node.key + '/settings/wrap-config';
+            window.location.href = url;
+          } else if (node.data.lvl != 0) {
+            window.location.href = url;
+          }
         }
       },
       icon: function (event, data) {
-        if (data.node.key == 1122334455) {
-          return "fa fa-sitemap";
-        } else if (data.node.key == 5544332211) {
-          return "fa fa-question-circle";
-        } else if (data.node.data.eq_wrap == 1) {
-          return "t fa fa-clone";
-        } else {
-          return "t fa fa-file-o";
+        var icon = data.node.data.icon;
+        if (icon) {
+          return icon;
         }
       },
       renderNode: function (node, data) {
       },
+      // Получение совпадений по регулярке сразу при инициализации дерева.
+      // получение id и контроллера из адресной строки браузера
       init: function (event, data) {
         uri = window.location.href;
-        match = uri.match('\\/control-panel\\/(\\d+)\\/(\\w+)\\/');
+        match = uri.match('\\/control-panel\\/([0-9-]+)\\/(\\w+)\\/');
         if (!match) {
           return;
         }
         data.tree.activateKey(match[1]);
-      },
+      }
     });
   });
 
   function getNodeId() {
     var node = $("#fancyree_w0").fancytree("getActiveNode");
     if (node) {
-      return node.data.ref;
+      return node.data.id;
     } else {
       return 1;
     }

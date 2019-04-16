@@ -8,25 +8,40 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 
+<style>
+  .d-flex {
+    display: flex !important;
+  }
+  .flex-items-center {
+    align-items: center !important;
+  }
+</style>
+
 <div class="wrap-settings">
 
-  <h3><?= Html::encode($tool->eq_title) ?></h3>
-
-  <div class="subhead" style="padding-top: 0px">
-    <h3 class="setting-header" style="padding-top: 0px">Отображение</h3>
+  <div class="row d-flex flex-items-center">
+    <div class="col-lg-11 col-md-11 col-xs-11">
+      <h3 style="margin-top: 0px"><?= Html::encode($tool->eq_title) ?></h3>
+    </div>
+    <div class="text-right" style="padding: 0 15px 0 5px">
+      <a type="button" href="/tehdoc/equipment/tool/<?= $tool->id?>/info/wrap"
+         class="btn-primary btn-sm">Info</a>
+    </div>
   </div>
+
   <ul class="list-group">
 
     <li class="list-group-item">
       <div class="form-checkbox js-complex-option">
         <label style="font-weight: 500">
           <input class="ch" type="checkbox"
-                 data-id="<?= $tool->ref ?>"
+                 data-id="<?= $tool->id ?>"
                  data-check='wrap-check' data-url='wrap' <?php if ($tool->wrap) echo 'checked' ?>>
           Обертка
         </label>
         <span class="status-indicator" id="wrap-check"></span>
-        <p class="note" style="margin-bottom: 10px">Отображать данный объект как обертку вокруг других объектов.</p>
+        <p class="note" style="margin-bottom: 10px">Отображать данный объект как обертку вокруг других объектов.
+          Добавлять информацию в данный объект нальзя.</p>
       </div>
     </li>
   </ul>
@@ -60,7 +75,25 @@ $this->params['breadcrumbs'][] = $this->title;
           bool: result
         },
         success: function (data) {
-          $('#' + checkId).html(successCheck);
+            $('#' + checkId).html(successCheck);
+            jc = $.confirm({
+                icon: 'fa fa-thumbs-up',
+                title: 'Успех!',
+                content: 'C данного узела снята пометка - обертка. Страница перезагрузится!',
+                type: 'green',
+                buttons: false,
+                closeIcon: false,
+                autoClose: 'ok|8000',
+                confirmButtonClass: 'hide',
+                buttons: {
+                    ok: {
+                        btnClass: 'btn-success',
+                        action: function () {
+                            window.location.href = 'index';
+                        }
+                    }
+                }
+            });
         },
         error: function (data) {
           $('#' + checkId).html(warningCheck);

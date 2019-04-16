@@ -16,45 +16,34 @@ class VksSubscribesController extends Controller
 
   public function actionSubscribes()
   {
-    $id = VksSubscribes::find()->select('id, rgt, lft, root')->where(['=', 'lvl', 0])->all();
+    $id = VksSubscribes::find()->where(['=', 'lvl', 0])->all();
     if (!$id) {
       $data = array();
       $data = [['title' => 'База данных пуста', 'key' => -999]];
       return json_encode($data);
     }
-    $roots = VksSubscribes::findOne($id)->tree();
+    $roots = VksSubscribes::findModel($id)->tree();
     return json_encode($roots);
   }
 
   public function actionVksSubscribesCreate($parentId, $title)
   {
     $data = [];
-    $parentSubscr = VksSubscribes::findOne($parentId);
-    $newSubscr = new VksSubscribes(['name' => $title]);
-    $newSubscr->parent_id = $parentSubscr->ref;
-    $newSubscr->ref = mt_rand();
+    $parentSubscr = VksSubscribes::findModel($parentId);
+    $newSubscr = new VksSubscribes();
+    $newSubscr->name = $title;
+    $newSubscr->parent_id = $parentSubscr->id;
+    $newSubscr->list = $parentSubscr->list;
     $newSubscr->appendTo($parentSubscr);
     $data['acceptedTitle'] = $title;
     $data['acceptedId'] = $newSubscr->id;
+    $data['lvl'] = $newSubscr->lvl;
     return json_encode($data);
-  }
-
-  public function actionCreateRoot($title)
-  {
-    \Yii::$app->db->schema->refresh();
-    $newRoot = new VksSubscribes(['name' => $title]);
-    $result = $newRoot->makeRoot();
-    if ($result) {
-      $data['acceptedTitle'] = $title;
-      return json_encode($data);
-    } else {
-      return var_dump('0');
-    }
   }
 
   public function actionUpdate($id, $title)
   {
-    $subscr = VksSubscribes::findOne(['id' => $id]);
+    $subscr = VksSubscribes::findModel($id);
     $subscr->name = $title;
     if ($subscr->save()){
       $data['acceptedTitle'] = $title;
@@ -65,8 +54,8 @@ class VksSubscribesController extends Controller
 
   public function actionMove($item, $action, $second, $parentId)
   {
-    $item_model = VksSubscribes::findOne($item);
-    $second_model = VksSubscribes::findOne($second);
+    $item_model = VksSubscribes::findModel($item);
+    $second_model = VksSubscribes::findModel($second);
     switch ($action) {
       case 'after':
         $item_model->insertAfter($second_model);
@@ -78,31 +67,40 @@ class VksSubscribesController extends Controller
         $item_model->appendTo($second_model);
         break;
     }
-    $parent = VksSubscribes::findOne($parentId);
-    $item_model->parent_id = $parent->ref;
+    $parent = VksSubscribes::findModel($parentId);
+    $item_model->parent_id = $parent->id;
+    $item_model->list = $parent->list;
     if ($item_model->save()) {
       return true;
     }
     return false;
   }
 
+
   public function actionDelete()
   {
     if (!empty($_POST)) {
-      // TODO: удаление или невидимый !!!!!!!
       $id = $_POST['id'];
-      $subscr = VksSubscribes::findOne(['id' => $id]);
-      $subscr->delete();
+      $subscr = VksSubscribes::findModel($id);
+      if ($subscr->delete()) {
+        return true;
+      }
+      return false;
     }
+    return false;
   }
 
   public function actionDeleteRoot()
   {
     if (!empty($_POST)) {
       $id = $_POST['id'];
-      $root = VksSubscribes::findOne(['id' => $id]);
+      $root = VksSubscribes::findModel($id);
+      if ($root->deleteWithChildren()) {
+        return true;
+      }
+      return false;
     }
-    $root->deleteWithChildren();
+    return false;
   }
 
   public function actionSurnames($id)

@@ -3,6 +3,8 @@
 namespace app\modules\tehdoc\modules\to\models;
 
 use creocoder\nestedsets\NestedSetsBehavior;
+
+use app\base\MHelper;
 use app\modules\tehdoc\modules\to\base\NestedSetsTreeBehaviorExX;
 
 class ToEquipment extends \yii\db\ActiveRecord
@@ -30,6 +32,11 @@ class ToEquipment extends \yii\db\ActiveRecord
     ];
   }
 
+  public function __construct()
+  {
+    $this->id = MHelper::generateId();
+  }
+
   public function getGroupName()
   {
     $parentCount = $this->parents()->count();
@@ -37,6 +44,14 @@ class ToEquipment extends \yii\db\ActiveRecord
       return $this->parents(1);
     }
     return '';
+  }
+
+  public static function findModel($id)
+  {
+    if (($model = ToEquipment::findOne($id)) !== null) {
+      return $model;
+    }
+    throw new NotFoundHttpException('Запрошенная страница не существует.');
   }
 
 }

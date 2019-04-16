@@ -2,12 +2,13 @@
 
 namespace app\modules\tehdoc\modules\equipment\controllers\infoPanel;
 
-use app\modules\tehdoc\modules\equipment\models\Images;
-use app\modules\tehdoc\modules\equipment\models\Tools;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
+
+use app\modules\tehdoc\modules\equipment\models\Tools;
+use app\modules\tehdoc\modules\equipment\models\Images;
 
 
 class FotoController extends Controller
@@ -17,10 +18,9 @@ class FotoController extends Controller
 
   public function actionIndex()
   {
-    $id = $_GET['id'];
-    if ($id != 1122334455) {
-      $request = Tools::find()->where(['ref' => $id])->limit(1)->all();
-      $model = $request[0];
+    $toolId = $_GET['id'];
+    if ($toolId != 1122334455) {
+      $model = Tools::findModel($toolId);
       $photoModels = $model->images;
 
       $wikiCount = $model->countWikiPages;
@@ -40,12 +40,11 @@ class FotoController extends Controller
   {
     $toolId = $_GET['id'];
     $imageModel = new Images();
-    $request = Tools::find()->where(['ref' => $toolId])->limit(1)->all();
-    $toolModel = $request[0];
+    $model = Tools::findModel($toolId);
 
-    $wikiCount = $toolModel->countWikiPages;
-    $imagesCount = $toolModel->countImages;
-    $docsCount = $toolModel->countDocs;
+    $wikiCount = $model->countWikiPages;
+    $imagesCount = $model->countImages;
+    $docsCount = $model->countDocs;
 
     if ($imageModel->load(Yii::$app->request->post())) {
       $imageModel->imageFiles = UploadedFile::getInstances($imageModel, 'imageFiles');
@@ -67,27 +66,18 @@ class FotoController extends Controller
 
   public function actionDeletePhotos()
   {
-    if (!empty($_POST['photosArray'])){
+    if (!empty($_POST['photosArray'])) {
       $counter = 0;
-      foreach ($_POST['photosArray'] as $photoId){
-        $photo = $this->findModel($photoId);
-        if (unlink(\Yii::$app->params['uploadImg'] . $photo->image_path)){
+      foreach ($_POST['photosArray'] as $photoId) {
+        $photo = Images::findModel($photoId);
+        if (unlink(\Yii::$app->params['uploadImg'] . $photo->image_path)) {
           $photo->delete();
-          $counter++ ;
+          $counter++;
         }
       }
       return $counter;
     }
     return false;
   }
-
-  protected function findModel($id)
-  {
-    if (($model = Images::findOne($id)) !== null) {
-      return $model;
-    }
-    throw new NotFoundHttpException('The requested page does not exist.');
-  }
-
 
 }

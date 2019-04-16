@@ -2,15 +2,16 @@
 
 namespace app\modules\tehdoc\modules\equipment\models;
 
-use app\modules\admin\models\Classifier;
-use app\modules\admin\models\Placement;
-use app\modules\admin\models\Category;
 use app\modules\tehdoc\modules\equipment\models\Images;
-use app\modules\tehdoc\modules\to\models\ToEquipment;
 use yii\helpers\ArrayHelper;
-use app\base\NestedSetsTreeBehaviorEx;
 use creocoder\nestedsets\NestedSetsBehavior;
+use yii\web\NotFoundHttpException;
 
+use app\base\MHelper;
+use app\base\NestedSetsTreeBehaviorEx;
+use app\modules\tehdoc\models\Placement;
+use app\modules\tehdoc\models\Category;
+use app\modules\tehdoc\modules\to\models\ToEquipment;
 
 /**
  * This is the model class for table "equipment_tbl".
@@ -39,6 +40,8 @@ class Tools extends \yii\db\ActiveRecord
   public $invent_number;
   public $tempId;
 
+  public $primaryKey = 'id';
+
   public static function tableName()
   {
     return 'teh_equipment_tbl';
@@ -59,6 +62,12 @@ class Tools extends \yii\db\ActiveRecord
         'depthAttribute' => 'lvl'
       ]
     ];
+  }
+
+  public function __construct()
+  {
+    $this->id = MHelper::generateId();
+    $this->icon = 't fa fa-file-o';                     // иконка
   }
 
   public function scenarios()
@@ -112,7 +121,7 @@ class Tools extends \yii\db\ActiveRecord
 
   public function getCategory()
   {
-    return $this->hasOne(Category::class, ['ref' => 'category_id']);
+    return $this->hasOne(Category::class, ['id' => 'category_id']);
   }
 
   public function getCategoryTitle()
@@ -135,7 +144,7 @@ class Tools extends \yii\db\ActiveRecord
 
   public function getPlacement()
   {
-    return $this->hasOne(Placement::class, ['ref' => 'place_id']);
+    return $this->hasOne(Placement::class, ['id' => 'place_id']);
   }
 
   public function getPlacementTitle($depth = 1)
@@ -170,7 +179,7 @@ class Tools extends \yii\db\ActiveRecord
   // Tool Settings
   public function getSettings()
   {
-    return $this->hasOne(ToolSettings::class, ['eq_id' => 'ref']);
+    return $this->hasOne(ToolSettings::class, ['eq_id' => 'id']);
   }
 
   //Tool generalTable
@@ -203,7 +212,7 @@ class Tools extends \yii\db\ActiveRecord
   //Tool TO
   public function getTo()
   {
-    return $this->hasOne(ToEquipment::class, ['eq_id' => 'ref']);
+    return $this->hasOne(ToEquipment::class, ['eq_id' => 'id']);
   }
 
   public function getToStatus()
@@ -226,13 +235,28 @@ class Tools extends \yii\db\ActiveRecord
   //Tool spec
   public function getSpecial()
   {
-    return $this->hasOne(Special::class, ['eq_id' => 'ref']);
+    return $this->hasOne(Special::class, ['eq_id' => 'id']);
   }
 
   public function getSpecialStatus()
   {
     if ($this->special) {
       return $this->special->valid;
+    }
+    return false;
+  }
+
+  public  function  getSpecialChildrenStatus()
+  {
+    $children = $this->children()->all();
+    if ($children) {
+      foreach ($children as $child) {
+        if ($child->specialStatus){
+          return true;
+        }
+        continue;
+      }
+      return false;
     }
     return false;
   }
@@ -248,7 +272,7 @@ class Tools extends \yii\db\ActiveRecord
   // Tool OTH
   public function getOth()
   {
-    return $this->hasOne(Oth::class, ['eq_id' => 'ref']);
+    return $this->hasOne(Oth::class, ['eq_id' => 'id']);
   }
 
   public function getOthStatus()
@@ -278,23 +302,23 @@ class Tools extends \yii\db\ActiveRecord
   // Wiki
   public function getWiki()
   {
-    return $this->hasMany(Wiki::class, ['eq_id' => 'ref']);
+    return $this->hasMany(Wiki::class, ['eq_id' => 'id']);
   }
 
   public function getCountWikiPages()
   {
-    return $this->hasMany(Wiki::class, ['eq_id' => 'ref'])->count();
+    return $this->hasMany(Wiki::class, ['eq_id' => 'id'])->count();
   }
 
   // Документы
   public function getDocs()
   {
-    return $this->hasMany(Docs::class, ['eq_id' => 'ref'])->orderBy(['doc_date' => SORT_ASC]);
+    return $this->hasMany(Docs::class, ['eq_id' => 'id'])->orderBy(['doc_date' => SORT_ASC]);
   }
 
   public function getCountDocs()
   {
-    return $this->hasMany(Docs::class, ['eq_id' => 'ref'])->count();
+    return $this->hasMany(Docs::class, ['eq_id' => 'id'])->count();
   }
 
   public function getDocsOrder()
@@ -322,7 +346,7 @@ class Tools extends \yii\db\ActiveRecord
       ->asArray()
       ->all();
     $result = array();
-    foreach ($years as $year){
+    foreach ($years as $year) {
       $result[] = $year['year'];
     }
     return $result;
@@ -340,10 +364,10 @@ class Tools extends \yii\db\ActiveRecord
       ->asArray()
       ->all();
     $result = array();
-    foreach ($months as $month){
+    foreach ($months as $month) {
       $str = ltrim($month['month'], '0');
       $result[] = $monthArray[$str];
-      $str = ltrim($month['month']-1, '0');
+      $str = ltrim($month['month'] - 1, '0');
       $result[] = $monthArray[$str];
     }
     return $result;
@@ -353,15 +377,13 @@ class Tools extends \yii\db\ActiveRecord
   // Изображения
   public function getImages()
   {
-    return $this->hasMany(Images::class, ['eq_id' => 'ref']);
+    return $this->hasMany(Images::class, ['eq_id' => 'id']);
   }
 
   public function getCountImages()
   {
-    return $this->hasMany(Images::class, ['eq_id' => 'ref'])->count();
+    return $this->hasMany(Images::class, ['eq_id' => 'id'])->count();
   }
-
-
 
 
   // Доступ к свойствам объекта
@@ -399,6 +421,14 @@ class Tools extends \yii\db\ActiveRecord
     }
   }
 
+  public static function findModel($id)
+  {
+    if (($model = Tools::findOne($id)) !== null) {
+      return $model;
+    }
+    throw new NotFoundHttpException('Запрошенная модель не существует.');
+  }
+
   public function getQuantity()
   {
     $ar = array();
@@ -413,16 +443,16 @@ class Tools extends \yii\db\ActiveRecord
   // DropDown lists
   public function getToolPlacesList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from " . self::PLACEMENT_TABLE . " C1 LEFT JOIN "
-      . self::PLACEMENT_TABLE . " C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from " . self::PLACEMENT_TABLE . " C1 LEFT JOIN "
+      . self::PLACEMENT_TABLE . " C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
   public function getToolCategoryList()
   {
-    $sql = "SELECT C1.ref, C1.name, C2.name as gr from " . self::CATEGORY_TABLE . " C1 LEFT JOIN "
-      . self::CATEGORY_TABLE . " C2 on C1.parent_id = C2.ref WHERE C1.lvl > 1 AND C1.root = 1 ORDER BY C1.lft";
-    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'ref', 'name', 'gr');
+    $sql = "SELECT C1.id, C1.name, C2.name as gr from " . self::CATEGORY_TABLE . " C1 LEFT JOIN "
+      . self::CATEGORY_TABLE . " C2 on C1.parent_id = C2.id WHERE C1.lvl > 1 ORDER BY C1.lft";
+    return ArrayHelper::map($this->findBySql($sql)->asArray()->all(), 'id', 'name', 'gr');
   }
 
 //======================================================================================================================

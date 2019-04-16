@@ -267,7 +267,7 @@ class SSP
 //    return var_dump
     $data = self::sql_exec($db, $bindings,
       "SELECT `" . implode("`, `", self::pluck($columns, 'db')) . "`
-			 FROM $table LEFT JOIN $tableTwo ON $table.eq_id = $tableTwo.ref 
+			 FROM $table LEFT JOIN $tableTwo ON $table.eq_id = $tableTwo.id 
 			 $where
 			 $order
 			 $limit"
@@ -275,7 +275,7 @@ class SSP
     // Data set length after filtering
     $resFilterLength = self::sql_exec($db, $bindings,
       "SELECT COUNT(eq_id)
-			 FROM   `$table` LEFT JOIN $tableTwo ON $table.eq_id = $tableTwo.ref
+			 FROM   `$table` LEFT JOIN $tableTwo ON $table.eq_id = $tableTwo.id
 			 $where"
     );
     $recordsFiltered = $resFilterLength[0][0];

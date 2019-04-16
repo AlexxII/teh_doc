@@ -13,4 +13,13 @@ class MHelper
       return str_replace($rus, $lat, $str);
   }
 
+  public static function generateId()
+  {
+    return mt_rand();
+  }
+
+  public static function genDefaultId()
+  {
+    return mt_rand();
+  }
 }

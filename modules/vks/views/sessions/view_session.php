@@ -36,13 +36,8 @@ $this->params['breadcrumbs'][] = $this->title;
   <div class="">
     <div class="container-fluid " style="margin-bottom: 20px">
       <?= Html::a('Изменить', ['update-session', 'id' => $model->id], ['class' => 'btn btn-primary btn-sm']) ?>
-      <?= Html::a('Удалить', ['delete-single', 'id' => $model->id], [
-        'class' => 'btn btn-danger btn-sm',
-        'data' => [
-          'confirm' => 'Вы уверены, что хотите удалить объект?',
-          'method' => 'post',
-        ],
-      ]) ?>
+      <?= Html::a('Удалить', ['delete-single-completely', 'id' => $model->id], [
+        'class' => 'btn btn-danger btn-sm', 'id' => 'delete', 'data-id' => $model->id]) ?>
     </div>
   </div>
 
@@ -140,6 +135,112 @@ $this->params['breadcrumbs'][] = $this->title;
 <script>
   $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
+
+    $('#delete').click(function (event) {
+      event.preventDefault();
+      var url = "/vks/sessions/delete-single";
+      var id = $(this).data('id');
+      jc = $.confirm({
+        icon: 'fa fa-question',
+        title: 'Вы уверены?',
+        content: 'Вы действительно хотите удалить запись?',
+        type: 'red',
+        closeIcon: false,
+        autoClose: 'cancel|9000',
+        buttons: {
+          ok: {
+            btnClass: 'btn-danger',
+            action: function () {
+              jc.close();
+              remoteProcess(url, id);
+            }
+          },
+          cancel: {
+            action: function () {
+              return;
+            }
+          }
+        }
+      })
+    });
+
+    function remoteProcess(url, id) {
+      var csrf = $('meta[name=csrf-token]').attr("content");
+      jc = $.confirm({
+        icon: 'fa fa-cog fa-spin',
+        title: 'Подождите!',
+        content: 'Ваш запрос выполняется!',
+        buttons: false,
+        closeIcon: false,
+        confirmButtonClass: 'hide'
+      });
+      $.ajax({
+        url: url,
+        method: 'post',
+        data: {id: id, _csrf: csrf},
+      }).done(function (response) {
+        if (response != false) {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-thumbs-up',
+            title: 'Успех!',
+            content: 'Ваш запрос выполнен.',
+            type: 'green',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-success',
+                action: function () {
+                  location.href = '/vks/sessions/archive';
+                }
+              }
+            }
+          });
+        } else {
+          jc.close();
+          jc = $.confirm({
+            icon: 'fa fa-exclamation-triangle',
+            title: 'Неудача!',
+            content: 'Запрос не выполнен. Что-то пошло не так.',
+            type: 'red',
+            buttons: false,
+            closeIcon: false,
+            autoClose: 'ok|8000',
+            confirmButtonClass: 'hide',
+            buttons: {
+              ok: {
+                btnClass: 'btn-danger',
+                action: function () {
+                }
+              }
+            }
+          });
+        }
+      }).fail(function () {
+        jc.close();
+        jc = $.confirm({
+          icon: 'fa fa-exclamation-triangle',
+          title: 'Неудача!',
+          content: 'Запрос не выполнен. Что-то пошло не так.',
+          type: 'red',
+          buttons: false,
+          closeIcon: false,
+          autoClose: 'ok|4000',
+          confirmButtonClass: 'hide',
+          buttons: {
+            ok: {
+              btnClass: 'btn-danger',
+              action: function () {
+              }
+            }
+          }
+        });
+      });
+    }
+
   });
 </script>
 

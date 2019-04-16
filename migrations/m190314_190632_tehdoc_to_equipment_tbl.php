@@ -1,6 +1,7 @@
 <?php
 
 use yii\db\Migration;
+use app\base\MHelper;
 
 /**
  * Class m190314_190632_tehdoc_to_equipment_tbl
@@ -17,9 +18,8 @@ class m190314_190632_tehdoc_to_equipment_tbl extends Migration
       $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
     }
     $this->createTable(self::TABLE_NAME, [
-      'id' => $this->primaryKey(),
-      'ref' => $this->bigInteger(),
-      'eq_id' => $this->integer()->notNull(),
+      'id' => $this->bigInteger()->notNull(),
+      'eq_id' => $this->bigInteger()->notNull(),
       'root' => $this->integer(),
       'lft' => $this->integer()->notNull(),
       'rgt' => $this->integer()->notNull(),
@@ -30,9 +30,11 @@ class m190314_190632_tehdoc_to_equipment_tbl extends Migration
       'valid' => $this->boolean()->defaultValue(1),
     ], $tableOptions);
 
-    $rand = '1122334455';
-    $sql = 'INSERT INTO' . self::TABLE_NAME . '(id, ref, eq_id, root, lft, rgt, lvl, name, parent_id) 
-                VALUES (1, ' . $rand . ', 0, 1, 1, 2, 0, "Оборудование",' . $rand . ')';
+    $this->addPrimaryKey('id', self::TABLE_NAME, 'id');
+
+    $defaultId = MHelper::genDefaultId();
+    $sql = 'INSERT INTO ' . self::TABLE_NAME . '(id, eq_id, root, lft, rgt, lvl, name, parent_id) 
+                VALUES (' . $defaultId . ',  0, ' . $defaultId . ', 1, 2, 0, "Оборудование",' . $defaultId . ')';
     \Yii::$app->db->createCommand($sql)->execute();
 
   }

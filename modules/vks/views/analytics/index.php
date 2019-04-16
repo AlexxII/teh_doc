@@ -552,6 +552,11 @@ $send_hint = 'Передать выделенные строки в подроб
           return row[12] + '-' + row[13] + '/т' + "<br> " + row[14] + '-' + row[15] + '/р';
         }
       }, {
+        "targets": 6,
+        "render": function (data, type, row) {
+          return row[6] + "<br> " + row[16];
+        }
+      }, {
         "targets": 3,
         "render": function (data, type, row) {
           // Чтобы не получить NaN

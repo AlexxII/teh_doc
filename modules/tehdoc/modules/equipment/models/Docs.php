@@ -5,6 +5,8 @@ namespace app\modules\tehdoc\modules\equipment\models;
 use Yii;
 use yii\helpers\ArrayHelper;
 
+use app\base\MHelper;
+
 class Docs extends \yii\db\ActiveRecord
 {
   public $docFiles;
@@ -12,6 +14,11 @@ class Docs extends \yii\db\ActiveRecord
   public static function tableName()
   {
     return 'teh_docs_tbl';
+  }
+
+  public function __construct()
+  {
+    $this->id = MHelper::generateId();
   }
 
   public function attributeLabels()
@@ -47,7 +54,7 @@ class Docs extends \yii\db\ActiveRecord
     }
     $flag = false;
     $date = date('Y-m-d H:i:s');
-    $userId = Yii::$app->user->identity->ref;
+    $userId = Yii::$app->user->identity->id;
     $doc = $this->docFiles[0];
     $ext = $doc->extension;
 
@@ -72,7 +79,7 @@ class Docs extends \yii\db\ActiveRecord
     // store the source file name
     foreach ($this->docFiles as $doc) {
       $date = date('Y-m-d H:i:s');
-      $userId = Yii::$app->user->identity->ref;
+      $userId = Yii::$app->user->identity->id;
       $ext = $doc->extension;
 
       $doc_path = \Yii::$app->security->generateRandomString() . ".{$ext}";   // для сохранения в БД
@@ -114,6 +121,14 @@ class Docs extends \yii\db\ActiveRecord
     if ($this->doc_date){
       return strftime("%e %b %G", strtotime($this->doc_date));
     }
+  }
+
+  public static function findModel($id)
+  {
+    if (($model = Docs::findOne($id)) !== null) {
+      return $model;
+    }
+    throw new NotFoundHttpException('Запрошенная страница не найдена.');
   }
 
 

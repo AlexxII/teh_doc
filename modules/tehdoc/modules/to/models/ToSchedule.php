@@ -85,6 +85,12 @@ class ToSchedule extends \yii\db\ActiveRecord
     ];
   }
 
-
+  public static function findModel($id)
+  {
+    if (($model = ToSchedule::find()->where(['schedule_id' => $id])) !== null) {
+      return $model;
+    }
+    throw new NotFoundHttpException('Запрошенная страница не существует.');
+  }
 
 }

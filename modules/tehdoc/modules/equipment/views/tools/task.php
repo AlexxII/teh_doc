@@ -39,17 +39,17 @@ $about = "Данный раздел позволяет планировать р
         <div class="thumbnail">
           <div class="caption">
             <span><small><?= $model->toolParents(0) ?></small></span>
-            <h4><?= $model['eq_title'] ?>
+            <h4><?= $model->eq_title ?>
               <span class="Counter" title="Кол-во изображений" data-toggle="tooltip" data-placement="top">
                 <?= $model->countImages ?>
               </span>
             </h4>
-            <p><a href="update-ex?id=<?= $model['ref'] ?>" class="btn btn-sm btn-default" role="button">Обновить</a></p>
+            <p><a href="update-ex?id=<?= $model->id ?>" class="btn btn-sm btn-default" role="button">Обновить</a></p>
             <li class="list-group-item" style="margin-bottom: 15px">
               <div class="form-checkbox js-complex-option">
                 <label style="font-weight: 500">
                   <input class="ch" id="consolidated-feature" type="checkbox" data-check='consolidated-check'
-                         data-id="<?= $model->ref ?>" <?php if ($model->settings->eq_task) echo 'checked' ?> > В задании на
+                         data-id="<?= $model->id ?>" <?php if ($model->settings->eq_task) echo 'checked' ?> > В задании на
                   обновление
                 </label>
                 <span class="status-indicator"></span>

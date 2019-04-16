@@ -60,7 +60,7 @@ class NestedSetsTreeBehavior extends Behavior
     // Trees mapped
     $trees = array();
     $collection = $this->owner->find()
-        ->select('id, ref, lft, rgt, root, lvl, name')
+        ->select('id, lft, rgt, root, lvl, name, icon')
         ->where(['=', 'valid', 1])
         ->orderBy('root, lft')
         ->asArray()
@@ -69,7 +69,7 @@ class NestedSetsTreeBehavior extends Behavior
     if (count($collection) > 0) {
       foreach ($collection as &$col)
       {
-        $col['key'] = $col['ref'];
+        $col['key'] = $col['id'];
         $col = $makeNode($col);
       }
 

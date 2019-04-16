@@ -5,7 +5,7 @@ namespace app\assets;
 class FancytreeAsset extends \yii\web\AssetBundle
 {
   public $sourcePath = '@bower/fancytree';
-  public $skin = 'dist/skin-lion/ui.fancytree';                       // скин для дерева
+  public $skin = 'dist/skin-xp/ui.fancytree';                       // скин для дерева
 
   public $depends = [
     'yii\web\JqueryAsset',

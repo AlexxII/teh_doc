@@ -631,11 +631,11 @@ $classif_hint = 'Присвоить выделенному оборудован�
   });
 
   jQuery(function ($) {
-    var main_url = '/tehdoc/settings/placement/placements';
+    var main_url = '/tehdoc/control/placement/placements';
 
     $("#fancyree_w0").fancytree({
       source: {
-        url: main_url,
+        url: main_url
       },
       extensions: ['filter'],
       quicksearch: true,

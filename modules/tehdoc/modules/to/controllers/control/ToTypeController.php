@@ -2,11 +2,9 @@
 
 namespace app\modules\tehdoc\modules\to\controllers\control;
 
-use app\modules\tehdoc\modules\to\models\ToEquipment;
 use app\modules\tehdoc\modules\to\models\ToType;
 use Yii;
 use yii\web\Controller;
-use app\modules\tehdoc\modules\equipment\models\Tools;
 
 class ToTypeController extends Controller
 {

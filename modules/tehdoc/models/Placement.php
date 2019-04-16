@@ -4,10 +4,18 @@ namespace app\modules\tehdoc\models;
 
 use yii\db\ActiveRecord;
 use creocoder\nestedsets\NestedSetsBehavior;
+use yii\web\NotFoundHttpException;
+
 use app\base\NestedSetsTreeBehavior;
+use app\base\MHelper;
 
 class Placement extends ActiveRecord
 {
+
+  public static function tableName()
+  {
+    return 'teh_placement_tbl';
+  }
 
   public function behaviors()
   {
@@ -33,9 +41,9 @@ class Placement extends ActiveRecord
     ];
   }
 
-  public static function tableName()
+  public function __construct()
   {
-    return 'teh_placement_tbl';
+    $this->id = MHelper::generateId();
   }
 
   public static function find()
@@ -43,5 +51,12 @@ class Placement extends ActiveRecord
     return new CategoryQuery(get_called_class());
   }
 
+  public static function findModel($id)
+  {
+    if (($model = Placement::findOne($id)) !== null) {
+      return $model;
+    }
+    throw new NotFoundHttpException('Запрошенная страница не существует.');
+  }
 
 }

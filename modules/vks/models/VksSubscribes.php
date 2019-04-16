@@ -2,9 +2,13 @@
 
 namespace app\modules\vks\models;
 
-use creocoder\nestedsets\NestedSetsBehavior;
 use Yii;
+use creocoder\nestedsets\NestedSetsBehavior;
+use yii\web\NotFoundHttpException;
+
+use app\base\MHelper;
 use app\base\NestedSetsTreeBehavior;
+
 
 /**
  * This is the model class for table "vks_subscribes_tbl".
@@ -35,6 +39,11 @@ class VksSubscribes extends \yii\db\ActiveRecord
     ];
   }
 
+  public function __construct()
+  {
+    $this->id = MHelper::generateId();
+  }
+
   public function transactions()
   {
     return [
@@ -51,5 +60,14 @@ class VksSubscribes extends \yii\db\ActiveRecord
   {
     return new VksQuery(get_called_class());
   }
+
+  public static function findModel($id)
+  {
+    if (($model = VksSubscribes::findOne($id)) !== null) {
+      return $model;
+    }
+    throw new NotFoundHttpException('Запрашиваемая страница не существует.');
+  }
+
 
 }

@@ -5,11 +5,14 @@ use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
+
 use app\assets\AppAsset;
+use app\assets\JConfirmAsset;
 use app\modules\tehdoc\asset\TehdocAsset;
 
 AppAsset::register($this);    // регистрация ресурсов всего приложения
 TehdocAsset::register($this);       // регистрация ресурсов модуля
+JConfirmAsset::register($this);
 
 ?>
 <?php $this->beginPage() ?>
@@ -96,11 +99,11 @@ TehdocAsset::register($this);       // регистрация ресурсов �
         'label' => 'Настройки',
         'items' => [
           '<li class="dropdown-header" style="font-size: 10px">Представления</li>',
-          ['label' => 'Категории', 'url' => ['/tehdoc/settings/category/index']],
-          ['label' => 'Места размещения', 'url' => ['/tehdoc/settings/placement/index']],
+          ['label' => 'Категории', 'url' => ['/tehdoc/control/category/index']],
+          ['label' => 'Места размещения', 'url' => ['/tehdoc/control/placement/index']],
           '<li class="divider"></li>',
           '<li class="dropdown-header" style="font-size: 10px">Инфтерфейса</li>',
-          ['label' => 'Производитель/модель', 'url' => ['/tehdoc/settings/interface/index']],
+          ['label' => 'Производитель/модель', 'url' => ['/tehdoc/control/interface/index']],
         ],
       ],
       Yii::$app->user->isGuest ? (
