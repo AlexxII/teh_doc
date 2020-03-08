@@ -5,8 +5,9 @@
 
 .parcha-btns {
   position: absolute;
-  bottom: -20px;
+  bottom: -15px;
   right: -10px;
+  font-size: 12px;
 }
 
 .parcha-btns a {
@@ -29,6 +30,9 @@
 #parcha-operators {
   width: 200px;
 }
+#parcha-date {
+  width: 200px;
+}
 #parcha-town {
   width: 200px;
 }
@@ -41,4 +45,18 @@
 #parcha-status {
   width: 200px;
 
+}
+/* Таблица */
+#parcha-table {
+  font-size: 12px;
+}
+#parcha-table th {
+  text-align: center;
+}
+#parcha-table td {
+  text-align: center;
+}
+#parcha-table td .fa {
+  font-size: 25px;
+  text-decoration: none;
 }
