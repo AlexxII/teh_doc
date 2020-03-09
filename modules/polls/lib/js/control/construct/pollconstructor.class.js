@@ -20,7 +20,6 @@ class PollConstructor {
     tempQuestions.forEach(function (val, index) {
       tempQuestionsArray[val.id] = new CQuestion(val);
     });
-    console.log(tempQuestionsArray);
     this._questions = tempQuestionsArray;
   }
 

@@ -13,7 +13,7 @@ function startParchaAnalyze() {
 }
 
 // основной объект
-function parchaSheet(data, answers, answersRow, aObject) {
+function parchaSheet(data, aObject) {
   this.id = data.id.value;
   this.user = data.usr_intrv.value;
   this.date = data.date_intrv.value;
@@ -28,8 +28,8 @@ function parchaSheet(data, answers, answersRow, aObject) {
   this.startLn = data['start-lon'].value;
   this.endLn = data['end-lon'].value;
   this._status = +data.status.value;
-  this.answers = answers;
-  this.answersRow = answersRow;
+  this.answers = data.poolOfAnswers;
+  this.answersRaw = data.answersRaw;
   this.aObject = aObject;                                             // ссылка на шит в исходном xml объекте
 
   this.status = function () {
@@ -206,8 +206,9 @@ function renderParchaTbl() {
   let resultNode = document.getElementById('control-result');
   resultNode.appendChild(renderTbl());
 
+
   parchaTable = $('#parcha-table').DataTable({
-    data: filteredArrayOfParchaSheeets,
+    data: tblData(),
     responsive: true,
     searching: false,
     columns: [
@@ -246,6 +247,17 @@ function renderParchaTbl() {
   });
 }
 
+function tblData() {
+  console.log(filteredArrayOfParchaSheeets);
+  let tblData;
+  if (filteredArrayOfParchaSheeets) {
+    tblData = Object.values(filteredArrayOfParchaSheeets);
+    console.log(tblData);
+    return tblData;
+  }
+  return [];
+}
+
 // функция обработки события добавления xml
 function loadXmlFile() {
   let xmlFile = this.files[0];
@@ -264,25 +276,26 @@ function parseLoadedXml(result) {
     let poll = doc.getElementsByTagName('opros')[0];
     let sheets = poll.children;                                             // коллекция Шитов
     let length = sheets.length;
-    let temp = [];
+    let temp = [], tempEx = {};
     for (let i = 0; i < length; i++) {                                      // xml объект Шита
       let sheetId = sheets[i].attributes.id.value;
       let data = sheets[i].attributes;
       let questions = sheets[i].children;
       let length = questions.length;
-      let poolOfQuestions = {}, answersRow = [];
+      let poolOfAnswers = {}, answersRaw = [];
       for (let i = 0; i < length; i++) {
         let question = questions[i];
         let qNumber = question.attributes[0].value;
         let answers = question.children;
         let aLength = answers.length;
-        let poolOfAnswers = [];
+        let allAnswers = [];
         for (let j = 0; j < aLength; j++) {
           let answerCode = answers[j].attributes[0].value;
-          poolOfAnswers[j] = answerCode;
-          answersRow.push(answerCode);
+          allAnswers[j] = answerCode;
+          answersRaw.push(answerCode.padStart(3, '0'));
         }
-        poolOfQuestions[qNumber] = poolOfAnswers;
+        poolOfAnswers[qNumber] = allAnswers;
+        // TODO надо указать в настройках конструктора !!!!!!!!!!!!!!!!!!!!!
         if (qNumber == 23) {
           data.gender = answers[0].attributes[0].value;
         } else if (qNumber == 24) {
@@ -291,15 +304,16 @@ function parseLoadedXml(result) {
           data.town = answers[0].attributes[0].value;
         }
       }
-      // TODO надо указать в настройках конструктора !!!!!!!!!!!!!!!!!!!!!
-
-      temp[i] = new parchaSheet(data, poolOfQuestions, answersRow, sheets[i]);
+      data.poolOfAnswers = poolOfAnswers;
+      data.answersRaw = answersRaw;
+      temp[i] = new parchaSheet(data, sheets[i]);
+      tempEx[sheetId] = new parchaSheet(data, sheets[i]);
       // let needQuestions = [23, 24, 28];
       // if (needQuestions.includes(+qNumber)) {
       // }
     }
     arrayOfParchaSheeets = temp;
-    filteredArrayOfParchaSheeets = temp;
+    filteredArrayOfParchaSheeets = tempEx;
 
     // let headerNode = document.getElementById('analytic-header');
     // let mapBtn = document.createElement('a');
@@ -314,7 +328,7 @@ function parseLoadedXml(result) {
 
     parchaTable
       .clear()
-      .rows.add(filteredArrayOfParchaSheeets)
+      .rows.add(tblData())
       .draw();
     return;
   }
@@ -355,7 +369,7 @@ function mapsMe() {
       let self = this;
       this.buttons.ok.disable();
       let map = L.map('map').setView([67.959, 33.061], 7);
-      L.tileLayer('http://182.11.57.17/osm_tiles/{z}/{x}/{y}.png', {
+      L.tileLayer('http://192.168.56.20/osm_tiles/{z}/{x}/{y}.png', {
         attribution: '&copy; ' + 'СпецСвязь ФСО России',
         maxZoom: 18
       }).addTo(map);
@@ -378,9 +392,10 @@ function mapsMe() {
         self.$title[0].textContent = 'Выбрано: ' + childCount + ' объектов';
         self.buttons.ok.enable();
       });
-
-      if (filteredArrayOfParchaSheeets) {
-        filteredArrayOfParchaSheeets.forEach(function (sheet, i) {
+      if (arrayOfParchaSheeets) {
+        // filteredArrayOfParchaSheeets.forEach(function (sheet, i) {
+        for (let key in arrayOfParchaSheeets) {
+          let sheet = arrayOfParchaSheeets[key];
           let marker = L.marker([sheet.endLt, sheet.endLn], {
             id: sheet.id,
             title: sheet.user
@@ -393,7 +408,7 @@ function mapsMe() {
           );
           m.addLayer(marker);
           // marker.addTo(map);
-        });
+        };
         map.addLayer(m);
       }
     },
@@ -419,31 +434,42 @@ function markerClick(e) {
 }
 
 function filterSelectedMarkers(markers) {
+  let sheeetObjs = filteredArrayOfParchaSheeets;
+  let result = {};
   markers.forEach(function (marker, index) {
     let id = marker.options.id;
-    let sheet = sheeetObjs[id];
-    let questions = sheet.children;
-    let length = questions.length;
-    let data = sheet.attributes;
-    let pollOfAnswers = [];
-    for (let i = 0; i < length; i++) {
-      let question = questions[i];
-      let qNumber = question.attributes[0].value;
-      let answer = question.children[0].attributes[0].value;
-      pollOfAnswers.push(answer);
-    }
+    result[id] = sheeetObjs[id];
   });
+  filteredArrayOfParchaSheeets = result;
+  parchaTable
+    .clear()
+    .rows.add(tblData())
+    .draw();
 }
 
 function renderRowAnswers() {
+  let sheets = filteredArrayOfParchaSheeets;
   let jc = $.confirm({
     title: 'Raw данные',
     columnClass: 'xlarge',
     content: '<div id="parcha-raw-data"></div>',
     onContentReady: function () {
       let self = this;
-
-
+      let divNode = document.createElement('div');
+      let result = '';
+      for (let key in sheets) {
+        let spanNode = document.createElement('span');
+        let brNode = document.createElement('br');
+        // spanNode.innerText = sheets[key].user + ' - ' + sheets[key].answers.toString();
+        // result += sheets[key].answersRaw.toString() + '\n';
+        spanNode.innerText = sheets[key].answersRaw.toString() + ',999';
+        divNode.appendChild(spanNode);
+        divNode.appendChild(brNode);
+      }
+      var XMLS = new XMLSerializer();
+      var divHtml = XMLS.serializeToString(divNode);
+      console.log(divHtml);
+      self.setContentPrepend(divHtml);
     },
     buttons: {
       cancel: {
@@ -453,18 +479,6 @@ function renderRowAnswers() {
 
   });
 
-
-
-
-  let divNode = document.createElement('div');
-  for (let key in sheets) {
-    let spanNode = document.createElement('span');
-    let brNode = document.createElement('br');
-    // spanNode.innerText = sheets[key].user + ' - ' + sheets[key].answers.toString();
-    spanNode.innerText = sheets[key].answers.toString();
-    divNode.appendChild(spanNode);
-    divNode.appendChild(brNode);
-  }
 }
 
 function unloadData() {

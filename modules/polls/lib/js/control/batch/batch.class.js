@@ -83,9 +83,13 @@ class Batch {
     let listView = document.createElement('div');
     listView.className = 'list';
     let questions = this.questions;
+    let visCount = 1;
     for (let qId in questions) {
       let question = questions[qId];
-      listView.append(question.renderBQuestionList());
+      if (question.visible === 1) {
+        visCount++;
+        listView.append(question.renderBQuestionList());
+      }
     }
     Obj._template = listView;
   }
@@ -130,7 +134,8 @@ class Batch {
           sheet.obj = codesTable[code];
           tempAr.push(sheet);
         } else {
-          console.log('Вероятно ошибка в анкете №'+ lIndex + '. В районе кода по счету ' + index + ', текст ответа: ' + answerCode);
+          console.log('Вероятно ошибка в анкете №'+ lIndex + '. В районе кода по счету ' + index + ', текст ответа: ' +
+            answerCode);
         }
       }
     });

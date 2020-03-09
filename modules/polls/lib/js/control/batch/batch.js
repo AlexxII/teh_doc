@@ -29,11 +29,11 @@ function batchResultUpload() {
   inputNode.id = 'batchupload';
   inputNode.type = 'file';
   divForm.appendChild(inputNode);
-  inputNode.addEventListener('change', loadAndParseXmlFile, false);
+  inputNode.addEventListener('change', loadAndParseOprFile, false);
   return divForm;
 }
 
-$(document).on('change', '#batchupload', function (e) {
+function loadAndParseOprFile(e) {
   e.preventDefault();
   var selectedFile = document.getElementById('batchupload').files[0];
   var reader = new FileReader();
@@ -44,7 +44,7 @@ $(document).on('change', '#batchupload', function (e) {
   };
   reader.readAsText(selectedFile);
   // renderListBatchView();
-});
+}
 
 function renderResult() {
   let reposnondetsAnswers = pollBatchIn.respondentsPool;
