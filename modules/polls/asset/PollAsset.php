@@ -34,7 +34,8 @@ class PollAsset extends AssetBundle
     'js/control/batch/bquestion.class.js',
     'js/control/batch/batch.js',
 
-    'js/control/parcha/parcha.js'
+    'js/control/parcha/parcha.js',
+    'js/control/results/results.js'
 
   ];
 
@@ -45,7 +46,8 @@ class PollAsset extends AssetBundle
     'css/batch.css',
     'css/analytics.css',
     'css/parcha.css',
-    'css/towns.css'
+    'css/towns.css',
+    'css/results.css'
   ];
 
   public $depends = [

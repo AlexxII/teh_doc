@@ -34,6 +34,7 @@ function mainInit(config) {
   console.log(mainPollConfig);
   pollCounstructor = new PollConstructor(config);
   pollBatchIn = new Batch(config);
+  prepareData(config);
   renderPollTitle(config.code);
   NProgress.done();
 }
@@ -51,7 +52,7 @@ function initInfoModule(config) {
 }
 
 function initResultModule() {
-
+  startResultAnalyze();
 }
 
 function initParchaModule() {

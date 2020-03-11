@@ -10,7 +10,6 @@ function startParchaAnalyze() {
 
 function renderParchaHeader() {
   let headerNode = document.getElementById('control-header');
-  headerNode.innerHTML = '';
 
   let wrapDiv = document.createElement('div');
   wrapDiv.className = 'parcha-upload';
@@ -61,7 +60,6 @@ function renderTbl() {
 
 function renderParchaTbl() {
   let resultNode = document.getElementById('control-result');
-  resultNode.innerHTML = '';
   resultNode.appendChild(renderTbl());
 
   $('#parcha-table').DataTable({

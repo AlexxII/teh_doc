@@ -1,44 +1,49 @@
-.parcha-upload {
+.result-wrap {
+
+}
+
+.result-header-wrap {
   position: relative;
   margin: 10px 25px 10px 25px;
 }
 
-.parcha-btns {
+.result-btns {
   position: absolute;
   bottom: -20px;
   right: -10px;
 }
 
-.parcha-btns a {
+.result-btns a {
   cursor: pointer;
   text-decoration: none !important;
   padding: 0 10px 0 0;
 }
 
-#parcha-show-map {
+#result-show-map {
 }
 
-#parcha-unload-data {
+#result-unload-data {
 }
-#parcha-wrap {
+
+#result-wrap {
   margin: 10px 25px 10px 25px;
 }
-.parcha-select-labels {
+.result-select-labels {
   margin: 0 15px 0 0;
 }
-#parcha-operators {
+#result-operators {
   width: 200px;
 }
-#parcha-town {
+#result-town {
   width: 200px;
 }
-#parcha-sex {
+#result-sex {
   width: 200px;
 }
-#parcha-age {
+#result-age {
   width: 200px;
 }
-#parcha-status {
+#result-status {
   width: 200px;
 
 }
