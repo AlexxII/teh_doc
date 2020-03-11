@@ -1,4 +1,9 @@
 function startConstruct(view) {
+  let headerNode = document.getElementById('control-header');
+  headerNode.innerHTML = '';
+  let resultNode = document.getElementById('control-result');
+  resultNode.innerHTML = '';
+
   if (view === 'list-view') {
     renderListView();
   } else {

@@ -1,9 +1,14 @@
 function startParchaAnalyze() {
-  renderHeader();
+  let headerNode = document.getElementById('control-header');
+  headerNode.innerHTML = '';
+  let resultNode = document.getElementById('control-result');
+  resultNode.innerHTML = '';
+
+  renderParchaHeader();
   renderParchaTbl()
 }
 
-function renderHeader() {
+function renderParchaHeader() {
   let headerNode = document.getElementById('control-header');
   headerNode.innerHTML = '';
 
@@ -55,7 +60,9 @@ function renderTbl() {
 }
 
 function renderParchaTbl() {
-  $('#control-result').html('').append(renderTbl());
+  let resultNode = document.getElementById('control-result');
+  resultNode.innerHTML = '';
+  resultNode.appendChild(renderTbl());
 
   $('#parcha-table').DataTable({
     data: dataSet,
@@ -95,14 +102,14 @@ function renderParchaTbl() {
   });
 }
 
+
 function xmlUploadTmpl() {
-  let formNode = document.createElement('form');
   let divForm = document.createElement('div');
   divForm.className = 'form-group';
-  formNode.appendChild(divForm);
   let labelNode = document.createElement('label');
-  let text = document.createTextNode('Добавить файл XML');
+  let text = document.createTextNode('Добавить файл XML:');
   labelNode.appendChild(text);
+  labelNode.htmlFor = 'parcha-upload';
   divForm.appendChild(labelNode);
   let inputNode = document.createElement('input');
   inputNode.className = 'form-control-file';
@@ -248,7 +255,7 @@ function parseSelectedMarkers(markers) {
     }
     detailData[data.id.value] = new detailSheet(data, pollOfAnswers);
   });
-  renderResults(detailData);
+  renderParchaResults(detailData);
 
 }
 
@@ -330,7 +337,7 @@ function detailSheet(data, answers) {
   this.answers = answers;
 }
 
-function renderResults(data) {
+function renderParchaResults(data) {
   console.log(data);
   let resultNode = document.getElementById('analytic-result');
   resultNode.innerHTML = '';

@@ -1,9 +1,43 @@
+function startBatchIn() {
+  let headerNode = document.getElementById('control-header');
+  headerNode.innerHTML = '';
+  let resultNode = document.getElementById('control-result');
+  resultNode.innerHTML = '';
+
+  renderBatchHeader()
+}
+
+function renderBatchHeader() {
+  let headerNode = document.getElementById('control-header');
+  headerNode.innerHTML = '';
+  let wrapDiv = document.createElement('div');
+  wrapDiv.className = 'batch-upload';
+  wrapDiv.appendChild(batchResultUpload());
+  headerNode.appendChild(wrapDiv);
+}
+
+function batchResultUpload() {
+  let divForm = document.createElement('div');
+  divForm.className = 'form-group';
+  let labelNode = document.createElement('label');
+  let text = document.createTextNode('Добавить файл с результатами:');
+  labelNode.appendChild(text);
+  labelNode.htmlFor = 'batchupload';
+  divForm.appendChild(labelNode);
+  let inputNode = document.createElement('input');
+  inputNode.className = 'form-control-file';
+  inputNode.id = 'batchupload';
+  inputNode.type = 'file';
+  divForm.appendChild(inputNode);
+  inputNode.addEventListener('change', loadAndParseXmlFile, false);
+  return divForm;
+}
+
 $(document).on('change', '#batchupload', function (e) {
   e.preventDefault();
   var selectedFile = document.getElementById('batchupload').files[0];
   var reader = new FileReader();
   moment.locale('ru');
-
   reader.onload = function (e) {
     oprData = e.target.result;
     pollBatchIn.parseOprFile(oprData, renderResult);
@@ -14,7 +48,6 @@ $(document).on('change', '#batchupload', function (e) {
 
 function renderResult() {
   let reposnondetsAnswers = pollBatchIn.respondentsPool;
-  $('.poll-batch-wrap').html('');
   let mainDiv = document.createElement('div');
   mainDiv.className = 'batch-grid';
   for (let key in reposnondetsAnswers) {
@@ -24,7 +57,9 @@ function renderResult() {
     divNode.id = key;
     mainDiv.append(divNode);
   }
-  $('.poll-batch-wrap').append(mainDiv);
+  let resultNode = document.getElementById('control-result');
+  resultNode.innerHTML = '';
+  resultNode.appendChild(mainDiv);
 }
 
 function renderListBatchView(key) {

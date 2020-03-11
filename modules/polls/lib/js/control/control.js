@@ -64,7 +64,7 @@ function initConstructModule(e) {
 }
 
 function initBatchInModule() {
-
+  startBatchIn();
 }
 
 function initStatisticModule() {
