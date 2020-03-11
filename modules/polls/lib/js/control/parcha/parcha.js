@@ -3,6 +3,8 @@ function startParchaAnalyze() {
   headerNode.innerHTML = '';
   let resultNode = document.getElementById('control-result');
   resultNode.innerHTML = '';
+  let footerNode = document.getElementById('control-footer');
+  footerNode.innerHTML = '';
 
   renderParchaHeader();
   renderParchaTbl()
@@ -234,7 +236,7 @@ function pollSheet(data) {
 function parseSelectedMarkers(markers) {
   let detailData = {};
   markers.forEach(function (marker, index) {
-    let needQuestions = [23, 24, 25, 26, 27, 28];
+    // let needQuestions = [23, 24, 25, 26, 27, 28];
     let id = marker.options.id;
     let sheet = sheeetObjs[id];
     let questions = sheet.children;
@@ -246,10 +248,10 @@ function parseSelectedMarkers(markers) {
     for (let i = 0; i < length; i++) {
       let question = questions[i];
       let qNumber = question.attributes[0].value;
-      if (needQuestions.includes(+qNumber)) {
-        let answer = question.children[0].attributes[0].value;
-        pollOfAnswers.push(answer);
-      }
+      // if (needQuestions.includes(+qNumber)) {
+      let answer = question.children[0].attributes[0].value;
+      pollOfAnswers.push(answer);
+      // }
     }
     detailData[data.id.value] = new detailSheet(data, pollOfAnswers);
   });
@@ -337,16 +339,17 @@ function detailSheet(data, answers) {
 
 function renderParchaResults(data) {
   console.log(data);
-  let resultNode = document.getElementById('analytic-result');
-  resultNode.innerHTML = '';
+  let footerNode = document.getElementById('control-footer');
+  footerNode.innerHTML = '';
   let hrNode = document.createElement('hr');
-  resultNode.appendChild(hrNode);
+  footerNode.appendChild(hrNode);
   let divNode = document.createElement('div');
-  resultNode.appendChild(divNode);
+  footerNode.appendChild(divNode);
   for (let key in data) {
     let spanNode = document.createElement('span');
     let brNode = document.createElement('br');
-    spanNode.innerText = data[key].user + ' - ' + data[key].answers.toString();
+    // spanNode.innerText = data[key].user + ' - ' + data[key].answers.toString();
+    spanNode.innerText = data[key].answers.toString();
     divNode.appendChild(spanNode);
     divNode.appendChild(brNode);
   }
