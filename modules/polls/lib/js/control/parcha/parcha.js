@@ -20,9 +20,9 @@ function parchaSheet(data, answers, answersRow, aObject) {
   // this.gender = '501 - Женский';
   // this.age = '507 - 50-59 лет';
   // this.townType = '554 - город с численностью до 50 тыс.чел., поселок городского типа';
-  this.gender = data.gender;
-  this.age = data.age;
-  this.townType = data.town;
+  this._gender = data.gender;
+  this._age = data.age;
+  this._townType = data.town;
   this.startLt = data['start-lan'].value;
   this.endLt = data['end-lat'].value;
   this.startLn = data['start-lon'].value;
@@ -33,8 +33,34 @@ function parchaSheet(data, answers, answersRow, aObject) {
   this.aObject = aObject;                                             // ссылка на шит в исходном xml объекте
 
   this.status = function () {
-    return this._status ? 'Принято' : 'Отклонен';
-  }
+    if (this._status === 1) {
+      return 'Принято';
+    } else {
+      return 'Отклонено';
+    }
+  };
+  this.gender = function () {
+    if (this._gender != null) {
+      return this._gender;
+    } else {
+      return '-';
+    }
+  };
+  this.age = function () {
+    if (this._age != null) {
+      return this._age;
+    } else {
+      return '-';
+    }
+  };
+  this.townType = function () {
+    if (this._townType != null) {
+      return this._townType;
+    } else {
+      return '-';
+    }
+  };
+
 }
 
 function renderParchaHeader() {
@@ -195,6 +221,7 @@ function renderParchaTbl() {
       {},
       {}
     ],
+    lengthMenu: [[50, 150, 300, 600, -1], [50, 150, 300, 600, 'Все']],
     columnDefs: [
       {
         'targets': -2,                    // предпоследний столбец
@@ -210,7 +237,7 @@ function renderParchaTbl() {
       }
     ],
     select: {
-      style: 'multi',
+      style: 'os',
       selector: 'td:last-child',
     },
     language: {
@@ -256,11 +283,16 @@ function parseLoadedXml(result) {
           answersRow.push(answerCode);
         }
         poolOfQuestions[qNumber] = poolOfAnswers;
+        if (qNumber == 23) {
+          data.gender = answers[0].attributes[0].value;
+        } else if (qNumber == 24) {
+          data.age = answers[0].attributes[0].value;
+        } else if (qNumber == 28) {
+          data.town = answers[0].attributes[0].value;
+        }
       }
       // TODO надо указать в настройках конструктора !!!!!!!!!!!!!!!!!!!!!
-      data.gender = questions[23].children[0].attributes[0].value;
-      data.age = questions[24].children[0].attributes[0].value;
-      data.town = questions[28].children[0].attributes[0].value;
+
       temp[i] = new parchaSheet(data, poolOfQuestions, answersRow, sheets[i]);
       // let needQuestions = [23, 24, 28];
       // if (needQuestions.includes(+qNumber)) {
