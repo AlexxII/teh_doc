@@ -17,11 +17,12 @@ class m191209_110649_poll_questions_tbl extends Migration
       'id' => $this->bigInteger()->notNull(),
       'poll_id' => $this->bigInteger()->notNull(),
       'title' => $this->string(800),
-      'title_ex' => $this->string(255),                                  // коротко
+      'title_ex' => $this->string(255),                                      // коротко
       'code' => $this->string(125),
       'limit' => $this->integer(),
       'input_type' => $this->integer(),
-      'order' => $this->integer(),                                       // порядок
+      'order' => $this->integer(),                                          // порядок
+      'oldOrder' => $this->integer(),                                       // порядок по барометру
       'visible' => $this->boolean()->defaultValue(1),
       'isDeleted' => $this->boolean()->defaultValue(0)
     ], $tableOptions);

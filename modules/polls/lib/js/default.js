@@ -444,6 +444,7 @@ function sendPollFormData(url, table, form, xmlData, yTest, nTest) {
       table.ajax.reload();
     },
     error: function (response) {
+      jc.close();
       initNoty(nTest, 'error');
     }
   });

@@ -20,6 +20,7 @@ class PollConstructor {
     tempQuestions.forEach(function (val, index) {
       tempQuestionsArray[val.id] = new CQuestion(val);
     });
+    console.log(tempQuestionsArray);
     this._questions = tempQuestionsArray;
   }
 
@@ -30,7 +31,7 @@ class PollConstructor {
       tempArray[index] = this._questions[key];
       index++;
     }
-    this.sortByOldOrder(tempArray);
+    this.sortByOrder(tempArray);
     return tempArray;
   }
 
@@ -316,7 +317,7 @@ class PollConstructor {
   resort() {
     let questions = this.questions;
     let ar = [];
-    this.sortByOldOrder(questions);
+    this.sortByOrder(questions);
     questions.forEach(function (question, index) {
       ar[index] = question.id;
     });
@@ -496,8 +497,8 @@ class PollConstructor {
     return true;
   }
 
-  sortByOldOrder(arr) {
-    arr.sort((a, b) => a.newOrder > b.newOrder ? 1 : -1);
+  sortByOrder(arr) {
+    arr.sort((a, b) => a.order > b.order ? 1 : -1);
   }
 
 }

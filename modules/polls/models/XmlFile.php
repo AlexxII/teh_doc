@@ -68,6 +68,7 @@ class XmlFile extends Model
               $q->limit = $reader->getAttribute("limit");
               $q->input_type = $reader->getAttribute("type_id");
               $q->order = $reader->getAttribute("sort");
+              $q->oldOrder = $reader->getAttribute("sort");
               if (!$q->save()) {
                 $transaction->rollback();
                 $this->error = "Error while saving question № " . $reader->getAttribute("order") . " in DB";

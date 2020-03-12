@@ -31,7 +31,8 @@ var pollCounstructor, pollBatchIn, mainPollConfig;
 
 function mainInit(config) {
   mainPollConfig = config;
-  console.log(mainPollConfig);
+  console.log(config);
+  // глобальные объекты
   pollCounstructor = new PollConstructor(config);
   pollBatchIn = new Batch(config);
   prepareData(config);

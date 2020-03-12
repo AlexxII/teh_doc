@@ -3,8 +3,8 @@ class CQuestion {
     this.id = +config.id;
     this.title = config.title;
     this.titleEx = config.title_ex;
-    this.newOrder = +config.order;                                          // приведение к int
-    this.oldOrder = +config.order;
+    this.order = +config.order;                                          // приведение к int
+    this.oldOrder = +config.oldOrder;
     this.limit = +config.limit;
     this.visible = +config.visible;
     this.answers = config.answers;
@@ -133,7 +133,7 @@ class CQuestion {
       questionClone.querySelector('.question-header').classList.add('be-attention');
     }
 
-    questionClone.querySelector('.original-question-order').innerHTML = this.newOrder;
+    questionClone.querySelector('.original-question-order').innerHTML = this.oldOrder;
     questionClone.querySelector('.question-title').innerHTML = this.title;
     questionClone.querySelector('.question-limit').value = this.limit;
     questionClone.querySelector('.question-limit').dataset.id = this.id;
@@ -364,7 +364,7 @@ class CQuestion {
   }
 
   sortByOrder(arr) {
-    arr.sort((a, b) => +a.oldOrder > +b.oldOrder ? 1 : -1);
+    arr.sort((a, b) => +a.order > +b.order ? 1 : -1);
   }
 
   sortByCode(arr) {

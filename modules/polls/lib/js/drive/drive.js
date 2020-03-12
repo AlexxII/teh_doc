@@ -93,8 +93,14 @@ function renderTownsSelect() {
     let option = document.createElement('option');
     option.text = town.name;
     option.value = town.id;
-    townSelect.add(option, i);
+    townSelect.add(option, i + 1);
   }
+  let disOption = document.createElement('option');
+  disOption.text = 'Выберите';
+  disOption.value = null;
+  // disOption.disabled = true;
+  townSelect.add(disOption, 0);
+  townSelect.options[0].selected = true;
   wrapDiv.appendChild(townSelect);
   return wrapDiv.outerHTML;
 }

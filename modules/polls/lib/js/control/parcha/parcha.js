@@ -17,9 +17,12 @@ function parchaSheet(data, answers, answersRow, aObject) {
   this.id = data.id.value;
   this.user = data.usr_intrv.value;
   this.date = data.date_intrv.value;
-  this.townType = '554 - город с численностью до 50 тыс.чел., поселок городского типа';
-  this.age = '507 - 50-59 лет';
-  this.gender = '501 - Женский';
+  // this.gender = '501 - Женский';
+  // this.age = '507 - 50-59 лет';
+  // this.townType = '554 - город с численностью до 50 тыс.чел., поселок городского типа';
+  this.gender = data.gender;
+  this.age = data.age;
+  this.townType = data.town;
   this.startLt = data['start-lan'].value;
   this.endLt = data['end-lat'].value;
   this.startLn = data['start-lon'].value;
@@ -155,13 +158,12 @@ function blockOfSelects() {
   return selectBlock;
 
 }
-
+/*
 var dataSet = [
   ['parcha51-3', '10.03.2020', '554 - город с численностью до 50 тыс.чел. пгт', '501 - Женский', '507 - 50-59 лет', 'Принято'],
   ['parcha51-4', '09.03.2020', '554 - город с численностью до 50 тыс.чел. пгт', '502 - Мужской', '506 - 30-49 лет', 'Принято']
 ];
-
-var dataSetEx = [];
+*/
 
 function renderTbl() {
   let wrapDiv = document.createElement('div');
@@ -255,9 +257,15 @@ function parseLoadedXml(result) {
         }
         poolOfQuestions[qNumber] = poolOfAnswers;
       }
+      // TODO надо указать в настройках конструктора !!!!!!!!!!!!!!!!!!!!!
+      data.gender = questions[23].children[0].attributes[0].value;
+      data.age = questions[24].children[0].attributes[0].value;
+      data.town = questions[28].children[0].attributes[0].value;
       temp[i] = new parchaSheet(data, poolOfQuestions, answersRow, sheets[i]);
+      // let needQuestions = [23, 24, 28];
+      // if (needQuestions.includes(+qNumber)) {
+      // }
     }
-    console.log(temp);
     arrayOfParchaSheeets = temp;
     filteredArrayOfParchaSheeets = temp;
 
@@ -271,15 +279,11 @@ function parseLoadedXml(result) {
     // let t = new XMLSerializer();
     // let tt = t.serializeToString(doc);
     // console.log(tt);
-    // renderParchaTbl();
 
-    $('#parcha-table').DataTable().data.reload();
-
-    // $('#parcha-table').data.reload();
-
-    // console.log(parchaTable);
-    // parchaTable.reload();
-
+    parchaTable
+      .clear()
+      .rows.add(filteredArrayOfParchaSheeets)
+      .draw();
     return;
   }
   let errorText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Ошибка при анализе XML. См. консоль';
@@ -308,8 +312,6 @@ function parseSelectedMarkers(markers) {
   renderParchaResults(detailData);
 }
 
-// let needQuestions = [23, 24, 25, 26, 27, 28];
-// if (needQuestions.includes(+qNumber)) {
 
 function mapsMe() {
   let selectedMarkers, childCount;
