@@ -369,7 +369,7 @@ function mapsMe() {
       let self = this;
       this.buttons.ok.disable();
       let map = L.map('map').setView([67.959, 33.061], 7);
-      L.tileLayer('http://192.168.56.20/osm_tiles/{z}/{x}/{y}.png', {
+      L.tileLayer('http://182.11.57.17/osm_tiles/{z}/{x}/{y}.png', {
         attribution: '&copy; ' + 'СпецСвязь ФСО России',
         maxZoom: 18
       }).addTo(map);
