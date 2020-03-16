@@ -364,6 +364,8 @@ function mapsMe() {
     sheets = filteredArrayOfParchaSheeets;
   }
 
+  // datatables select all rows
+
   let jc = $.confirm({
     title: ' ',
     columnClass: 'xlarge',

@@ -175,6 +175,7 @@ function prepareData(config) {
     let id = respondent.respondent_id;
     arrayOfRespondents[id] = [];
   }
+  console.log(results);
   results.forEach(function (result, index) {
     let out = result.answer_code;
     if (result.ex_answer !== '') {
@@ -182,6 +183,7 @@ function prepareData(config) {
     }
     arrayOfRespondents[result.respondent_id].push(out);
   });
+  console.log(arrayOfRespondents);
 }
 
 function showArrayOfCodes() {

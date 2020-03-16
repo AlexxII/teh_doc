@@ -21,29 +21,29 @@ LeafletAsset::register($this);
     <div id="control-leftside">
       <div class="panel-group" id="accordion">
         <!-- панель -->
-        <div class="panel panel-default">
-          <!-- Заголовок панели -->
+
+<!--        <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">Инфо</a>
             </h4>
           </div>
           <div id="collapseSix" class="panel-collapse collapse in">
-            <!-- Содержимое панели -->
             <div class="panel-body">
               <p><a class="ext control-poll-info" id="about">Об опросе</a></p>
               <p><a class="ext control-poll-info" id="files">Файлы</a></p>
             </div>
           </div>
         </div>
-        <div class="panel panel-default">
+-->
+      <div class="panel panel-default">
           <!-- Заголовок 1 панели -->
           <div class="panel-heading">
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">Результаты опроса</a>
             </h4>
           </div>
-          <div id="collapseOne" class="panel-collapse collapse">
+          <div id="collapseOne" class="panel-collapse collapse in">
             <!-- Содержимое 1 панели -->
             <div class="panel-body">
               <p><a class="ext control-poll-results" id="array-codes">Данные</a></p>
@@ -94,20 +94,6 @@ LeafletAsset::register($this);
             <!-- Содержимое 5 панели -->
             <div class="panel-body">
               <p><a class="ext control-batch-input" id="input">Ввод данных</a></p>
-            </div>
-          </div>
-        </div>
-        <!-- 3 панель -->
-        <div class="panel panel-default">
-          <!-- Заголовок 3 панели -->
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">Статистика</a>
-            </h4>
-          </div>
-          <div id="collapseThree" class="panel-collapse collapse">
-            <div class="panel-body">
-              <p><a class="ext control-statistic" id="drive-statistic">Статистика по вводу</a></p>
             </div>
           </div>
         </div>
