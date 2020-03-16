@@ -50,6 +50,7 @@ class ControlController extends Controller
     $data[0]["respondent"] = $respondents;
     $data[0]["towns"] = $towns;
     $data[0]["users"] = $users;
+    $data[0]["tailIp"] = Yii::$app->params['tailIp'];
     return [
       'data' => [
         'success' => true,

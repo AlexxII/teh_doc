@@ -27,7 +27,7 @@ $(document).on('click', '.control-poll-info', initInfoModule)
   .on('click', '.control-statistic', initStatisticModule)
   .on('click', '.control-poll-tests', intiTestsModule);
 
-var pollCounstructor, pollBatchIn, mainPollConfig;
+var pollCounstructor, pollBatchIn, mainPollConfig, tailIp;
 
 function mainInit(config) {
   mainPollConfig = config;
@@ -37,6 +37,7 @@ function mainInit(config) {
   pollBatchIn = new Batch(config);
   prepareData(config);
   renderPollTitle(config.code);
+  tailIp = config.tailIp;
   NProgress.done();
 }
 

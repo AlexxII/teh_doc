@@ -70,13 +70,13 @@ function renderResultTbl() {
     responsive: true,
     searching: false,
     columns: [
-      {},
-      {title: 'Оператор'},
-      {title: 'Дата'},
-      {title: 'Населенный пункт'},
-      {title: 'Пол'},
-      {title: 'Возраст'},
-      {title: 'Статус'},
+      {title: 'id', data: 'id'},
+      {title: 'Оператор', data: 'user'},
+      {title: 'Дата', data: 'date'},
+      {title: 'Населеный пункт', data: 'town'},
+      {title: 'Пол', data: 'gender'},
+      {title: 'Возраст', data: 'age'},
+      {title: 'Статус', data: 'status'},
       {},
       {}
     ],
@@ -107,8 +107,6 @@ function renderResultTbl() {
     }
   });
 }
-
-
 
 function resultBlockOfSelectsTmpl() {
   let selectBlock = document.createElement('div');
@@ -168,7 +166,6 @@ function resultBlockOfSelectsTmpl() {
   return selectBlock;
 }
 
-
 function prepareData(config) {
   arrayOfRespondents = {};
   let respondents = config.respondent;
@@ -200,4 +197,13 @@ function showArrayOfCodes() {
     textAreaNode.append(textNode);
   }
   return textAreaNode;
+}
+
+function resultSheet(data) {
+  this.id = data.id.value;
+  this.user = data.user;
+  this.town = data.town;
+  this.gender = data.gender;
+  this.age = data.age;
+  this.status = data.status;
 }

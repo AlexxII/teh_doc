@@ -1,4 +1,4 @@
-let parchaTable, filteredArrayOfParchaSheeets, arrayOfParchaSheeets;
+let parchaTable, filteredArrayOfParchaSheeets, arrayOfParchaSheeets, arrayOfParchaSheeetsEx;
 
 function startParchaAnalyze() {
   let headerNode = document.getElementById('control-header');
@@ -182,14 +182,7 @@ function blockOfSelects() {
   selectBlock.appendChild(statusLabel);
 
   return selectBlock;
-
 }
-/*
-var dataSet = [
-  ['parcha51-3', '10.03.2020', '554 - город с численностью до 50 тыс.чел. пгт', '501 - Женский', '507 - 50-59 лет', 'Принято'],
-  ['parcha51-4', '09.03.2020', '554 - город с численностью до 50 тыс.чел. пгт', '502 - Мужской', '506 - 30-49 лет', 'Принято']
-];
-*/
 
 function renderTbl() {
   let wrapDiv = document.createElement('div');
@@ -205,7 +198,6 @@ function renderTbl() {
 function renderParchaTbl() {
   let resultNode = document.getElementById('control-result');
   resultNode.appendChild(renderTbl());
-
 
   parchaTable = $('#parcha-table').DataTable({
     data: tblData(),
@@ -248,11 +240,9 @@ function renderParchaTbl() {
 }
 
 function tblData() {
-  console.log(filteredArrayOfParchaSheeets);
   let tblData;
   if (filteredArrayOfParchaSheeets) {
     tblData = Object.values(filteredArrayOfParchaSheeets);
-    console.log(tblData);
     return tblData;
   }
   return [];
@@ -313,6 +303,7 @@ function parseLoadedXml(result) {
       // }
     }
     arrayOfParchaSheeets = temp;
+    arrayOfParchaSheeetsEx = tempEx;
     filteredArrayOfParchaSheeets = tempEx;
 
     // let headerNode = document.getElementById('analytic-header');
@@ -360,7 +351,19 @@ function parseSelectedMarkers(markers) {
 
 
 function mapsMe() {
-  let selectedMarkers, childCount;
+  let selectedMarkers, childCount, sheets;
+  let selectedData = parchaTable.rows({selected: true}).data();
+  if (selectedData.length !== 0) {
+    sheets = {};
+    let length = selectedData.length;
+    for (let i = 0; i < length; i++) {
+      let id = selectedData[i].id;
+      sheets[id] =  selectedData[i];
+    }
+  } else {
+    sheets = filteredArrayOfParchaSheeets;
+  }
+
   let jc = $.confirm({
     title: ' ',
     columnClass: 'xlarge',
@@ -369,7 +372,7 @@ function mapsMe() {
       let self = this;
       this.buttons.ok.disable();
       let map = L.map('map').setView([67.959, 33.061], 7);
-      L.tileLayer('http://182.11.57.17/osm_tiles/{z}/{x}/{y}.png', {
+      L.tileLayer('http://' + tailIp + '/osm_tiles/{z}/{x}/{y}.png', {
         attribution: '&copy; ' + 'СпецСвязь ФСО России',
         maxZoom: 18
       }).addTo(map);
@@ -392,10 +395,10 @@ function mapsMe() {
         self.$title[0].textContent = 'Выбрано: ' + childCount + ' объектов';
         self.buttons.ok.enable();
       });
-      if (arrayOfParchaSheeets) {
+      if (sheets) {
         // filteredArrayOfParchaSheeets.forEach(function (sheet, i) {
-        for (let key in arrayOfParchaSheeets) {
-          let sheet = arrayOfParchaSheeets[key];
+        for (let key in sheets) {
+          let sheet = sheets[key];
           let marker = L.marker([sheet.endLt, sheet.endLn], {
             id: sheet.id,
             title: sheet.user
@@ -408,7 +411,7 @@ function mapsMe() {
           );
           m.addLayer(marker);
           // marker.addTo(map);
-        };
+        }
         map.addLayer(m);
       }
     },
@@ -430,11 +433,11 @@ function mapsMe() {
 }
 
 function markerClick(e) {
-  console.log(e);
+  // console.log(e);
 }
 
 function filterSelectedMarkers(markers) {
-  let sheeetObjs = filteredArrayOfParchaSheeets;
+  let sheeetObjs = arrayOfParchaSheeetsEx;
   let result = {};
   markers.forEach(function (marker, index) {
     let id = marker.options.id;
@@ -448,7 +451,18 @@ function filterSelectedMarkers(markers) {
 }
 
 function renderRowAnswers() {
-  let sheets = filteredArrayOfParchaSheeets;
+  let sheets;
+  let selectedData = parchaTable.rows({selected: true}).data();
+  if (selectedData.length !== 0) {
+    sheets = {};
+    let length = selectedData.length;
+    for (let i = 0; i < length; i++) {
+      let id = selectedData[i].id;
+      sheets[id] =  selectedData[i];
+    }
+  } else {
+    sheets = filteredArrayOfParchaSheeets;
+  }
   let jc = $.confirm({
     title: 'Raw данные',
     columnClass: 'xlarge',
@@ -468,7 +482,6 @@ function renderRowAnswers() {
       }
       var XMLS = new XMLSerializer();
       var divHtml = XMLS.serializeToString(divNode);
-      console.log(divHtml);
       self.setContentPrepend(divHtml);
     },
     buttons: {
@@ -476,12 +489,9 @@ function renderRowAnswers() {
         text: 'НАЗАД'
       }
     }
-
   });
-
 }
 
 function unloadData() {
 
 }
-
