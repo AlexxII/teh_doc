@@ -79,6 +79,11 @@ function renderParchaHeader() {
   unloadXmlNode.id = 'parcha-unload-data';
   unloadXmlNode.addEventListener('click', unloadData, false);
 
+  let deleteSheetNode = document.createElement('a');
+  deleteSheetNode.innerText = 'Удалить';
+  deleteSheetNode.id = 'parcha-delete-sheet';
+  deleteSheetNode.addEventListener('click', deleteSheetData, false);
+
   let unloadRawNode = document.createElement('a');
   unloadRawNode.innerText = 'Выгрузить данные (Raw)';
   unloadRawNode.id = 'parcha-unload-data';
@@ -88,6 +93,7 @@ function renderParchaHeader() {
   btnsWrap.className = 'parcha-btns';
 
   btnsWrap.appendChild(mapBtn);
+  btnsWrap.appendChild(deleteSheetNode);
   btnsWrap.appendChild(unloadXmlNode);
   btnsWrap.appendChild(unloadRawNode);
 
@@ -98,6 +104,38 @@ function renderParchaHeader() {
   wrapDiv.appendChild(btnsWrap);
   headerNode.appendChild(wrapDiv);
 }
+
+function deleteSheetData() {
+  let selectedData = parchaTable.rows({selected: true}).data();
+  if (selectedData.length !== 0) {
+    let length = selectedData.length;
+    for (let i = 0; i < length; i++) {
+      let obj = selectedData[i].aObject;
+      docOfSheets.documentElement.children[1].removeChild(obj)
+    }
+  }
+}
+
+function unloadData() {
+  let testXml = docOfSheets;
+  let t = new XMLSerializer();
+  let tt = t.serializeToString(testXml);
+  console.log(tt);
+  // let jc = $.confirm({
+  //   title: 'Raw данные',
+  //   columnClass: 'xlarge',
+  //   content: '<div id="parcha-raw-data"></div>',
+  //   onContentReady: function () {
+  //     this.setContentPrepend(tt);
+  //   },
+  //   buttons: {
+  //     cancel: {
+  //       text: 'НАЗАД'
+  //     }
+  //   }
+  // });
+}
+
 
 function xmlUploadTmpl() {
   let divForm = document.createElement('div');
@@ -259,11 +297,13 @@ function loadXmlFile() {
   reader.readAsText(xmlFile);
 }
 
+let docOfSheets;
+
 function parseLoadedXml(result) {
-  let
-    doc = tryParseXML(result);
-  if (doc) {
-    let poll = doc.getElementsByTagName('opros')[0];
+  docOfSheets = tryParseXML(result);
+  if (docOfSheets) {
+    let poll = docOfSheets.getElementsByTagName('opros')[0];
+
     let sheets = poll.children;                                             // коллекция Шитов
     let length = sheets.length;
     let temp = [], tempEx = {};
@@ -358,7 +398,7 @@ function mapsMe() {
     let length = selectedData.length;
     for (let i = 0; i < length; i++) {
       let id = selectedData[i].id;
-      sheets[id] =  selectedData[i];
+      sheets[id] = selectedData[i];
     }
   } else {
     sheets = filteredArrayOfParchaSheeets;
@@ -460,7 +500,7 @@ function renderRowAnswers() {
     let length = selectedData.length;
     for (let i = 0; i < length; i++) {
       let id = selectedData[i].id;
-      sheets[id] =  selectedData[i];
+      sheets[id] = selectedData[i];
     }
   } else {
     sheets = filteredArrayOfParchaSheeets;
@@ -494,6 +534,3 @@ function renderRowAnswers() {
   });
 }
 
-function unloadData() {
-
-}
