@@ -12,7 +12,7 @@ use app\assets\fullcalendar\CalendarListAsset;
 use app\assets\BootstrapYearCalendarAsset;
 use app\assets\fullcalendar\CalendarCoreAsset;
 
-SchedulerAppAsset::register($this);
+//SchedulerAppAsset::register($this);
 
 NotyAsset::register($this);
 CalendarCoreAsset::register($this);

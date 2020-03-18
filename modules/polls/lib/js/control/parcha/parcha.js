@@ -166,6 +166,7 @@ function blockOfSelects() {
   operatorSelect.classList = 'form-control';
   operatorSelect.disabled = true;
   operatorLabel.appendChild(operatorSelect);
+  operatorSelect.addEventListener('change', filterByOperator, false);
 
   let dateSelect = document.createElement('select');
   let dateLabel = document.createElement('label');
@@ -175,6 +176,7 @@ function blockOfSelects() {
   dateSelect.classList = 'form-control';
   dateSelect.disabled = true;
   dateLabel.appendChild(dateSelect);
+  dateSelect.addEventListener('change', filterByDate, false);
 
   let townSelect = document.createElement('select');
   let townLabel = document.createElement('label');
@@ -184,6 +186,7 @@ function blockOfSelects() {
   townSelect.classList = 'form-control';
   townSelect.disabled = true;
   townLabel.appendChild(townSelect);
+  townSelect.addEventListener('change', filterByTown, false);
 
   let sexSelect = document.createElement('select');
   let sexLabel = document.createElement('label');
@@ -193,6 +196,7 @@ function blockOfSelects() {
   sexSelect.classList = 'form-control';
   sexSelect.disabled = true;
   sexLabel.appendChild(sexSelect);
+  sexSelect.addEventListener('change', filterBySex, false);
 
   let ageSelect = document.createElement('select');
   let ageLabel = document.createElement('label');
@@ -202,6 +206,7 @@ function blockOfSelects() {
   ageSelect.classList = 'form-control';
   ageSelect.disabled = true;
   ageLabel.appendChild(ageSelect);
+  ageSelect.addEventListener('change', filterByAge, false);
 
   let statusSelect = document.createElement('select');
   let statusLabel = document.createElement('label');
@@ -211,6 +216,7 @@ function blockOfSelects() {
   statusSelect.classList = 'form-control';
   statusSelect.disabled = true;
   statusLabel.appendChild(statusSelect);
+  statusSelect.addEventListener('change', filterByStatus, false);
 
   selectBlock.appendChild(operatorLabel);
   selectBlock.appendChild(dateLabel);
@@ -220,6 +226,31 @@ function blockOfSelects() {
   selectBlock.appendChild(statusLabel);
 
   return selectBlock;
+}
+
+
+function filterByOperator() {
+  
+}
+
+function filterByDate() {
+  
+}
+
+function filterByTown() {
+  
+}
+
+function filterBySex() {
+  
+}
+
+function filterByAge() {
+  
+}
+
+function filterByStatus() {
+  
 }
 
 function renderTbl() {
@@ -303,7 +334,6 @@ function parseLoadedXml(result) {
   docOfSheets = tryParseXML(result);
   if (docOfSheets) {
     let poll = docOfSheets.getElementsByTagName('opros')[0];
-
     let sheets = poll.children;                                             // коллекция Шитов
     let length = sheets.length;
     let temp = [], tempEx = {};
@@ -338,14 +368,14 @@ function parseLoadedXml(result) {
       data.answersRaw = answersRaw;
       temp[i] = new parchaSheet(data, sheets[i]);
       tempEx[sheetId] = new parchaSheet(data, sheets[i]);
-      // let needQuestions = [23, 24, 28];
-      // if (needQuestions.includes(+qNumber)) {
-      // }
     }
     arrayOfParchaSheeets = temp;
     arrayOfParchaSheeetsEx = tempEx;
     filteredArrayOfParchaSheeets = tempEx;
 
+    // let needQuestions = [23, 24, 28];
+    // if (needQuestions.includes(+qNumber)) {
+    // }
     // let headerNode = document.getElementById('analytic-header');
     // let mapBtn = document.createElement('a');
     // mapBtn.id = 'maps-me';
@@ -365,7 +395,6 @@ function parseLoadedXml(result) {
   }
   let errorText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Ошибка при анализе XML. См. консоль';
   initNoty(errorText, 'warning');
-
 }
 
 // функия проверки корректности XML

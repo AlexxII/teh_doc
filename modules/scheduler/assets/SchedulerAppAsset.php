@@ -10,9 +10,12 @@ class SchedulerAppAsset extends AssetBundle
 
   public $css = [
     'css/scheduler_style.css',
+    'css/by-calendar.min.css'
   ];
 
   public $js = [
-    'js/scheduler.js'
+    'js/scheduler.js',
+    'js/by-calendar.min.js',
+    'js/languages/bootstrap-year-calendar.ru.js'
   ];
 }
