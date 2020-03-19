@@ -5,8 +5,8 @@ class CAnswer {
     this.logicArray = config.logic;
     this.title = config.title;
     this.titleEx = config.title_ex;
-    this.newOrder = +config.order;
-    this.oldOrder = +config.order;
+    this.order = +config.order;
+    this.oldOrder = +config.oldOrder;
     this.code = config.code;
     this.dCode = +config.code;                                                    // цифровой код ответа
     this.unique = +config.unique;

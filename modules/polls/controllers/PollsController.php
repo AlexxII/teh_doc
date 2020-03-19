@@ -61,7 +61,6 @@ class PollsController extends Controller
 
       $xmlF->xmlFile = UploadedFile::getInstances($xmlF, 'xmlFile');
       $name = $model->code . "_" . $model->id . ".xml";
-
       $transaction = Yii::$app->db->beginTransaction();
 //        Polls::log($model->id, "info", "Добавил новый опрос.");
       if ($model->save()) {

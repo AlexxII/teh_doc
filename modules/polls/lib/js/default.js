@@ -439,9 +439,14 @@ function sendPollFormData(url, table, form, xmlData, yTest, nTest) {
     dataType: 'json',
     data: formData,
     success: function (response) {
-      jc.close();
-      initNoty(yTest, 'success');
-      table.ajax.reload();
+      if (response.code !== 0) {
+        jc.close();
+        initNoty(yTest, 'success');
+        table.ajax.reload();
+      } else {
+        jc.close();
+        initNoty(nTest, 'error');
+      }
     },
     error: function (response) {
       jc.close();

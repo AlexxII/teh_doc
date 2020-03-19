@@ -182,27 +182,12 @@ class CQuestion {
       onUpdate: function (evt) {
         NProgress.start();
         let newOrder = Obj.sortable.toArray();
-        console.log(newOrder);
         Obj.saveAnswersReorder(newOrder);
-        // Obj.saveListReorder(newOrder);
-        // let items = evt.from.children;
-        // for (let i = 0, child; child = items[i]; i++) {
-        //   child.querySelector('.question-order').innerHTML = (i + 1);
-        // }
+        let items = evt.from.children;
+        for (let i = 0, child; child = items[i]; i++) {
+          child.querySelector('.answer-number').innerHTML = (i + 1);
+        }
       }
-      // onEnd: function (evt) {
-      //   let from = evt.from;
-      //   let currentItem = evt.item;
-      //   let items = from.children;
-      //   for (let i = 0, child; child = items[i]; i++) {
-      //     let oldOrder = child.dataset.old;
-      //     child.querySelector('.answer-number').innerHTML = (i + 1);
-      //     child.querySelector('.answer-old-order').innerHTML = oldOrder;
-      //   }
-      //   var tText = '<span style="font-weight: 600">Порядок не изменен!</span><br>Эта опция приостановлена';
-      //   initNoty(tText, 'warning');
-      //   return;
-      // }
     });
     this.hSortable = new Sortable(answerContentDelNode, {
       selectedClass: 'selected',
@@ -215,6 +200,7 @@ class CQuestion {
   saveAnswersReorder(newOrder) {
     let url = this.REORDER_ANSWERS_URL;
     let Obj = this;
+    let sortable = this.sortable;
     $.ajax({
       url: url,
       method: 'post',
@@ -223,6 +209,10 @@ class CQuestion {
       }
     }).done(function (response) {
       if (!response.code) {
+        let oldOrder = Obj._oldOrder;
+        sortable.sort(oldOrder);                                                         // восстанавливаем порядок
+        Obj.pasteOldNum(sortable);
+        NProgress.done();
         var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить порядок не удалось';
         initNoty(tText, 'warning');
         console.log(response.data.message + ' ' + response.data.data);
@@ -230,12 +220,22 @@ class CQuestion {
       }
       NProgress.done();
     }).fail(function () {
+      let oldOrder = Obj._oldOrder;
+      sortable.sort(oldOrder);                                                          // восстанавливаем порядок
+      Obj.pasteOldNum(sortable);
       NProgress.done();
       var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить порядок не удалось';
       initNoty(tText, 'warning');
       console.log('Не удалось получить ответ сервера. Примените отладочную панель, оснаска "Сеть"');
     });
 
+  }
+
+  pasteOldNum(obj) {
+    let items = obj.el.children;
+    for (let i = 0, child; child = items[i]; i++) {
+      child.querySelector('.question-order').innerHTML = (i + 1);
+    }
   }
 
   hideAnswer(id) {

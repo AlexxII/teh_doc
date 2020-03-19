@@ -355,7 +355,7 @@ class Worksheet {
 
   sortByOrder(arr) {
     arr.sort(function (a, b) {
-      return a.oldOrder < b.oldOrder;
+      return a.Order < b.Order;
     });
   }
 

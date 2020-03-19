@@ -157,7 +157,7 @@ class PollConstructor {
       NProgress.done();
       let newOrder = sortable.toArray();
       newOrder.forEach(function (val, index) {
-        questions[val].newOrder = index;
+        questions[val].order = index;
       });
       Obj.renderGridTmpl();
     }).fail(function () {
@@ -208,7 +208,7 @@ class PollConstructor {
     Obj._pollGridView = gridDiv;
   }
 
-  saveGridReorder(questionsArr) {
+  saveGridReorder(newOrder) {
     let url = this.REORDER_QUESTIONS_URL;
     let Obj = this;
     let questions = this._questions;
@@ -217,7 +217,7 @@ class PollConstructor {
       url: url,
       method: 'post',
       data: {
-        questions: questionsArr
+        questions: newOrder
       }
     }).done(function (response) {
       if (!response.code) {
@@ -233,7 +233,7 @@ class PollConstructor {
       NProgress.done();
       let newOrder = sortable.toArray();
       newOrder.forEach(function (val, index) {
-        questions[val].newOrder = index;
+        questions[val].order = index;
       });
       Obj.renderListTmpl();
     }).fail(function () {
