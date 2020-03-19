@@ -22,19 +22,16 @@ LeafletAsset::register($this);
   /*}*/
 </style>
 
-<div id="map">
-
+<div id="map" data-tail="<?= $tailIp ?>">
 </div>
 
 <script>
   $(document).ready(function () {
-
-    var map = L.map('map').setView([68.959, 33.061], 12);
-
-    L.tileLayer('http://182.11.57.17/osm_tiles/{z}/{x}/{y}.png', {
+    let tailIp = document.getElementById('map').dataset.tail;
+    let map = L.map('map').setView([68.959, 33.061], 12);
+    L.tileLayer('http://' + tailIp + '/osm_tiles/{z}/{x}/{y}.png', {
       attribution: '&copy; ' + 'СпецСвязь ФСО России',
       maxZoom: 18
     }).addTo(map);
-
   });
 </script>

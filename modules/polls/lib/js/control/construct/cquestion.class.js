@@ -16,6 +16,7 @@ class CQuestion {
     this.HIDE_QUESTION_URL = '/polls/control/construct/hide-to-fill';
     this.RESTORE_ANSWER_URL = '/polls/control/construct/restore-question';
     this.LIMIT_QUESTION_URL = '/polls/control/construct/set-question-limit';
+    this.REORDER_ANSWERS_URL = '/polls/control/construct/reorder-answers';
   }
 
   set answers(answers) {
@@ -125,6 +126,7 @@ class CQuestion {
   }
 
   renderQuestionListTmpl() {
+    let Obj = this;
     let mainQuestionDiv = document.getElementById('question-main-template');
     let questionClone = mainQuestionDiv.cloneNode(true);
     questionClone.dataset.id = this.id;
@@ -177,19 +179,30 @@ class CQuestion {
       multiDrag: true,
       selectedClass: 'selected',
       animation: 150,
-      onEnd: function (evt) {
-        let from = evt.from;
-        let currentItem = evt.item;
-        let items = from.children;
-        for (let i = 0, child; child = items[i]; i++) {
-          let oldOrder = child.dataset.old;
-          child.querySelector('.answer-number').innerHTML = (i + 1);
-          child.querySelector('.answer-old-order').innerHTML = oldOrder;
-        }
-        var tText = '<span style="font-weight: 600">Порядок не изменен!</span><br>Эта опция приостановлена';
-        initNoty(tText, 'warning');
-        return;
+      onUpdate: function (evt) {
+        NProgress.start();
+        let newOrder = Obj.sortable.toArray();
+        console.log(newOrder);
+        Obj.saveAnswersReorder(newOrder);
+        // Obj.saveListReorder(newOrder);
+        // let items = evt.from.children;
+        // for (let i = 0, child; child = items[i]; i++) {
+        //   child.querySelector('.question-order').innerHTML = (i + 1);
+        // }
       }
+      // onEnd: function (evt) {
+      //   let from = evt.from;
+      //   let currentItem = evt.item;
+      //   let items = from.children;
+      //   for (let i = 0, child; child = items[i]; i++) {
+      //     let oldOrder = child.dataset.old;
+      //     child.querySelector('.answer-number').innerHTML = (i + 1);
+      //     child.querySelector('.answer-old-order').innerHTML = oldOrder;
+      //   }
+      //   var tText = '<span style="font-weight: 600">Порядок не изменен!</span><br>Эта опция приостановлена';
+      //   initNoty(tText, 'warning');
+      //   return;
+      // }
     });
     this.hSortable = new Sortable(answerContentDelNode, {
       selectedClass: 'selected',
@@ -197,6 +210,32 @@ class CQuestion {
       sort: false
     });
     this._questionListTmpl = questionClone;
+  }
+
+  saveAnswersReorder(newOrder) {
+    let url = this.REORDER_ANSWERS_URL;
+    let Obj = this;
+    $.ajax({
+      url: url,
+      method: 'post',
+      data: {
+        answers: newOrder
+      }
+    }).done(function (response) {
+      if (!response.code) {
+        var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить порядок не удалось';
+        initNoty(tText, 'warning');
+        console.log(response.data.message + ' ' + response.data.data);
+        return;
+      }
+      NProgress.done();
+    }).fail(function () {
+      NProgress.done();
+      var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить порядок не удалось';
+      initNoty(tText, 'warning');
+      console.log('Не удалось получить ответ сервера. Примените отладочную панель, оснаска "Сеть"');
+    });
+
   }
 
   hideAnswer(id) {
@@ -364,11 +403,10 @@ class CQuestion {
   }
 
   sortByOrder(arr) {
-    arr.sort((a, b) => +a.order > +b.order ? 1 : -1);
+    arr.sort((a, b) => a.order > b.order ? 1 : -1);
   }
 
   sortByCode(arr) {
     arr.sort((a, b) => +a.dCode > +b.dCode ? 1 : -1);
   }
-
 }

@@ -18,8 +18,10 @@ class MurmController extends Controller
 
   public function actionIndex()
   {
-
-    return $this->render('_index');
+    $tailIp = Yii::$app->params['tailIp'];
+    return $this->render('_index', [
+      'tailIp' => $tailIp
+    ]);
   }
 
 }

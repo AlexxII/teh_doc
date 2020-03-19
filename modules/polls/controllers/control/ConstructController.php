@@ -296,6 +296,39 @@ class ConstructController extends Controller
     }
   }
 
+  public function actionReorderAnswers()
+  {
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    if (!empty($_POST)) {
+      $arrayOfIds = $_POST['answers'];
+      $transaction = Yii::$app->db->beginTransaction();
+      foreach ($arrayOfIds as $key => $id) {
+        $question = Answers::findModel($id);
+        $question->order = $key + 1;
+        if (!$question->save()) {
+          $transaction->rollback();
+          return [
+            'data' => [
+              'success' => false,
+              'data' => $question->errors,
+              'message' => 'Не удалось сохранить очередность. Ошибка - ',
+            ],
+            'code' => 0,
+          ];
+        }
+      }
+      $transaction->commit();
+      return [
+        'data' => [
+          'success' => true,
+          'data' => 'Good work',
+          'message' => 'Limit set successfully',
+        ],
+        'code' => 1,
+      ];
+    }
+  }
+
   public function actionAddPollLogic()
   {
     Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;

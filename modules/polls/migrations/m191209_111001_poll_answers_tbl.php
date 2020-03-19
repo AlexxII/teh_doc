@@ -21,6 +21,7 @@ class m191209_111001_poll_answers_tbl extends Migration
       'title_ex' => $this->string(255),                                  // коротко
       'code' => $this->string(125),
       'order' => $this->integer(),                                       // порядок
+      'oldOrder' => $this->integer(),                                    // порядок по Барометру
       'input_type' => $this->integer(),                                  // тип ответа
       'jump' => $this->bigInteger()->defaultValue(0),                    // переход
       'unique' => $this->boolean()->defaultValue(0),                     // уникальный для вопроса
