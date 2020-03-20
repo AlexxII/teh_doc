@@ -324,7 +324,7 @@ class CQuestion {
     questionClone.dataset.id = this.id;
     questionClone.removeAttribute('id');
     questionClone.querySelector('.q-title').innerHTML = this.title;
-    questionClone.querySelector('.q-order').innerHTML = this.newOrder + '.';
+    questionClone.querySelector('.q-order').innerHTML = this.order + '.';
 
     let answers = this.answers;
     let qNode = questionClone.querySelector('.question-content-ex');
