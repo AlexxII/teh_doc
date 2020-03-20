@@ -4,9 +4,9 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 use app\modules\vks\assets\VksFormAsset;
-use app\assets\BootstrapDatepickerAsset;
-
-BootstrapDatepickerAsset::register($this);
+//use app\assets\BootstrapDatepickerAsset;
+//
+//BootstrapDatepickerAsset::register($this);
 
 $poll_title_hint = "Укажите наименование опроса без кода.";
 $poll_sample_hint = "Укажите выборку цифрами.";
@@ -36,7 +36,7 @@ $poll_election_hint = "Является ли данный опрос - выбо�
 -->    <?php else: ?>
     <div class="row" style="padding-bottom:10px; top: -20px">
       <span class="text-muted" style="font-size: 10px">
-        Чтобы обновить структуру опроса, выделите его в основной таблице и выбирите клавишу "Редактор анкет"
+        Чтобы обновить структуру опроса, выделите его в основной таблице и выбирите клавишу "Настройки и результаты"
       </span>
     </div>
     <?php endif; ?>

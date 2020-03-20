@@ -9,6 +9,7 @@ use app\assets\Select2Asset;
 use app\modules\maps\asset\LeafletAsset;
 use app\modules\maps\asset\LeafletClusterAsset;
 use app\assets\FancytreeAsset;
+use app\assets\BootstrapDatepickerAsset;
 
 
 FancytreeAsset::register($this);
@@ -20,6 +21,8 @@ TableBaseAsset::register($this);                // регистрация рес
 NotyAsset::register($this);
 SortableJSAsset::register($this);
 Select2Asset::register($this);
+BootstrapDatepickerAsset::register($this);
+
 
 ?>
 <div class="tool-task">

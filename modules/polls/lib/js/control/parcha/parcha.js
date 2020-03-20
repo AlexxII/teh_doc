@@ -1,4 +1,6 @@
-let parchaTable, filteredArrayOfParchaSheeets, arrayOfParchaSheeets, arrayOfParchaSheeetsEx;
+let parchaTable, filteredArrayOfParchaSheeets,
+  arrayOfParchaSheeets, arrayOfParchaSheeetsEx,
+  arrayOfAnswersCodes, parchaSelects = {};
 
 function startParchaAnalyze() {
   let headerNode = document.getElementById('control-header');
@@ -9,20 +11,36 @@ function startParchaAnalyze() {
   footerNode.innerHTML = '';
 
   renderParchaHeader();
-  renderParchaTbl()
+  renderParchaTbl();
+  prepareParchaData();
+}
+
+function prepareParchaData() {
+  let answers = mainPollConfig.answers;
+  arrayOfAnswersCodes = {};
+  let length = answers.length;
+  for (let i = 0; i < length; i++) {
+    let code = answers[i].code;
+    arrayOfAnswersCodes[code] = answers[i].title;
+  }
 }
 
 // основной объект
 function parchaSheet(data, aObject) {
   this.id = data.id.value;
   this.user = data.usr_intrv.value;
-  this.date = data.date_intrv.value;
-  // this.gender = '501 - Женский';
-  // this.age = '507 - 50-59 лет';
-  // this.townType = '554 - город с численностью до 50 тыс.чел., поселок городского типа';
-  this._gender = data.gender;
-  this._age = data.age;
-  this._townType = data.town;
+  this._date = data.date_intrv.value;
+  // переменные данные
+  this._propertyOneText = data.propertyOneText;
+  this._propertyTwoText = data.propertyTwoText;
+  this._propertyThreeText = data.propertyThreeText;
+  this._propertyFourText = data.propertyFourText;
+
+  this._propertyOne = data.propertyOne;
+  this._propertyTwo = data.propertyTwo;
+  this._propertyThree = data.propertyThree;
+  this._propertyFour = data.propertyFour;
+  //
   this.startLt = data['start-lan'].value;
   this.endLt = data['end-lat'].value;
   this.startLn = data['start-lon'].value;
@@ -31,6 +49,58 @@ function parchaSheet(data, aObject) {
   this.answers = data.poolOfAnswers;
   this.answersRaw = data.answersRaw;
   this.aObject = aObject;                                             // ссылка на шит в исходном xml объекте
+  this.error = data.error;
+
+  this.date = function () {
+    return this._date;
+  };
+
+  // объект дата
+  let dateObj = null;
+  Object.defineProperty(this, 'dateObj', {
+    get: function () {
+      return dateObj;
+    },
+    set: function (date) {
+      let pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
+      let dt = new Date(date.replace(pattern,'$3-$2-$1'));
+      dateObj = dt;
+    },
+    enumerable: true,
+    configurable: true
+  });
+
+  this.propertyOneText = function () {
+    if (this._propertyOneText != null) {
+      return this._propertyOneText;
+    } else {
+      return '-';
+    }
+  };
+
+  this.propertyTwoText = function () {
+    if (this._propertyTwoText != null) {
+      return this._propertyTwoText;
+    } else {
+      return '-';
+    }
+  };
+
+  this.propertyThreeText = function () {
+    if (this._propertyThreeText != null) {
+      return this._propertyThreeText;
+    } else {
+      return '-';
+    }
+  };
+
+  this.propertyFourText = function () {
+    if (this._propertyFourText != null) {
+      return this._propertyFourText;
+    } else {
+      return '-';
+    }
+  };
 
   this.status = function () {
     if (this._status === 1) {
@@ -39,29 +109,48 @@ function parchaSheet(data, aObject) {
       return 'Отклонено';
     }
   };
-  this.gender = function () {
-    if (this._gender != null) {
-      return this._gender;
+  this.propertyOne = function () {
+    if (this._propertyOne != null) {
+      return this._propertyOne;
     } else {
       return '-';
     }
   };
-  this.age = function () {
-    if (this._age != null) {
-      return this._age;
+  this.propertyTwo = function () {
+    if (this._propertyTwo != null) {
+      return this._propertyTwo;
     } else {
       return '-';
     }
   };
-  this.townType = function () {
-    if (this._townType != null) {
-      return this._townType;
+  this.propertyThree = function () {
+    if (this._propertyThree != null) {
+      return this._propertyThree;
+    } else {
+      return '-';
+    }
+  };
+
+  this.propertyFour = function () {
+    if (this._propertyFour != null) {
+      return this._propertyFour;
     } else {
       return '-';
     }
   };
 
 }
+
+$('.pool-dates').datepicker({
+  format: 'd MM yyyy г.',
+  autoclose: true,
+  language: "ru",
+  startView: "days",
+  minViewMode: "days",
+  clearBtn: true,
+  todayHighlight: true,
+  daysOfWeekHighlighted: [0, 6]
+});
 
 function renderParchaHeader() {
   let headerNode = document.getElementById('control-header');
@@ -120,7 +209,7 @@ function unloadData() {
   let testXml = docOfSheets;
   let t = new XMLSerializer();
   let tt = t.serializeToString(testXml);
-  console.log(tt);
+  // console.log(tt);
   // let jc = $.confirm({
   //   title: 'Raw данные',
   //   columnClass: 'xlarge',
@@ -135,7 +224,6 @@ function unloadData() {
   //   }
   // });
 }
-
 
 function xmlUploadTmpl() {
   let divForm = document.createElement('div');
@@ -167,16 +255,30 @@ function blockOfSelects() {
   operatorSelect.disabled = true;
   operatorLabel.appendChild(operatorSelect);
   operatorSelect.addEventListener('change', filterByOperator, false);
+  parchaSelects.operatorSelect = operatorSelect;
 
-  let dateSelect = document.createElement('select');
+  let dateInput = document.createElement('input');
   let dateLabel = document.createElement('label');
   dateLabel.innerText = 'Датa:';
   dateLabel.className = 'parcha-select-labels';
-  dateSelect.id = 'parcha-date';
-  dateSelect.classList = 'form-control';
-  dateSelect.disabled = true;
-  dateLabel.appendChild(dateSelect);
-  dateSelect.addEventListener('change', filterByDate, false);
+  dateInput.readOnly = true;
+  dateInput.id = 'parcha-date';
+  dateInput.classList = 'form-control';
+  dateInput.placeholder = 'Выберите дату';
+  // dateInput.disabled = true;
+  dateLabel.appendChild(dateInput);
+  // dateInput.addEventListener('input', filterByDate, false);
+  $(dateInput).datepicker({
+    format: 'd MM yyyy г.',
+    autoclose: true,
+    language: "ru",
+    startView: "days",
+    minViewMode: "days",
+    clearBtn: true,
+    todayHighlight: true,
+    daysOfWeekHighlighted: [0, 6]
+  }).on('changeDate', filterByDate);
+  parchaSelects.dataInput = dateInput;
 
   let townSelect = document.createElement('select');
   let townLabel = document.createElement('label');
@@ -187,6 +289,7 @@ function blockOfSelects() {
   townSelect.disabled = true;
   townLabel.appendChild(townSelect);
   townSelect.addEventListener('change', filterByTown, false);
+  parchaSelects.townSelect = townSelect;
 
   let sexSelect = document.createElement('select');
   let sexLabel = document.createElement('label');
@@ -197,6 +300,7 @@ function blockOfSelects() {
   sexSelect.disabled = true;
   sexLabel.appendChild(sexSelect);
   sexSelect.addEventListener('change', filterBySex, false);
+  parchaSelects.sexSelect = sexSelect;
 
   let ageSelect = document.createElement('select');
   let ageLabel = document.createElement('label');
@@ -207,14 +311,29 @@ function blockOfSelects() {
   ageSelect.disabled = true;
   ageLabel.appendChild(ageSelect);
   ageSelect.addEventListener('change', filterByAge, false);
+  parchaSelects.ageSelect = ageSelect;
 
   let statusSelect = document.createElement('select');
   let statusLabel = document.createElement('label');
   statusLabel.className = 'parcha-select-labels';
   statusLabel.innerText = 'Статус:';
+  let dOption = document.createElement('option');
+  let pOption = document.createElement('option');
+  let nOption = document.createElement('option');
+  dOption.text = '---';
+  dOption.value = null;
+  pOption.text = 'Принятые';
+  pOption.value = 1;
+  nOption.text = 'Отклоненные';
+  nOption.value = 0;
+  statusSelect.add(dOption);
+  statusSelect.add(pOption);
+  statusSelect.add(nOption);
+  parchaSelects.statusSelect = statusSelect;
+
   statusSelect.id = 'parcha-status';
   statusSelect.classList = 'form-control';
-  statusSelect.disabled = true;
+  // statusSelect.disabled = true;
   statusLabel.appendChild(statusSelect);
   statusSelect.addEventListener('change', filterByStatus, false);
 
@@ -230,27 +349,31 @@ function blockOfSelects() {
 
 
 function filterByOperator() {
-  
+
 }
 
-function filterByDate() {
-  
+function filterByDate(e) {
+  console.log(e);
+  let date = e.date;
+
+
+
 }
 
 function filterByTown() {
-  
+
 }
 
 function filterBySex() {
-  
+
 }
 
 function filterByAge() {
-  
+
 }
 
 function filterByStatus() {
-  
+
 }
 
 function renderTbl() {
@@ -276,9 +399,9 @@ function renderParchaTbl() {
       {title: 'id', data: 'id'},
       {title: 'Планшет', data: 'user'},
       {title: 'Дата', data: 'date'},
-      {title: 'Тип населенного пункта', data: 'townType'},
-      {title: 'Пол', data: 'gender'},
-      {title: 'Возраст', data: 'age'},
+      {title: 'Тип населенного пункта', data: 'propertyOneText'},
+      {title: 'Пол', data: 'propertyTwoText'},
+      {title: 'Возраст', data: 'propertyThreeText'},
       {title: 'Статус', data: 'status'},
       {},
       {}
@@ -332,11 +455,18 @@ let docOfSheets;
 
 function parseLoadedXml(result) {
   docOfSheets = tryParseXML(result);
+
   if (docOfSheets) {
     let poll = docOfSheets.getElementsByTagName('opros')[0];
     let sheets = poll.children;                                             // коллекция Шитов
     let length = sheets.length;
     let temp = [], tempEx = {};
+
+    // TODO надо указать в настройках конструктора !!!!!!!!!!!!!!!!!!!!!
+    let criteria = [28, 23, 24];
+    let properties = ['propertyOne', 'propertyTwo', 'propertyThree', 'propertyFour'];
+    let criteriaLength = criteria.length;
+
     for (let i = 0; i < length; i++) {                                      // xml объект Шита
       let sheetId = sheets[i].attributes.id.value;
       let data = sheets[i].attributes;
@@ -355,19 +485,24 @@ function parseLoadedXml(result) {
           answersRaw.push(answerCode.padStart(3, '0'));
         }
         poolOfAnswers[qNumber] = allAnswers;
-        // TODO надо указать в настройках конструктора !!!!!!!!!!!!!!!!!!!!!
-        if (qNumber == 23) {
-          data.gender = answers[0].attributes[0].value;
-        } else if (qNumber == 24) {
-          data.age = answers[0].attributes[0].value;
-        } else if (qNumber == 28) {
-          data.town = answers[0].attributes[0].value;
+        let code = answers[0].attributes[0].value;
+        for (let i = 0; i < criteriaLength; i++) {
+          if (qNumber == criteria[i]) {
+            let name = properties[i];
+            let title = properties[i] + 'Text';
+            data[name] = code;
+            data[title] = arrayOfAnswersCodes[code];
+          }
         }
       }
       data.poolOfAnswers = poolOfAnswers;
       data.answersRaw = answersRaw;
-      temp[i] = new parchaSheet(data, sheets[i]);
-      tempEx[sheetId] = new parchaSheet(data, sheets[i]);
+      data.error = null;
+
+      let sheet = new parchaSheet(data, sheets[i]);
+      sheet.dateObj = data.date_intrv.value;
+      temp[i] = sheet;
+      tempEx[sheetId] = sheet;
     }
     arrayOfParchaSheeets = temp;
     arrayOfParchaSheeetsEx = tempEx;
@@ -387,6 +522,9 @@ function parseLoadedXml(result) {
     // let tt = t.serializeToString(doc);
     // console.log(tt);
 
+    initFilterOptions();
+
+    console.log(arrayOfParchaSheeetsEx);
     parchaTable
       .clear()
       .rows.add(tblData())
@@ -409,8 +547,8 @@ function tryParseXML(xmlString) {
   return dom;
 }
 
-function initFilterSelects() {
-
+function initFilterOptions(data) {
+//  parchaSelects
 }
 
 function parseSelectedMarkers(markers) {

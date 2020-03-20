@@ -3,6 +3,7 @@
 namespace app\modules\polls\controllers\control;
 
 use app\modules\maps\models\Regions;
+use app\modules\polls\models\Answers;
 use app\modules\polls\models\Towns;
 use Yii;
 use yii\web\Controller;
@@ -41,11 +42,12 @@ class ControlController extends Controller
       ->with(['results'])
       ->asArray()
       ->all();
+    $answers = Answers::find()->where(['poll_id' => $id])->distinct()->asArray()->all();
     $respondents = Result::find()->select('respondent_id')->where(['poll_id' => $id])->distinct()->asArray()->all();
     $operators = Result::find()->select('user_id')->where(['poll_id' => $id])->distinct()->asArray()->all();
-//    $towns = Result::find()->select('town_id')->where(['poll_id' => $id])->distinct()->asArray()->all();
     $towns = Towns::find()->select('id, name')->where(['selected' => 1])->asArray()->all();
     $users = User::find()->select('id, username')->asArray()->all();
+    $data[0]["answers"] = $answers;
     $data[0]["operators"] = $operators;
     $data[0]["respondent"] = $respondents;
     $data[0]["towns"] = $towns;
