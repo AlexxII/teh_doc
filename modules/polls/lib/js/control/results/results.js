@@ -1,5 +1,11 @@
 let arrayOfRespondents;
 
+
+
+
+
+// TODO: 222222222222222222
+
 function startResultAnalyze() {
   let headerNode = document.getElementById('control-header');
   headerNode.innerHTML = '';
