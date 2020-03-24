@@ -1,5 +1,3 @@
-// TODO: asdasdfasdfjkas;erj;wjr;klwje;rklja;slkjf;lskajdf;klasjd;kl jf;asdkljf; lasjd;fkl jsadf
-
 let arrayOfRespondents;
 
 function startResultAnalyze() {
