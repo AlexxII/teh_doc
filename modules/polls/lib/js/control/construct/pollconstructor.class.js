@@ -35,7 +35,7 @@ class PollConstructor {
   }
 
   set numberOfQuestions(questions) {
-    this._numberOfQuestions = questions.length
+    this._numberOfQuestions = questions.length;
   }
 
   set title(title) {

@@ -44,7 +44,7 @@ class CQuestion {
   }
 
   set numberOfAnswers(answers) {
-    this._numberOfAnswers = answers.length
+    this._numberOfAnswers = answers.length;
   }
 
   get numberOfAnswers() {
@@ -165,7 +165,7 @@ class CQuestion {
       if (answers[key].visible === 0) {
         let hr = document.createElement('hr');
         answerContentDelNode.appendChild(hr);
-        break
+        break;
       }
     }
     answers.forEach(function (answer, index) {

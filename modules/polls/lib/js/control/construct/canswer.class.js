@@ -1,10 +1,10 @@
 class CAnswer {
   constructor(config, index, qId) {
-    this.parentQuestion = +qId;
     this.id = config.id;
-    this.logicArray = config.logic;
-    this.title = config.title;
     this.titleEx = config.title_ex;
+    this.title = config.title;
+    this.parentQuestion = +qId;
+    this.logicArray = config.logic;
     this.order = +config.order;
     this.oldOrder = +config.oldOrder;
     this.code = config.code;
@@ -152,7 +152,7 @@ class CAnswer {
     let unique = this.unique;
     if (unique === 1) {
       this.unique = 0;
-      return this.unique
+      return this.unique;
     } else {
       this.unique = 1;
       return this.unique;
@@ -207,6 +207,6 @@ class CAnswer {
     branchNode.appendChild(branchSvg);
     jmpNode.appendChild(branchNode);
     return jmpNode;
-  };
+  }
 
 }

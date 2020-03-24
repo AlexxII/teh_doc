@@ -222,7 +222,7 @@ function result(index) {
     arr.sort(function (a, b) {
       return a.order < b.order;
     });
-  }
+  };
 
 }
 

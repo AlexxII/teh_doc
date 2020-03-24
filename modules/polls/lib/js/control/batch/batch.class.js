@@ -75,7 +75,7 @@ class Batch {
     let ar = this.m;
     ar.forEach(function (val, index) {
       val.remove();
-    })
+    });
   }
 
   renderTemplate() {

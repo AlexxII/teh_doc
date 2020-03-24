@@ -1,10 +1,10 @@
 class BAnswer {
   constructor(config, index, qId) {
+    this.id = +config.id;
+    this.title = config.title;
     this.parentQuestion = +qId;
     this.logicArray = config.logic;
-    this.id = +config.id;
     this.code = config.code;
-    this.title = config.title;
     this.order = +config.order;
     this.unique = +config.unique;
     this.type = +config.input_type;
@@ -95,7 +95,7 @@ class BAnswer {
     uniqueSvg.appendChild(path);
     uniqueNode.appendChild(uniqueSvg);
     return uniqueNode;
-  };
+  }
 
   renderBranchSymbl() {
     let branchNode = document.createElement('span');
@@ -114,7 +114,7 @@ class BAnswer {
     branchSvg.appendChild(path);
     branchNode.appendChild(branchSvg);
     return branchNode;
-  };
+  }
 
   renderFreeSymbl() {
     let freeNode = document.createElement('span');
@@ -129,7 +129,7 @@ class BAnswer {
     editSvg.appendChild(path);
     freeNode.appendChild(editSvg);
     return freeNode;
-  };
+  }
 
   renderDifficultSymbol() {
     let difficultNode = document.createElement('span');

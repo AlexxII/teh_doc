@@ -3,8 +3,7 @@ function startBatchIn() {
   headerNode.innerHTML = '';
   let resultNode = document.getElementById('control-result');
   resultNode.innerHTML = '';
-
-  renderBatchHeader()
+  renderBatchHeader();
 }
 
 function renderBatchHeader() {
