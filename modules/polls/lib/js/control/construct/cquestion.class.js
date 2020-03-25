@@ -104,8 +104,12 @@ class CQuestion {
     questionClone.querySelector('.original-question-order').innerHTML = this.oldOrder;
     questionClone.querySelector('.question-title').innerHTML = this.title;
     questionClone.querySelector('.question-limit').value = this.limit;
-    questionClone.querySelector('.question-limit').dataset.id = this.id;
-    questionClone.querySelector('.question-limit').dataset.old = this.limit;
+
+    // лимит ответов
+    let limitNode = questionClone.querySelector('.question-limit');
+    limitNode.addEventListener('click', Obj.ttt, false);
+    limitNode.addEventListener('paste', () => { return; }, false);
+    limitNode.addEventListener('blur', (e) => { Obj.setQuestionLimit(e.target.value); }, false);
 
     // скрыть вопрос
     let hideBtn = questionClone.querySelector('.question-hide');
@@ -170,6 +174,14 @@ class CQuestion {
     this._questionListTmpl = questionClone;
   }
 
+  ttt() {
+    $.mask.definitions['H'] = '[1-9]';
+    $.mask.definitions['h'] = '[0-9]';
+    $(this).mask('H?h', {
+      placeholder: ' '
+    });
+  }
+
   saveAnswersReorder(newOrder) {
     let url = this.REORDER_ANSWERS_URL;
     let Obj = this;
@@ -229,6 +241,7 @@ class CQuestion {
     }
   }
 
+  // пересортировка по коду ответа
   resort() {
     let answers = this.answers;
     let ar = [];
@@ -380,7 +393,7 @@ class CQuestion {
     }
     return false;
   }
-
+/*
   showTrash() {
     let hiddenAnswers = this._hiddenAnswers;
     let content = document.createElement('div');
@@ -392,7 +405,7 @@ class CQuestion {
       content: content,
     });
   }
-
+*/
   sortByOrder(arr) {
     arr.sort((a, b) => a.order > b.order ? 1 : -1);
   }

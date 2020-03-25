@@ -73,24 +73,15 @@ class CAnswer {
     hideBtn.addEventListener('click', () => { Obj.hideAnswerInListView(); }, false);
 
     let uniqueBtn = answerClone.querySelector('.unique-btn');
-    uniqueBtn.addEventListener('click', () => { Obj.changeUniqueForQuestion(); }, false)
+    uniqueBtn.addEventListener('click', () => { Obj.changeUniqueForQuestion(); }, false);
 
     if (this.visible === 0) {
       answerClone.classList.add('hidden-answer');
       answerClone.querySelector('.answer-hide').style.display = 'none';
       answerClone.querySelector('.answer-options').style.display = 'none';
       answerClone.querySelector('.unique-btn').style.display = 'none';
-      answerClone.querySelector('.restore-btn').dataset.id = answerId;
-      answerClone.querySelector('.restore-btn').dataset.questionId = this.parentQuestion.id;
     } else {
       answerClone.querySelector('.restore-btn').style.display = 'none';
-      answerClone.querySelector('.answer-hide').dataset.id = answerId;
-      answerClone.querySelector('.answer-hide').dataset.questionId = this.parentQuestion.id;
-      answerClone.querySelector('.unique-btn').dataset.id = answerId;
-      answerClone.querySelector('.unique-btn').dataset.questionId = this.parentQuestion.id;
-      answerClone.querySelector('.answer-menu .logic').dataset.id = answerId;
-      answerClone.querySelector('.answer-menu .logic').dataset.question = this.parentQuestion.id;
-      answerClone.querySelector('.answer-menu .delete-answer').dataset.id = answerId;
     }
     if (this.unique === 1) {
       answerClone.classList.add('unique-answer');

@@ -12,33 +12,10 @@ function startConstruct(view) {
   NProgress.done();
 }
 
-// $(document).on('click', '.question-hide', hideQuestion)
 $(document)
-  // .on('click', '.question-hide', hideQuestion)
-  // .on('click', '.restore-question', restoreQuestion)
-  // .on('click', '.answer-hide', hideAnswer)
-  // .on('click', '.restore-btn', restoreAnswer)
-  // .on('click', '.unique-btn', setAnswerUnique)
-  .on('click', '.question-trash', showQTrash)
+  // .on('click', '.question-trash', showQTrash)
   .on('click', '.logic', setLogic)
   .on('click', '.check-all', checkboxLogicEx);
-
-$.mask.definitions['H'] = '[1-9]';
-$.mask.definitions['h'] = '[0-9]';
-$(document).on('paste', '.question-limit', function (e) {
-  e.preventDefault();
-  return;
-}).on('keydown', '.question-limit', function (e) {
-  if (e.keyCode === 13) {
-    this.blur();
-    return;
-  }
-  $(this).mask('H?h', {
-    placeholder: ' '
-  });
-}).on('blur', '.question-limit', function () {
-  saveQuestionLimit(this);
-});
 
 
 function renderListView() {
@@ -49,6 +26,7 @@ function renderGridView() {
   $('#control-result').html('').append(pollCounstructor.renderGridView());
 }
 
+/*
 function hideQuestion() {
   let questionId = $(this).data('id');
   pollCounstructor.hideQuestionInListView(questionId);
@@ -88,18 +66,21 @@ function setAnswerUnique() {
   }
 }
 
-function saveQuestionLimit(input) {
-  let value = input.value;
-  let questionId = input.dataset.id;
-  let question = pollCounstructor.findQuestionById(+questionId);
-  question.setQuestionLimit(value);
-}
 
 function showQTrash() {
   let questionId = $(this).data('id');
   let question = pollCounstructor.findQuestionById(questionId);
   question.showTrash();
 }
+
+function saveQuestionLimit(input) {
+  let value = input.value;
+  let questionId = input.dataset.id;
+  let question = pollCounstructor.findQuestionById(+questionId);
+  question.setQuestionLimit(value);
+}
+*/
+
 
 function setLogic() {
   let questionId = this.dataset.question;

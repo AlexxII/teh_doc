@@ -301,6 +301,7 @@ class PollConstructor {
     return this.pollGridView;
   }
 
+ // ====================== логика ответа ================
   renderLogicMenu(questionObj, answerObj) {
     let Obj = this;
     let menuDiv = document.createElement('div');
