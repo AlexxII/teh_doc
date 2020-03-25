@@ -12,12 +12,16 @@ class PollAsset extends AssetBundle
     'js/vars.js',
     'js/settings/towns.js',
 
+    'js/common/poll.js',
+    'js/common/question.js',
+    'js/common/answer.js',
+
     'js/drive/user.class.js',
     'js/drive/drive.js',
     'js/drive/worksheet.class.js',
     'js/drive/respondent.class.js',
-    'js/drive/answer.class.js',
-    'js/drive/question.class.js',
+    'js/drive/danswer.class.js',
+    'js/drive/dquestion.class.js',
     'js/default.js',
 
     'js/jquery.maskedinput.js',

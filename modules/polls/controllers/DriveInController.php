@@ -58,7 +58,7 @@ class DriveInController extends Controller
     $data = Polls::find()
       ->select(["id", "title", "code"])
       ->where(["id" => $id])
-      ->with(['visibleQuestions.visibleAnswers.logic'])
+      ->with(['questions.answers.logic'])
       ->asArray()
       ->all();
     $logic = Answers::find()

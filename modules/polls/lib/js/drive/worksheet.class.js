@@ -48,7 +48,7 @@ class Worksheet {
   }
 
   set respondent(questions) {
-    return this._respondent = new Respondent(questions);
+    this._respondent = new Respondent(questions);
   }
 
   get respondent() {
@@ -56,10 +56,10 @@ class Worksheet {
   }
 
   set questions(config) {
-    let questions = config.visibleQuestions;
+    let questions = config.questions;
     let output = [];
     questions.forEach(function (question, index) {
-      output[index] = new Question(question, index);
+      output[index] = new DQuestion(question, index);
     });
     this.sortByOrder(output);
     this._questions = output;
@@ -70,7 +70,7 @@ class Worksheet {
   }
 
   set totalNumberOfQuestions(config) {
-    this._totalNumberOfQuestions = config.visibleQuestions.length;
+    this._totalNumberOfQuestions = config.questions.length;
   }
 
   get totalNumberOfQuestions() {
