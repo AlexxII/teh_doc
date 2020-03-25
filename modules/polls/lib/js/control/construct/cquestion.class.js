@@ -1,5 +1,6 @@
 class CQuestion {
-  constructor(config) {
+  constructor(config, pObj) {
+    this.mainParent = pObj;
     this.id = +config.id;
     this.title = config.title;
     this.titleEx = config.title_ex;
@@ -20,10 +21,11 @@ class CQuestion {
   }
 
   set answers(answers) {
+    let Obj = this;
     let id = this.id;
     let tempAnswersArray = {};
     answers.forEach(function (val, index) {
-      tempAnswersArray[val.id] = new CAnswer(val, index, id);
+      tempAnswersArray[val.id] = new CAnswer(val, index, Obj);
     });
     this._answers = tempAnswersArray;
   }
@@ -51,46 +53,6 @@ class CQuestion {
     return this._numberOfAnswers;
   }
 
-  hideQuestion(callback) {
-    let url = this.HIDE_QUESTION_URL;
-    let questionId = this.id;
-    $.ajax({
-      url: url,
-      method: 'post',
-      data: {
-        id: questionId
-      }
-    }).done(function (response) {
-      if (response.code) {
-        callback();
-      } else {
-        console.log(response.data.message + '\n' + response.data.data);
-      }
-    }).fail(function () {
-      console.log('Failed to hide question');
-    });
-  }
-
-  restoreQuestion(callback) {
-    let url = this.RESTORE_ANSWER_URL;
-    let questionId = this.id;
-    $.ajax({
-      url: url,
-      method: 'post',
-      data: {
-        id: questionId
-      }
-    }).done(function (response) {
-      if (response.code) {
-        callback();
-      } else {
-        console.log(response.data.message + '\n' + response.data.data);
-      }
-    }).fail(function () {
-      console.log('Failed to hide question - URL failed');
-    });
-  }
-
   setQuestionLimit(value) {
     let oldVal = this.limit;                                          // + - приведение к типу number
     let Obj = this;
@@ -115,7 +77,7 @@ class CQuestion {
       }
       Obj.limit = +value;
       if (Obj.limit > 1) {
-        titleNode.classList.add('be-attention');
+          titleNode.classList.add('be-attention');
       } else {
         titleNode.classList.remove('be-attention');
       }
@@ -134,14 +96,25 @@ class CQuestion {
     if (this.limit > 1 || this.limit === 0) {
       questionClone.querySelector('.question-header').classList.add('be-attention');
     }
+    // меню
+    let questionMenu = questionClone.querySelectorAll('.question-menu')[0];
+    let addNewAnswerNode = questionMenu.querySelector('#add-new-answer');
+    addNewAnswerNode.addEventListener('click', () => { Obj.addNewAnswer(); }, false);
 
     questionClone.querySelector('.original-question-order').innerHTML = this.oldOrder;
     questionClone.querySelector('.question-title').innerHTML = this.title;
     questionClone.querySelector('.question-limit').value = this.limit;
     questionClone.querySelector('.question-limit').dataset.id = this.id;
     questionClone.querySelector('.question-limit').dataset.old = this.limit;
-    questionClone.querySelector('.question-hide').dataset.id = this.id;
-    questionClone.querySelector('.restore-question').dataset.id = this.id;
+
+    // скрыть вопрос
+    let hideBtn = questionClone.querySelector('.question-hide');
+    hideBtn.addEventListener('click', () => { Obj.hideQuestion(); }, false);
+
+    // восстановить вопрос
+    let restoreBtn = questionClone.querySelector('.restore-question');
+    restoreBtn.addEventListener('click', () => { Obj.restoreQuestion(); }, false);
+
     if (this.visible === 0) {
       questionClone.querySelector('.question-hide').style.display = 'none';
       questionClone.querySelector('.restore-question').style.display = 'inline';
@@ -238,56 +211,6 @@ class CQuestion {
     }
   }
 
-  hideAnswer(id) {
-    let Obj = this;
-    let answer = this.findAnswerById(id);
-    let qTmpl = this._questionListTmpl;
-    let hSortDiv = Obj.hSortable.el;
-    let sortDiv = Obj.sortable.el;
-    if (answer) {
-      answer.hideAnswerInListView(function () {
-        if (hSortDiv.getElementsByTagName('hr').length === 0) {
-          let hr = document.createElement('hr');
-          hSortDiv.appendChild(hr);
-        }
-        let tmpl = answer.answerTmpl;
-        tmpl.querySelector('.answer-hide').style.display = 'none';
-        tmpl.querySelector('.answer-options').style.display = 'none';
-        tmpl.querySelector('.unique-btn').style.display = 'none';
-        tmpl.querySelector('.restore-btn').style.display = 'block';
-        tmpl.querySelector('.restore-btn').dataset.id = answer.id;
-        tmpl.querySelector('.restore-btn').dataset.questionId = Obj.id;
-        tmpl.classList.add('hidden-answer');
-        hSortDiv.appendChild(tmpl);
-        setTimeout(() => Obj.reindex(), 300);
-      });
-    }
-  }
-
-  restoreAnswer(id) {
-    let Obj = this;
-    let answer = this.findAnswerById(id);
-    if (answer) {
-      answer.restoreAnswerInListView(function () {
-        let sortable = Obj.sortable;
-        let sortDiv = sortable.el;
-        let tmpl = answer.answerTmpl;
-
-        tmpl.querySelector('.answer-hide').style.display = 'inline';
-        tmpl.querySelector('.answer-options').style.display = 'inline';
-        tmpl.querySelector('.unique-btn').style.display = 'inline';
-        tmpl.querySelector('.restore-btn').style.display = 'none';
-        tmpl.classList.remove('hidden-answer');
-
-        sortDiv.appendChild(tmpl);
-        let ar = sortable.toArray();
-        ar.push(answer.id + '');
-        sortable.sort(ar);
-      });
-      setTimeout(() => Obj.resort(), 300);
-    }
-  }
-
   reindex() {
     let sortDiv = this.sortable.el;
     let answersArray = sortDiv.getElementsByClassName('answer-number');
@@ -358,6 +281,74 @@ class CQuestion {
       return;
     }
     this._questionGridTmpl = null;
+  }
+
+  addNewAnswer() {
+    console.log(this.id);
+  }
+
+  hideQuestion() {
+    let Obj = this;
+    let pObj = this.mainParent;
+    let url = this.HIDE_QUESTION_URL;
+    let questionId = this.id;
+    $.ajax({
+      url: url,
+      method: 'post',
+      data: {
+        id: questionId
+      }
+    }).done(function (response) {
+      if (response.code) {
+        let hSortDiv = pObj.hSortable.el;
+        let sortDiv = pObj.sortable.el;
+        if (hSortDiv.getElementsByTagName('hr').length === 0) {
+          let hr = document.createElement('hr');
+          hSortDiv.appendChild(hr);
+        }
+        let tmpl = Obj.questionListTmpl;
+        tmpl.querySelector('.question-hide').style.display = 'none';
+        tmpl.querySelector('.restore-question').style.display = 'inline';
+        hSortDiv.appendChild(tmpl);
+        setTimeout(() => pObj.reindex(), 300);
+      } else {
+        console.log(response.data.message + '\n' + response.data.data);
+      }
+    }).fail(function () {
+      console.log('Failed to hide question');
+    });
+  }
+
+  restoreQuestion() {
+    let Obj = this;
+    let pObj = this.mainParent;
+    let url = this.RESTORE_ANSWER_URL;
+    let questionId = this.id;
+    $.ajax({
+      url: url,
+      method: 'post',
+      data: {
+        id: questionId
+      }
+    }).done(function (response) {
+      if (response.code) {
+        let hSortDiv = pObj.hSortable.el;
+        let sortDiv = pObj.sortable.el;
+        if (hSortDiv.getElementsByTagName('hr').length === 0) {
+          let hr = document.createElement('hr');
+          hSortDiv.appendChild(hr);
+        }
+        let tmpl = Obj.questionListTmpl;
+        tmpl.querySelector('.restore-question').style.display = 'none';
+        tmpl.querySelector('.question-hide').style.display = 'inline';
+        sortDiv.appendChild(tmpl);
+        setTimeout(() => pObj.resort(), 300);
+      } else {
+        console.log(response.data.message + '\n' + response.data.data);
+      }
+    }).fail(function () {
+      console.log('Failed to hide question - URL failed');
+    });
   }
 
   findAnswerById(id) {

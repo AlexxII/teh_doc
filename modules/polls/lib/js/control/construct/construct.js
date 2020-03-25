@@ -12,11 +12,13 @@ function startConstruct(view) {
   NProgress.done();
 }
 
-$(document).on('click', '.question-hide', hideQuestion)
-  .on('click', '.restore-question', restoreQuestion)
-  .on('click', '.answer-hide', hideAnswer)
-  .on('click', '.restore-btn', restoreAnswer)
-  .on('click', '.unique-btn', setAnswerUnique)
+// $(document).on('click', '.question-hide', hideQuestion)
+$(document)
+  // .on('click', '.question-hide', hideQuestion)
+  // .on('click', '.restore-question', restoreQuestion)
+  // .on('click', '.answer-hide', hideAnswer)
+  // .on('click', '.restore-btn', restoreAnswer)
+  // .on('click', '.unique-btn', setAnswerUnique)
   .on('click', '.question-trash', showQTrash)
   .on('click', '.logic', setLogic)
   .on('click', '.check-all', checkboxLogicEx);

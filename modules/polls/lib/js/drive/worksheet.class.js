@@ -56,10 +56,10 @@ class Worksheet {
   }
 
   set questions(config) {
-    let questions = config.questions;
+    let questions = config.visibleQuestions;
     let output = [];
     questions.forEach(function (question, index) {
-      output[index] = new DQuestion(question, index);
+      output[index] = new Question(question, index);
     });
     this.sortByOrder(output);
     this._questions = output;
@@ -70,7 +70,7 @@ class Worksheet {
   }
 
   set totalNumberOfQuestions(config) {
-    this._totalNumberOfQuestions = config.questions.length;
+    this._totalNumberOfQuestions = config.visibleQuestions.length;
   }
 
   get totalNumberOfQuestions() {
@@ -305,7 +305,7 @@ class Worksheet {
     serviceArea.appendChild(selectTemplate);
   }
 
-  // нивигационная мозайка
+  // навигационная мозайка
   renderNavigator() {
     let serviceArea = document.getElementById('drive-service-area');
     let svgNAv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -343,7 +343,7 @@ class Worksheet {
     svgNAv.setAttribute('width', '100%');
     svgNAv.setAttribute('height', y);
     serviceArea.appendChild(svgNAv);
-  };
+  }
 
   verifyPollConfigStructure(val) {
     return val !== null;

@@ -167,7 +167,7 @@ function result(index) {
   };
 
   this.alreadySaved = function (id) {
-    return this.respondentAnswers[id] !== undefined
+    return this.respondentAnswers[id] !== undefined;
   };
 
   this.hasUniqueAnswers = function () {

@@ -1,7 +1,6 @@
-class DAnswer extends Answer {
+class Answer {
   constructor(config)
   {
-    super(config);
     this.id = config.id;
     this.title = config.title;
     this.code = config.code;

@@ -119,7 +119,7 @@ function showTownIn(p, callback) {
         driveTownId = self.$content.find('select :selected').val();
         driveTownTitle = self.$content.find('select :selected').text();
         self.buttons.ok.enable();
-      })
+      });
     },
     buttons: {
       ok: {

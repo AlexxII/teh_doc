@@ -1,6 +1,5 @@
-class DQuestion extends Question {
+class Question {
   constructor(config, number) {
-    super(config);
     this.id = config.id;
     this.title = config.title;
     this.titleEx = config.title_ex;
@@ -10,6 +9,17 @@ class DQuestion extends Question {
     this.required = 1;                                       // вопрос обязателен
     this.answers = config.visibleAnswers;                    // пул ответов (объектов)
     this.numberOfAnswers = config.visibleAnswers;
+  }
+
+  set answers(answers) {
+    console.log(answers);
+    let answersPool = answers;
+    this.sortByOrder(answersPool);
+    let tempOutput = [];
+    answersPool.forEach(function (val, index) {
+      tempOutput[index] = new Answer(val);
+    });
+    this._answers = tempOutput;
   }
 
   set numberOfAnswers(answers) {

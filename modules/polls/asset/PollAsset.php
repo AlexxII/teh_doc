@@ -12,9 +12,9 @@ class PollAsset extends AssetBundle
     'js/vars.js',
     'js/settings/towns.js',
 
-    'js/common/poll.js',
-    'js/common/question.js',
-    'js/common/answer.js',
+    // 'js/common/poll.js',
+    // 'js/common/question.js',
+    // 'js/common/answer.js',
 
     'js/drive/user.class.js',
     'js/drive/drive.js',

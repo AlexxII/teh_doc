@@ -16,9 +16,10 @@ class PollConstructor {
   }
 
   set questions(tempQuestions) {
+    let Obj = this;
     let tempQuestionsArray = {};
     tempQuestions.forEach(function (val, index) {
-      tempQuestionsArray[val.id] = new CQuestion(val);
+      tempQuestionsArray[val.id] = new CQuestion(val, Obj);
     });
     this._questions = tempQuestionsArray;
   }
@@ -254,47 +255,6 @@ class PollConstructor {
     }
   }
 
-  hideQuestionInListView(id) {
-    let Obj = this;
-    let question = this.findQuestionById(id);
-    let hSortDiv = Obj.hSortable.el;
-    let sortDiv = Obj.sortable.el;
-    if (question) {
-      question.hideQuestion(function () {
-        if (hSortDiv.getElementsByTagName('hr').length === 0) {
-          let hr = document.createElement('hr');
-          hSortDiv.appendChild(hr);
-        }
-        let tmpl = question.questionListTmpl;
-
-        tmpl.querySelector('.question-hide').style.display = 'none';
-        tmpl.querySelector('.restore-question').style.display = 'inline';
-        hSortDiv.appendChild(tmpl);
-      });
-    }
-    setTimeout(() => Obj.reindex(), 300);
-  }
-
-  restoreQuestionInListView(id) {
-    let Obj = this;
-    let question = this.findQuestionById(id);
-    let hSortDiv = Obj.hSortable.el;
-    let sortDiv = Obj.sortable.el;
-    if (question) {
-      question.restoreQuestion(function () {
-        if (hSortDiv.getElementsByTagName('hr').length === 0) {
-          let hr = document.createElement('hr');
-          hSortDiv.appendChild(hr);
-        }
-        let tmpl = question.questionListTmpl;
-        tmpl.querySelector('.restore-question').style.display = 'none';
-        tmpl.querySelector('.question-hide').style.display = 'inline';
-        sortDiv.appendChild(tmpl);
-      });
-    }
-    setTimeout(() => Obj.resort(), 300);
-  }
-
   reindex() {
     let sortDiv = this.sortable.el;
     let questionArray = sortDiv.getElementsByClassName('question-order');
@@ -391,7 +351,7 @@ class PollConstructor {
         }
       }
     });
-  };
+  }
 
   confirmLogic(questionObj, answerObj) {
     let menu = document.getElementById('logic-menu-content');

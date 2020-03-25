@@ -1,9 +1,9 @@
 class CAnswer {
-  constructor(config, index, qId) {
+  constructor(config, index, pObj) {
+    this.parentQuestion = pObj;
     this.id = config.id;
     this.titleEx = config.title_ex;
     this.title = config.title;
-    this.parentQuestion = +qId;
     this.logicArray = config.logic;
     this.order = +config.order;
     this.oldOrder = +config.oldOrder;
@@ -55,6 +55,7 @@ class CAnswer {
   }
 
   set answerTmpl(index) {
+    let Obj = this;
     let answerDiv = document.getElementById('answer-template');
     let answerClone = answerDiv.cloneNode(true);
     answerClone.removeAttribute('id');
@@ -65,21 +66,30 @@ class CAnswer {
     let code = this.code.padStart(3, '0');
     answerClone.querySelector('.answer-code').innerHTML = code;
 
+    let restoreBtn = answerClone.querySelector('.restore-btn');
+    restoreBtn.addEventListener('click', () => { Obj.restoreAnswerInListView(); }, false);
+
+    let hideBtn = answerClone.querySelector('.answer-hide');
+    hideBtn.addEventListener('click', () => { Obj.hideAnswerInListView(); }, false);
+
+    let uniqueBtn = answerClone.querySelector('.unique-btn');
+    uniqueBtn.addEventListener('click', () => { Obj.changeUniqueForQuestion(); }, false)
+
     if (this.visible === 0) {
       answerClone.classList.add('hidden-answer');
       answerClone.querySelector('.answer-hide').style.display = 'none';
       answerClone.querySelector('.answer-options').style.display = 'none';
       answerClone.querySelector('.unique-btn').style.display = 'none';
       answerClone.querySelector('.restore-btn').dataset.id = answerId;
-      answerClone.querySelector('.restore-btn').dataset.questionId = this.parentQuestion;
+      answerClone.querySelector('.restore-btn').dataset.questionId = this.parentQuestion.id;
     } else {
       answerClone.querySelector('.restore-btn').style.display = 'none';
       answerClone.querySelector('.answer-hide').dataset.id = answerId;
-      answerClone.querySelector('.answer-hide').dataset.questionId = this.parentQuestion;
+      answerClone.querySelector('.answer-hide').dataset.questionId = this.parentQuestion.id;
       answerClone.querySelector('.unique-btn').dataset.id = answerId;
-      answerClone.querySelector('.unique-btn').dataset.questionId = this.parentQuestion;
+      answerClone.querySelector('.unique-btn').dataset.questionId = this.parentQuestion.id;
       answerClone.querySelector('.answer-menu .logic').dataset.id = answerId;
-      answerClone.querySelector('.answer-menu .logic').dataset.question = this.parentQuestion;
+      answerClone.querySelector('.answer-menu .logic').dataset.question = this.parentQuestion.id;
       answerClone.querySelector('.answer-menu .delete-answer').dataset.id = answerId;
     }
     if (this.unique === 1) {
@@ -108,9 +118,12 @@ class CAnswer {
     return answerClone;
   }
 
-  hideAnswerInListView(callback) {
+  hideAnswerInListView() {
+    let Obj = this;
+    let pObj = this.parentQuestion;
     let url = this.HIDE_ANSWER_URL;
     let answerId = this.id;
+    let hSortDiv = pObj.hSortable.el;
     $.ajax({
       url: url,
       method: 'post',
@@ -119,7 +132,18 @@ class CAnswer {
       }
     }).done(function (response) {
       if (response.code) {
-        callback();
+        if (hSortDiv.getElementsByTagName('hr').length === 0) {
+          let hr = document.createElement('hr');
+          hSortDiv.appendChild(hr);
+        }
+        let tmpl = Obj.answerTmpl;
+        tmpl.querySelector('.answer-hide').style.display = 'none';
+        tmpl.querySelector('.answer-options').style.display = 'none';
+        tmpl.querySelector('.unique-btn').style.display = 'none';
+        tmpl.querySelector('.restore-btn').style.display = 'block';
+        tmpl.classList.add('hidden-answer');
+        hSortDiv.appendChild(tmpl);
+        setTimeout(() => pObj.reindex(), 300);
       } else {
         console.log(response.data.message + '\n' + response.data.data);
       }
@@ -129,8 +153,12 @@ class CAnswer {
   }
 
   restoreAnswerInListView(callback) {
+    let Obj = this;
+    let pObj = this.parentQuestion;
     let url = this.RESTORE_ANSWER_URL;
     let answerId = this.id;
+    let sortable = pObj.sortable;
+    let sortDiv = sortable.el;
     $.ajax({
       url: url,
       method: 'post',
@@ -139,7 +167,17 @@ class CAnswer {
       }
     }).done(function (response) {
       if (response.code) {
-        callback();
+        let tmpl = Obj.answerTmpl;
+        tmpl.querySelector('.answer-hide').style.display = 'inline';
+        tmpl.querySelector('.answer-options').style.display = 'inline';
+        tmpl.querySelector('.unique-btn').style.display = 'inline';
+        tmpl.querySelector('.restore-btn').style.display = 'none';
+        tmpl.classList.remove('hidden-answer');
+        sortDiv.appendChild(tmpl);
+        let ar = sortable.toArray();
+        ar.push(Obj.id + '');
+        sortable.sort(ar);
+        setTimeout(() => pObj.resort(), 300);
       } else {
         console.log(response.data.message + '\n' + response.data.data);
       }
