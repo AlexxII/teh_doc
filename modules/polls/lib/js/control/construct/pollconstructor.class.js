@@ -10,8 +10,6 @@ class PollConstructor {
       this.renderGridTmpl();
       this.renderPollInfo();
       this.REORDER_QUESTIONS_URL = '/polls/control/construct/reorder-questions';
-      this.ADD_LOGIC_URL = '/polls/control/construct/add-poll-logic';
-      this.SUB_LOGIC_URL = '/polls/control/construct/sub-poll-logic';
     }
   }
 
@@ -61,6 +59,8 @@ class PollConstructor {
     return false;
   }
 
+
+  // ====== rendering =======
   renderPollInfo() {
     let hNode = document.createElement('span');
     let numOfAnswers = this.numOfAnswers;
@@ -133,6 +133,45 @@ class PollConstructor {
     Obj._pollListView = listView;
   }
 
+  renderGridTmpl() {
+    let gridDiv = document.createElement('div');
+    gridDiv.id = 'grid-poll-order';
+    gridDiv.className = 'grid';
+    let questions = this.questions;
+    let visQuestions = 1;
+    for (let qId in questions) {
+      let question = questions[qId];
+      if (question.renderCQuestionGrid()) {
+        gridDiv.appendChild(question.renderCQuestionGrid(visQuestions));
+        visQuestions++;
+      }
+    }
+    // изменение порядка
+    let oldOrder;
+    let Obj = this;
+    this.sortableGrid = new Sortable(gridDiv, {
+      multiDrag: true,
+      selectedClass: 'multi-selected',
+      animation: 150,
+      group: 'poll-grid-store',
+      onStart: function (evt) {
+        Obj._oldOrder = Obj.sortableGrid.toArray();
+      },
+      onUpdate: function (evt) {
+        NProgress.start();
+        let newOrder = Obj.sortableGrid.toArray();
+        Obj.saveGridReorder(newOrder);
+        let items = evt.from.children;
+        for (let i = 0, child; child = items[i]; i++) {
+          child.querySelector('.question-order').innerHTML = (i + 1);
+        }
+      }
+    });
+    Obj._pollGridView = gridDiv;
+  }
+
+
+  // ======= reodering ===========
   saveListReorder(questionsArr) {
     let url = this.REORDER_QUESTIONS_URL;
     let Obj = this;
@@ -172,42 +211,6 @@ class PollConstructor {
     });
   }
 
-  renderGridTmpl() {
-    let gridDiv = document.createElement('div');
-    gridDiv.id = 'grid-poll-order';
-    gridDiv.className = 'grid';
-    let questions = this.questions;
-    let visQuestions = 1;
-    for (let qId in questions) {
-      let question = questions[qId];
-      if (question.renderCQuestionGrid()) {
-        gridDiv.appendChild(question.renderCQuestionGrid(visQuestions));
-        visQuestions++;
-      }
-    }
-    // изменение порядка
-    let oldOrder;
-    let Obj = this;
-    this.sortableGrid = new Sortable(gridDiv, {
-      multiDrag: true,
-      selectedClass: 'multi-selected',
-      animation: 150,
-      group: 'poll-grid-store',
-      onStart: function (evt) {
-        Obj._oldOrder = Obj.sortableGrid.toArray();
-      },
-      onUpdate: function (evt) {
-        NProgress.start();
-        let newOrder = Obj.sortableGrid.toArray();
-        Obj.saveGridReorder(newOrder);
-        let items = evt.from.children;
-        for (let i = 0, child; child = items[i]; i++) {
-          child.querySelector('.question-order').innerHTML = (i + 1);
-        }
-      }
-    });
-    Obj._pollGridView = gridDiv;
-  }
 
   saveGridReorder(newOrder) {
     let url = this.REORDER_QUESTIONS_URL;
@@ -299,154 +302,6 @@ class PollConstructor {
 
   renderGridView() {
     return this.pollGridView;
-  }
-
- // ====================== логика ответа ================
-  renderLogicMenu(questionObj, answerObj) {
-    let Obj = this;
-    let menuDiv = document.createElement('div');
-    menuDiv.id = 'logic-menu-content';
-    let questions = this.questions;
-    let logic = answerObj.logicArray;
-    for (let qId in questions) {
-      let question = questions[qId];
-      menuDiv.appendChild(question.questionTmplEx);
-      let answers = question.answers;
-      answers.forEach(function (answer, index) {
-        if (logic && logic.includes(answer.id)) {
-          answer.tempTmpl.getElementsByTagName('input')[0].checked = true;
-        }
-      });
-    }
-    questionObj.tempTmpl.classList.add('selected-question');
-    questionObj.tempTmpl.querySelector('.q-title').classList.remove('check-all');
-    let answers = questionObj.answers;
-    answers.forEach(function (answer, index) {
-      answer.tempTmpl.getElementsByTagName('input')[0].disabled = true;
-    });
-    answerObj.tempTmpl.classList.add('selected-answer');
-    return menuDiv;
-  }
-
-  showLogicMenu(questionId, answerId) {
-    let Obj = this;
-    let questionObj = Obj._questions[questionId];
-    let answerObj = questionObj._answers[answerId];
-    $.alert({
-      title: Obj.code + ' ' + 'исключить ответы',
-      content: Obj.renderLogicMenu(questionObj, answerObj),
-      columnClass: 'col-md-12',
-      animateFromElement: false,
-      buttons: {
-        ok: {
-          text: 'Сохранить',
-          btnClass: 'btn-success',
-          action: function () {
-            Obj.confirmLogic(questionObj, answerObj);
-          }
-        },
-        cancel: {
-          text: 'Отмена',
-          action: function () {
-          }
-        }
-      }
-    });
-  }
-
-  confirmLogic(questionObj, answerObj) {
-    let menu = document.getElementById('logic-menu-content');
-    let inputs = menu.getElementsByTagName('input');
-    let result = [];
-    Array.prototype.map.call(inputs, function (val) {
-      if (val.checked) {
-        result.push(val.dataset.id);
-        val.checked = false;                                          // снимаем checkbox
-      }
-    });
-    let oldLogic = answerObj._logicArray;
-    let newLogic = result;
-    let subbing = oldLogic.filter(x => !newLogic.includes(x));    // удаление
-    let adding = newLogic.filter(x => !oldLogic.includes(x));    //  прибавление
-    if (adding) {
-      this.addLogic(adding, result, questionObj, answerObj);
-    }
-    if (subbing) {
-      this.subLogic(subbing, result, questionObj, answerObj);
-    }
-  }
-
-  addLogic(adding, result, questionObj, answerObj) {
-    let Obj = this;
-    if (adding.length !== 0) {
-      let url = this.ADD_LOGIC_URL;
-      $.ajax({
-        url: url,
-        method: 'post',
-        data: {
-          restrict: adding,
-          pollId: Obj.id,
-          answer: answerObj.id
-        }
-      }).done(function (response) {
-        if (!response.code) {
-          var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить логику не удалось';
-          initNoty(tText, 'warning');
-          console.log(response.data.message + ' ' + response.data.data);
-          return;
-        }
-        answerObj._logicArray = result;
-        answerObj.answerTmpl.append(answerObj.renderBranchSymbl());
-
-        var tText = '<span style="font-weight: 600">Успех!</span><br>Логика изменена';
-        initNoty(tText, 'success');
-      }).fail(function () {
-        var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить логику не удалось';
-        initNoty(tText, 'warning');
-        console.log('Не удалось получить ответ сервера. Примените отладочную панель, оснаска "Сеть"');
-      });
-    }
-  }
-
-  subLogic(subbing, result, questionObj, answerObj) {
-    let Obj = this;
-    if (subbing.length !== 0) {
-      let url = this.SUB_LOGIC_URL;
-      $.ajax({
-        url: url,
-        method: 'post',
-        data: {
-          restrict: subbing,
-          answer: answerObj.id
-        }
-      }).done(function (response) {
-        if (!response.code) {
-          var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить логику не удалось';
-          initNoty(tText, 'warning');
-          console.log(response.data.message + ' ' + response.data.data);
-          return;
-        }
-        answerObj._logicArray = result;
-        if (result.length > 0) {
-          answerObj.answerTmpl.append(answerObj.renderBranchSymbl());
-        } else {
-          answerObj.answerTmpl.querySelector('.jump-icon').remove();
-        }
-        var tText = '<span style="font-weight: 600">Успех!</span><br>Логика изменена';
-        initNoty(tText, 'success');
-      }).fail(function () {
-        var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить логику не удалось';
-        initNoty(tText, 'warning');
-        console.log('Не удалось получить ответ сервера. Примените отладочную панель, оснаска "Сеть"');
-      });
-    }
-  }
-
-  clearCheckboxes(menu) {
-    let inputs = menu.getElementsByTagName('input');
-    for (let key in inputs) {
-      inputs[key].checked = false;
-    }
   }
 
   verifyPollConfigStructure(val) {

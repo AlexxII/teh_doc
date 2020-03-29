@@ -75,5 +75,54 @@ function initStatisticModule() {
 }
 
 function intiTestsModule() {
+  testIniParser();
 
+}
+
+function testIniParser() {
+  let headerNode = document.getElementById('control-header');
+  headerNode.innerHTML = '';
+  let resultNode = document.getElementById('control-result');
+  resultNode.innerHTML = '';
+  let footerNode = document.getElementById('control-footer');
+  footerNode.innerHTML = '';
+
+
+  let wrapDiv = document.createElement('div');
+  wrapDiv.style['margin-top'] = '20px';
+
+  let iniArea = document.createElement('textarea');
+  iniArea.className = 'ini-editor';
+  iniArea.style.resize = 'vertical';
+  iniArea.maxLength = '50000';
+  iniArea.cols = '150';
+  iniArea.rows = '20';
+  wrapDiv.appendChild(iniArea);
+
+  let saveBtn = document.createElement('button');
+  saveBtn.classList = 'btn btn-sm btn-success';
+  saveBtn.innerHTML = 'Сохранить';
+  saveBtn.addEventListener('click', () => { parseIni(iniArea); } , false);
+
+  let loadBtn = document.createElement('button');
+  loadBtn.classList = 'btn btn-sm btn-info';
+  loadBtn.innerHTML = 'Скрипт';
+  loadBtn.addEventListener('click', loadScript , false);
+
+  headerNode.appendChild(saveBtn);
+  headerNode.appendChild(loadBtn);
+  resultNode.appendChild(wrapDiv);
+}
+
+
+function loadScript() {
+  let sScript = document.createElement('script');
+  sScript.src = 'js/iniparser.js';
+  // let text = '$(".js-data-array").select2({' +
+  //   'placeholder: "Выберите ответ",' +
+  //   '});';
+  // let sText = document.createTextNode(text);
+  // sScript.appendChild(sText);
+  document.head.append(sScript);
+  // setTimeout(() => document.body.removeChild(sScript), 150);          //TODO слабое место с ожиданием
 }

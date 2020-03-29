@@ -200,7 +200,7 @@ function deleteSheetData() {
     let length = selectedData.length;
     for (let i = 0; i < length; i++) {
       let obj = selectedData[i].aObject;
-      docOfSheets.documentElement.children[1].removeChild(obj)
+      docOfSheets.documentElement.children[1].removeChild(obj);
     }
   }
 }
@@ -700,4 +700,3 @@ function renderRowAnswers() {
     }
   });
 }
-

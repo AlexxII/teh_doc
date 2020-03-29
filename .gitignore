@@ -33,3 +33,5 @@ phpunit.phar
 #vagrant - управление виртуальными машинами
 
 ./config
+
+/node_modules

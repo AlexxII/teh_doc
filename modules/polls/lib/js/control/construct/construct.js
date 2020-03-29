@@ -13,9 +13,7 @@ function startConstruct(view) {
 }
 
 $(document)
-  // .on('click', '.question-trash', showQTrash)
-  .on('click', '.logic', setLogic)
-  .on('click', '.check-all', checkboxLogicEx);
+  // .on('click', '.logic', setLogic)
 
 
 function renderListView() {

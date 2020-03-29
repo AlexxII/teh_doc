@@ -1,6 +1,7 @@
 class CAnswer {
   constructor(config, index, pObj) {
     this.parentQuestion = pObj;
+    this.parentPoll = pObj;
     this.id = config.id;
     this.titleEx = config.title_ex;
     this.title = config.title;
@@ -18,12 +19,16 @@ class CAnswer {
     this.HIDE_ANSWER_URL = '/polls/control/construct/hide-answer';
     this.RESTORE_ANSWER_URL = '/polls/control/construct/restore-answer';
     this.UNIQUE_ANSWER_URL = '/polls/control/construct/unique-answer';
+    this.ADD_LOGIC_URL = '/polls/control/construct/add-poll-logic';
+    this.SUB_LOGIC_URL = '/polls/control/construct/sub-poll-logic';
   }
 
-  renderCAnswer(index) {
-    let answer = this.answerTmpl;
-    answer.querySelector('.answer-number').innerHTML = index;
-    return answer;
+  set parentPoll(Obj) {
+    this._parentPoll = Obj.parentPoll;
+  }
+
+  get parentPoll() {
+    return this._parentPoll;
   }
 
   get answerTmpl() {
@@ -52,61 +57,6 @@ class CAnswer {
 
   get logic() {
     return this._logicArray.length !== 0 ? 1 : 0;
-  }
-
-  set answerTmpl(index) {
-    let Obj = this;
-    let answerDiv = document.getElementById('answer-template');
-    let answerClone = answerDiv.cloneNode(true);
-    answerClone.removeAttribute('id');
-    let answerId = this.id;
-    answerClone.dataset.id = answerId;
-    answerClone.dataset.old = this.oldOrder;
-    answerClone.querySelector('.answer-title').innerHTML = this.title;
-    let code = this.code.padStart(3, '0');
-    answerClone.querySelector('.answer-code').innerHTML = code;
-
-    let restoreBtn = answerClone.querySelector('.restore-btn');
-    restoreBtn.addEventListener('click', () => { Obj.restoreAnswerInListView(); }, false);
-
-    let hideBtn = answerClone.querySelector('.answer-hide');
-    hideBtn.addEventListener('click', () => { Obj.hideAnswerInListView(); }, false);
-
-    let uniqueBtn = answerClone.querySelector('.unique-btn');
-    uniqueBtn.addEventListener('click', () => { Obj.changeUniqueForQuestion(); }, false);
-
-    if (this.visible === 0) {
-      answerClone.classList.add('hidden-answer');
-      answerClone.querySelector('.answer-hide').style.display = 'none';
-      answerClone.querySelector('.answer-options').style.display = 'none';
-      answerClone.querySelector('.unique-btn').style.display = 'none';
-    } else {
-      answerClone.querySelector('.restore-btn').style.display = 'none';
-    }
-    if (this.unique === 1) {
-      answerClone.classList.add('unique-answer');
-    }
-    if (this.logic === 1) {
-      answerClone.appendChild(this.renderBranchSymbl());
-    }
-    this._answerTmpl = answerClone;
-  }
-
-  renderAnswerTmplEx() {
-    let answerDiv = document.getElementById('answer-li-tmpl');
-    let answerClone = answerDiv.cloneNode(true);
-    // answerClone.removeAttribute('id');
-    // answerClone.querySelector('.check-logic').id = this.id;
-    answerClone.id = this.id;
-    answerClone.querySelector('.check-logic').dataset.id = this.id;
-    answerClone.querySelector('.a-title').innerHTML = this.title;
-    let code = this.code.padStart(3, '0');
-    answerClone.querySelector('.a-code').innerHTML = code;
-    // if (this.unique === 1) {
-    //   answerClone.classList.add('unique-answer');
-    // }
-    this.tempTmpl = answerClone;
-    return answerClone;
   }
 
   hideAnswerInListView() {
@@ -214,6 +164,416 @@ class CAnswer {
     }).fail(function () {
       console.log('Failed to hide question - see Network Monitor - "Ctrl+SHift+E "');
     });
+  }
+
+  setLogicConflict() {
+    this.showLogicMenu();
+  }
+
+  showLogicMenu() {
+    let Obj = this;
+    let questionObj = this.parentQuestion;
+    let pollObj = this.parentPoll;
+    let menu = $.alert({
+      title: pollObj.code + ' ' + 'исключить ответы',
+      content: Obj.renderExeptionMenu(),
+      columnClass: 'col-md-12',
+      animateFromElement: false,
+      buttons: {
+        ok: {
+          text: 'Сохранить',
+          btnClass: 'btn-success',
+          action: function () {
+            Obj.confirmLogic(menu);
+          }
+        },
+        cancel: {
+          text: 'Отмена',
+          action: function () {
+          }
+        }
+      }
+    });
+  }
+
+   renderExeptionMenu() {
+     let Obj = this;
+     let questionObj = this.parentQuestion;
+     let pollObj = this.parentPoll;
+     let menuDiv = document.createElement('div');
+     menuDiv.id = 'logic-menu-content';
+     let questions = pollObj.questions;
+     let logic = Obj.logicArray;
+     for (let qId in questions) {
+       let question = questions[qId];
+       menuDiv.appendChild(question.questionTmplEx);
+       let answers = question.answers;
+       let length = answers.length;
+       for (let i = 0; i < length; i ++) {
+         let answer = answers[i];
+         if (logic && logic.includes(answer.id)) {
+           answer.tempTmpl.getElementsByTagName('input')[0].checked = true;
+         }
+       }
+     }
+     questionObj.tempTmpl.classList.add('selected-question');
+     let answers = questionObj.answers;
+     questionObj.tempTmpl.querySelector('.q-title').classList.remove('check-all');
+     answers.forEach(function (answer, index) {
+       answer.tempTmpl.getElementsByTagName('input')[0].disabled = true;
+     });
+     // Obj.tempTmpl.getElementsByTagName('input')[0].disabled = true;
+     Obj.tempTmpl.classList.add('selected-answer');
+     return menuDiv;
+   }
+
+  confirmLogic(menu) {
+    let Obj = this;
+    let questionObj = this.parentQuestion;
+    let pollObj = this.parentPoll;
+    let menuContent = menu.$content[0];
+    let inputs = menuContent.getElementsByTagName('input');
+    let result = [];
+    Array.prototype.map.call(inputs, function (val) {
+      if (val.checked) {
+        result.push(val.dataset.id);
+        val.checked = false;                                          // снимаем checkbox
+      }
+    });
+    let oldLogic = Obj._logicArray;
+    let newLogic = result;
+    let subbing = oldLogic.filter(x => !newLogic.includes(x));    // удаление
+    let adding = newLogic.filter(x => !oldLogic.includes(x));    //  прибавление
+    if (adding) {
+      this.addLogic(adding, result);
+    }
+    if (subbing) {
+      this.subLogic(subbing, result);
+    }
+  }
+
+  addLogic(adding, result) {
+    let Obj = this;
+    let pollObj = this.parentPoll;
+    let questionObj = this.parentQuestion;
+    if (adding.length !== 0) {
+      let url = this.ADD_LOGIC_URL;
+      $.ajax({
+        url: url,
+        method: 'post',
+        data: {
+          restrict: adding,
+          pollId: pollObj.id,
+          answer: Obj.id
+        }
+      }).done(function (response) {
+        if (!response.code) {
+          var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить логику не удалось';
+          initNoty(tText, 'warning');
+          console.log(response.data.message + ' ' + response.data.data);
+          return;
+        }
+        Obj._logicArray = result;
+        Obj.answerTmpl.append(Obj.renderBranchSymbl());
+        var tText = '<span style="font-weight: 600">Успех!</span><br>Логика изменена';
+        initNoty(tText, 'success');
+      }).fail(function () {
+        var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить логику не удалось';
+        initNoty(tText, 'warning');
+        console.log('Не удалось получить ответ сервера. Примените отладочную панель, оснаска "Сеть"');
+      });
+    }
+  }
+
+  subLogic(subbing, result) {
+    let Obj = this;
+    let pollObj = this.parentPoll;
+    let questionObj = this.parentQuestion;
+    if (subbing.length !== 0) {
+      let url = this.SUB_LOGIC_URL;
+      $.ajax({
+        url: url,
+        method: 'post',
+        data: {
+          restrict: subbing,
+          answer: Obj.id
+        }
+      }).done(function (response) {
+        if (!response.code) {
+          var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить логику не удалось';
+          initNoty(tText, 'warning');
+          console.log(response.data.message + ' ' + response.data.data);
+          return;
+        }
+        Obj._logicArray = result;
+        if (result.length > 0) {
+          Obj.answerTmpl.append(Obj.renderBranchSymbl());
+        } else {
+          Obj.answerTmpl.querySelector('.jump-icon').remove();
+        }
+        var tText = '<span style="font-weight: 600">Успех!</span><br>Логика изменена';
+        initNoty(tText, 'success');
+      }).fail(function () {
+        var tText = '<span style="font-weight: 600">Что-то пошло не так!</span><br>Изменить логику не удалось';
+        initNoty(tText, 'warning');
+        console.log('Не удалось получить ответ сервера. Примените отладочную панель, оснаска "Сеть"');
+      });
+    }
+  }
+
+  // ===== настройки автоматики ответа ========
+  setTechnologicalKey() {
+    let Obj = this;
+    let pollObj = this.parentPoll;
+    let questionObj = this.parentQuestion;
+    let menu = $.alert({
+      title: 'Настройка автоматики ответа',
+      content: Obj.renderTehnologicalContent(),
+      boxWidth: '30%',
+      useBootstrap: false,
+      // columnClass: 'col-md-6',
+      animateFromElement: false,
+      buttons: {
+        ok: {
+          text: 'Сохранить',
+          btnClass: 'btn-success',
+          action: function () {
+            Obj.confirmTehologicalData(menu);
+          }
+        },
+        cancel: {
+          text: 'Отмена',
+          action: function () {
+          }
+        }
+      }
+    });
+  }
+
+  renderTehnologicalContent() {
+    let Obj = this;
+    let pollObj = this.parentPoll;
+    let questionObj = this.parentQuestion;
+    let divNode = document.createElement('div');
+    divNode.className = 'technological-wrap';
+
+    let infoNode = document.createElement('div');
+    infoNode.classList = 'alert alert-info';
+    infoNode.setAttribute('role', 'alert');
+
+    let textData = 'Внимание! ';
+    let strongText = document.createTextNode(textData);
+    let strongNode = document.createElement('strong');
+    strongNode.appendChild(strongText);
+
+    let infoData = 'Выберите или впишите коды последующих ответов в поле ниже. Они будут сохранены автоматически при выборе данного ответа.';
+    let infoText = document.createTextNode(infoData);
+
+    infoNode.appendChild(strongNode);
+    infoNode.appendChild(infoText);
+
+    divNode.appendChild(infoNode);
+
+    let serviceDiv = document.createElement('div');
+    serviceDiv.className = 'technological-service';
+
+    let input = document.createElement('textarea');
+    input.classList = 'form-control technological-input';
+    input.maxLength = '5000';
+    input.cols = '55';
+    input.rows = '5';
+    serviceDiv.appendChild(input);
+
+    let chooseBtn = document.createElement('a');
+    chooseBtn.className = 'technological-choose';
+    chooseBtn.innerHTML = 'Выберите';
+    serviceDiv.appendChild(chooseBtn);
+    chooseBtn.addEventListener('click', () => { Obj.showTechMenu(); }, false);
+
+    let span = document.createElement('span');
+    span.appendChild(document.createTextNode('вводите коды ответов через запятую'));
+    span.className = 'technological-area-label';
+    serviceDiv.appendChild(span);
+
+
+    let footerDiv = document.createElement('div');
+    footerDiv.className = 'technological-footer';
+
+    let checkbox = document.createElement('input');
+    checkbox.classList = 'technological-self-code';
+    checkbox.type = 'checkbox';
+    checkbox.id = 'technological-self';
+    footerDiv.appendChild(checkbox);
+
+    let checkboxLabel = document.createElement('label');
+    checkboxLabel.className = 'technological-self-label';
+    checkboxLabel.htmlFor = 'technological-self';
+    checkboxLabel.appendChild(document.createTextNode('Cохранять собственный код'));
+    footerDiv.appendChild(checkboxLabel);
+
+    divNode.appendChild(serviceDiv);
+    divNode.appendChild(footerDiv);
+
+    return divNode;
+  }
+
+
+  showTechMenu() {
+    let Obj = this;
+    let pollObj = this.parentPoll;
+    let questionObj = this.parentQuestion;
+    let menu = $.alert({
+      title: 'Выберите ответы, которые проставяться автоматически',
+      content: Obj.renderTechMenu(),
+      useBootstrap: false,
+      columnClass: 'col-md-12',
+      animateFromElement: false,
+      buttons: {
+        ok: {
+          text: 'Очистить',
+          // btnClass: 'btn-success',
+          action: function () {
+            // очитисть чекбоксы;
+          }
+        },
+        cancel: {
+          text: 'Назад',
+          btnClass: 'btn-success',
+          action: function () {
+            return;
+          }
+        }
+      }
+    });
+  }
+
+  renderTechMenu() {
+    let Obj = this;
+    let questionObj = this.parentQuestion;
+    let pollObj = this.parentPoll;
+    let menuDiv = document.createElement('div');
+    menuDiv.id = 'logic-menu-content';
+    let questions = pollObj.questions;
+    let logic = Obj.logicArrayEx;
+
+    for (let qId in questions) {
+      let question = questions[qId];
+      menuDiv.appendChild(question.questionTmplEx);
+      let answers = question.answers;
+      let length = answers.length;
+      for (let i = 0; i < length; i ++) {
+        let answer = answers[i];
+        let limit = question.limit;
+        if (limit > 1) {
+          question.tempTmpl.querySelector('.q-title').style.color = 'red';
+        }
+        question.tempTmpl.querySelector('.q-title').classList.remove('check-all');
+        // TODO: выставить логику + подхватывать те коды, которые указал пользователь;
+        let count = 0;
+        //=====
+        let checkboxesPool = answer.tempTmpl.parentElement;
+        answer.tempTmpl.getElementsByTagName('input')[0].addEventListener('change', Obj.countCheckInputs.bind(this, checkboxesPool, limit) , false);
+        if (logic && logic.includes(answer.id)) {
+          answer.tempTmpl.getElementsByTagName('input')[0].checked = true;
+        }
+      }
+    }
+    questionObj.tempTmpl.classList.add('selected-question');
+    let answers = questionObj.answers;
+    questionObj.tempTmpl.querySelector('.q-title').classList.remove('check-all');
+    Obj.tempTmpl.getElementsByTagName('input')[0].disabled = true;
+    Obj.tempTmpl.classList.add('selected-answer');
+    return menuDiv;
+  }
+
+  // не дает выбирать больше checkbox-ов, чем лимит, установленный в настройках вопроса.
+  countCheckInputs() {
+    let checkboxesPool = arguments[0];
+    let limit = arguments[1];
+    let e = arguments[2];
+    let checkedcount = 0;
+    let currentInput = e.originalTarget;
+    let checkboxgroup  = checkboxesPool.getElementsByTagName("input");
+    for (let i = 0; i < checkboxgroup.length; i++) {
+      checkedcount += (checkboxgroup[i].checked) ? 1 : 0;
+    }
+		if (checkedcount > limit) {
+			console.log("You can select maximum of " + limit + " checkbox.");
+			currentInput.checked = false;
+		}
+  }
+
+  confirmTehologicalData() {
+
+  }
+
+  // ====== rendering ========
+  // основной шаблон вида ответа
+  set answerTmpl(index) {
+    let Obj = this;
+    let answerDiv = document.getElementById('answer-template');
+    let answerClone = answerDiv.cloneNode(true);
+    answerClone.removeAttribute('id');
+    let answerId = this.id;
+    answerClone.dataset.id = answerId;
+    answerClone.dataset.old = this.oldOrder;
+    answerClone.querySelector('.answer-title').innerHTML = this.title;
+    let code = this.code.padStart(3, '0');
+    answerClone.querySelector('.answer-code').innerHTML = code;
+
+    let restoreBtn = answerClone.querySelector('.restore-btn');
+    restoreBtn.addEventListener('click', () => { Obj.restoreAnswerInListView(); }, false);
+
+    let hideBtn = answerClone.querySelector('.answer-hide');
+    hideBtn.addEventListener('click', () => { Obj.hideAnswerInListView(); }, false);
+
+    let uniqueBtn = answerClone.querySelector('.unique-btn');
+    uniqueBtn.addEventListener('click', () => { Obj.changeUniqueForQuestion(); }, false);
+
+    let conflictLogicBtn = answerClone.querySelectorAll('.logic-conflict')[0];
+    conflictLogicBtn.addEventListener('click', () => { Obj.setLogicConflict(); }, false);
+
+    let technologicalBtn = answerClone.querySelectorAll('.technological')[0];
+    technologicalBtn.addEventListener('click', () => { Obj.setTechnologicalKey(); }, false);
+
+    if (this.visible === 0) {
+      answerClone.classList.add('hidden-answer');
+      answerClone.querySelector('.answer-hide').style.display = 'none';
+      answerClone.querySelector('.answer-options').style.display = 'none';
+      answerClone.querySelector('.unique-btn').style.display = 'none';
+    } else {
+      answerClone.querySelector('.restore-btn').style.display = 'none';
+    }
+    if (this.unique === 1) {
+      answerClone.classList.add('unique-answer');
+    }
+    if (this.logic === 1) {
+      answerClone.appendChild(this.renderBranchSymbl());
+    }
+    this._answerTmpl = answerClone;
+  }
+
+  renderAnswerTmplEx() {
+    let answerDiv = document.getElementById('answer-li-tmpl');
+    let answerClone = answerDiv.cloneNode(true);
+    // answerClone.removeAttribute('id');
+    // answerClone.querySelector('.check-logic').id = this.id;
+    answerClone.id = this.id;
+    answerClone.querySelector('.check-logic').dataset.id = this.id;
+    answerClone.querySelector('.a-title').innerHTML = this.title;
+    let code = this.code.padStart(3, '0');
+    answerClone.querySelector('.a-code').innerHTML = code;
+    // if (this.unique === 1) {
+    //   answerClone.classList.add('unique-answer');
+    // }
+    this.tempTmpl = answerClone;
+    return answerClone;
+  }
+
+  renderCAnswer(index) {
+    let answer = this.answerTmpl;
+    answer.querySelector('.answer-number').innerHTML = index;
+    return answer;
   }
 
   renderBranchSymbl() {

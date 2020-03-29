@@ -1,6 +1,6 @@
 class CQuestion {
   constructor(config, pObj) {
-    this.mainParent = pObj;
+    this.parentPoll = pObj;
     this.id = +config.id;
     this.title = config.title;
     this.titleEx = config.title_ex;
@@ -87,94 +87,8 @@ class CQuestion {
     });
   }
 
-  renderQuestionListTmpl() {
-    let Obj = this;
-    let mainQuestionDiv = document.getElementById('question-main-template');
-    let questionClone = mainQuestionDiv.cloneNode(true);
-    questionClone.dataset.id = this.id;
-    questionClone.removeAttribute('id');
-    if (this.limit > 1 || this.limit === 0) {
-      questionClone.querySelector('.question-header').classList.add('be-attention');
-    }
-    // меню
-    let questionMenu = questionClone.querySelectorAll('.question-menu')[0];
-    let addNewAnswerNode = questionMenu.querySelector('#add-new-answer');
-    addNewAnswerNode.addEventListener('click', () => { Obj.addNewAnswer(); }, false);
 
-    questionClone.querySelector('.original-question-order').innerHTML = this.oldOrder;
-    questionClone.querySelector('.question-title').innerHTML = this.title;
-    questionClone.querySelector('.question-limit').value = this.limit;
-
-    // лимит ответов
-    let limitNode = questionClone.querySelector('.question-limit');
-    limitNode.addEventListener('click', Obj.ttt, false);
-    limitNode.addEventListener('paste', () => { return; }, false);
-    limitNode.addEventListener('blur', (e) => { Obj.setQuestionLimit(e.target.value); }, false);
-
-    // скрыть вопрос
-    let hideBtn = questionClone.querySelector('.question-hide');
-    hideBtn.addEventListener('click', () => { Obj.hideQuestion(); }, false);
-
-    // восстановить вопрос
-    let restoreBtn = questionClone.querySelector('.restore-question');
-    restoreBtn.addEventListener('click', () => { Obj.restoreQuestion(); }, false);
-
-    if (this.visible === 0) {
-      questionClone.querySelector('.question-hide').style.display = 'none';
-      questionClone.querySelector('.restore-question').style.display = 'inline';
-    } else {
-      questionClone.querySelector('.question-hide').style.display = 'inline';
-      questionClone.querySelector('.restore-question').style.display = 'none';
-    }
-
-    let answers = this.answers;
-    let answerContentNode = questionClone.querySelector('.answers-content');
-    let answerContentDelNode = questionClone.querySelector('.answers-content-ex');
-    let visCount = 1, skipCount = 1, answerNode;
-    answers.forEach(function (answer, index) {
-      if (answer.visible === 1) {
-        answerNode = answer.renderCAnswer(visCount);
-        visCount++;
-        answerContentNode.appendChild(answerNode);
-      }
-    });
-    for (let key in answers) {
-      if (answers[key].visible === 0) {
-        let hr = document.createElement('hr');
-        answerContentDelNode.appendChild(hr);
-        break;
-      }
-    }
-    answers.forEach(function (answer, index) {
-      if (answer.visible === 0) {
-        answerNode = answer.renderCAnswer(skipCount);
-        skipCount++;
-        answerContentDelNode.appendChild(answerNode);
-      }
-    });
-    this.sortable = new Sortable(answerContentNode, {
-      multiDrag: true,
-      selectedClass: 'selected',
-      animation: 150,
-      onUpdate: function (evt) {
-        NProgress.start();
-        let newOrder = Obj.sortable.toArray();
-        Obj.saveAnswersReorder(newOrder);
-        let items = evt.from.children;
-        for (let i = 0, child; child = items[i]; i++) {
-          child.querySelector('.answer-number').innerHTML = (i + 1);
-        }
-      }
-    });
-    this.hSortable = new Sortable(answerContentDelNode, {
-      selectedClass: 'selected',
-      animation: 150,
-      sort: false
-    });
-    this._questionListTmpl = questionClone;
-  }
-
-  ttt() {
+  limitInput() {
     $.mask.definitions['H'] = '[1-9]';
     $.mask.definitions['h'] = '[0-9]';
     $(this).mask('H?h', {
@@ -254,46 +168,10 @@ class CQuestion {
     this.reindex();
   }
 
-  renderQuestionTmplEx() {
-    let mainQuestionDiv = document.getElementById('question-tmpl-ex');
-    let questionClone = mainQuestionDiv.cloneNode(true);
-    questionClone.dataset.id = this.id;
-    questionClone.removeAttribute('id');
-    questionClone.querySelector('.q-title').innerHTML = this.title;
-    questionClone.querySelector('.q-order').innerHTML = this.order + '.';
-
-    let answers = this.answers;
-    let qNode = questionClone.querySelector('.question-content-ex');
-    answers.forEach(function (answer, index) {
-      if (answer.visible === 1) {
-        let answerNode = answer.answerTmplEx;
-        qNode.appendChild(answerNode);
-      }
-    });
-    this.tempTmpl = questionClone;
-    return questionClone;
-  }
 
   get questionTmplEx() {
     // return this._questionTmplEx;
     return this.renderQuestionTmplEx();
-  }
-
-  renderQuestionGridTmpl() {
-    let gridItem = document.getElementById('gridview-template');
-    if (this.visible) {
-      let gridItemClone = gridItem.cloneNode(true);
-      gridItemClone.removeAttribute('id');
-      gridItemClone.dataset.id = this.id;
-      if (this.limit !== 1) {
-        gridItemClone.classList.add('multiple-answers');
-      }
-      gridItemClone.querySelector('.question-order').innerHTML = this.oldOrder;
-      gridItemClone.querySelector('.question-title').innerHTML = this.title;
-      this._questionGridTmpl = gridItemClone;
-      return;
-    }
-    this._questionGridTmpl = null;
   }
 
   addNewAnswer() {
@@ -302,7 +180,7 @@ class CQuestion {
 
   hideQuestion() {
     let Obj = this;
-    let pObj = this.mainParent;
+    let pObj = this.parentPoll;
     let url = this.HIDE_QUESTION_URL;
     let questionId = this.id;
     $.ajax({
@@ -334,7 +212,7 @@ class CQuestion {
 
   restoreQuestion() {
     let Obj = this;
-    let pObj = this.mainParent;
+    let pObj = this.parentPoll;
     let url = this.RESTORE_ANSWER_URL;
     let questionId = this.id;
     $.ajax({
@@ -379,6 +257,95 @@ class CQuestion {
     return this._questionGridTmpl;
   }
 
+  // ======= rendering ========
+
+  renderQuestionListTmpl() {
+    let Obj = this;
+    let mainQuestionDiv = document.getElementById('question-main-template');
+    let questionClone = mainQuestionDiv.cloneNode(true);
+    questionClone.dataset.id = this.id;
+    questionClone.removeAttribute('id');
+    if (this.limit > 1 || this.limit === 0) {
+      questionClone.querySelector('.question-header').classList.add('be-attention');
+    }
+    // меню
+    let questionMenu = questionClone.querySelectorAll('.question-menu')[0];
+    let addNewAnswerNode = questionMenu.querySelector('#add-new-answer');
+    addNewAnswerNode.addEventListener('click', () => { Obj.addNewAnswer(); }, false);
+
+    questionClone.querySelector('.original-question-order').innerHTML = this.oldOrder;
+    questionClone.querySelector('.question-title').innerHTML = this.title;
+    questionClone.querySelector('.question-limit').value = this.limit;
+
+    // лимит ответов
+    let limitNode = questionClone.querySelector('.question-limit');
+    limitNode.addEventListener('click', Obj.limitInput, false);
+    limitNode.addEventListener('paste', () => { return; }, false);
+    limitNode.addEventListener('blur', (e) => { Obj.setQuestionLimit(e.target.value); }, false);
+
+    // скрыть вопрос
+    let hideBtn = questionClone.querySelector('.question-hide');
+    hideBtn.addEventListener('click', () => { Obj.hideQuestion(); }, false);
+
+    // восстановить вопрос
+    let restoreBtn = questionClone.querySelector('.restore-question');
+    restoreBtn.addEventListener('click', () => { Obj.restoreQuestion(); }, false);
+
+    if (this.visible === 0) {
+      questionClone.querySelector('.question-hide').style.display = 'none';
+      questionClone.querySelector('.restore-question').style.display = 'inline';
+    } else {
+      questionClone.querySelector('.question-hide').style.display = 'inline';
+      questionClone.querySelector('.restore-question').style.display = 'none';
+    }
+
+    let answers = this.answers;
+    let answerContentNode = questionClone.querySelector('.answers-content');
+    let answerContentDelNode = questionClone.querySelector('.answers-content-ex');
+    let visCount = 1, skipCount = 1, answerNode;
+    answers.forEach(function (answer, index) {
+      if (answer.visible === 1) {
+        answerNode = answer.renderCAnswer(visCount);
+        visCount++;
+        answerContentNode.appendChild(answerNode);
+      }
+    });
+    for (let key in answers) {
+      if (answers[key].visible === 0) {
+        let hr = document.createElement('hr');
+        answerContentDelNode.appendChild(hr);
+        break;
+      }
+    }
+    answers.forEach(function (answer, index) {
+      if (answer.visible === 0) {
+        answerNode = answer.renderCAnswer(skipCount);
+        skipCount++;
+        answerContentDelNode.appendChild(answerNode);
+      }
+    });
+    this.sortable = new Sortable(answerContentNode, {
+      multiDrag: true,
+      selectedClass: 'selected',
+      animation: 150,
+      onUpdate: function (evt) {
+        NProgress.start();
+        let newOrder = Obj.sortable.toArray();
+        Obj.saveAnswersReorder(newOrder);
+        let items = evt.from.children;
+        for (let i = 0, child; child = items[i]; i++) {
+          child.querySelector('.answer-number').innerHTML = (i + 1);
+        }
+      }
+    });
+    this.hSortable = new Sortable(answerContentDelNode, {
+      selectedClass: 'selected',
+      animation: 150,
+      sort: false
+    });
+    this._questionListTmpl = questionClone;
+  }
+
   renderCQuestionList(index) {
     let question = this.questionListTmpl;
     question.querySelector('.question-order').innerHTML = index;
@@ -393,6 +360,55 @@ class CQuestion {
     }
     return false;
   }
+
+  renderQuestionGridTmpl() {
+    let gridItem = document.getElementById('gridview-template');
+    if (this.visible) {
+      let gridItemClone = gridItem.cloneNode(true);
+      gridItemClone.removeAttribute('id');
+      gridItemClone.dataset.id = this.id;
+      if (this.limit !== 1) {
+        gridItemClone.classList.add('multiple-answers');
+      }
+      gridItemClone.querySelector('.question-order').innerHTML = this.oldOrder;
+      gridItemClone.querySelector('.question-title').innerHTML = this.title;
+      this._questionGridTmpl = gridItemClone;
+      return;
+    }
+    this._questionGridTmpl = null;
+  }
+
+  renderQuestionTmplEx() {
+    let Obj = this;
+    let mainQuestionDiv = document.getElementById('question-tmpl-ex');
+    let questionClone = mainQuestionDiv.cloneNode(true);
+    questionClone.dataset.id = this.id;
+    questionClone.removeAttribute('id');
+    questionClone.querySelector('.q-title').innerHTML = this.title;
+    questionClone.querySelector('.q-order').innerHTML = this.order + '.';
+    questionClone.querySelector('.q-title').addEventListener('click', () => { Obj.selectAllCheckOfQuestion(); }, false);
+
+    let answers = this.answers;
+    let qNode = questionClone.querySelector('.question-content-ex');
+    answers.forEach(function (answer, index) {
+      if (answer.visible === 1) {
+        let answerNode = answer.answerTmplEx;
+        qNode.appendChild(answerNode);
+      }
+    });
+    this.tempTmpl = questionClone;
+    return questionClone;
+  }
+
+  selectAllCheckOfQuestion() {
+    let li = this.tempTmpl.children[0];
+    let inputs = li.getElementsByTagName('input');
+    let length = inputs.length;
+    for (let i = 0; i < length; i++) {
+      inputs[i].checked = !inputs[i].checked;
+    }
+  }
+
 /*
   showTrash() {
     let hiddenAnswers = this._hiddenAnswers;

@@ -137,6 +137,7 @@ BootstrapDatepickerAsset::register($this);
           </div>
           <ul class="dropdown-menu question-menu" aria-labelledby="question-menu">
             <li><a id="add-new-answer" href="#">Добавить ответ</a></li>
+            <li><a id="add-new-answer" href="#">Автоматика</a></li>
             <li><a href="#">Удалить вопрос</a></li>
           </ul>
         </div>
@@ -175,7 +176,8 @@ BootstrapDatepickerAsset::register($this);
       </span>
       <ul class="dropdown-menu answer-menu" aria-labelledby="question-menu">
         <li class="dropdown-header">Логика</li>
-        <li><a class="logic" href="#">Исключить</a></li>
+        <li><a class="logic-conflict" href="#">Противоречия</a></li>
+        <li><a class="technological" href="#">Автоматика</a></li>
         <li role="separator" class="divider"></li>
         <li><a class="delete-answer" href="#">Удалить ответ</a></li>
       </ul>

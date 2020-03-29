@@ -1,0 +1,35 @@
+{
+  "name": "riac",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">     <h1 align=\"center\">Приложение информационной поддержки информационно-аналитических подразделений</h1>     <br> </p>",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "webpack-dev-server --mode development",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexxII/teh_doc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexxII/teh_doc/issues"
+  },
+  "homepage": "https://github.com/AlexxII/teh_doc#readme",
+  "devDependencies": {
+    "path": "^0.12.7",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.1.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-3": "^6.24.1"
+  }
+}

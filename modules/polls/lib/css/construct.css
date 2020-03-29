@@ -319,3 +319,49 @@ ul {
 .construct-list {
   margin: 0 85px 10px 15px;
 }
+.answer-menu .dropdown-header {
+  font-size: 11px;
+}
+.answer-menu > li > a {
+  font-size: 13px;
+}
+.question-menu .dropdown-header {
+  font-size: 11px;
+}
+.question-menu > li > a {
+  font-size: 13px;
+}
+
+.technological-service {
+  margin: 35px 0 20px 0;
+  position: relative;
+}
+
+.technological-input {
+  resize: vertical;
+}
+.technological-choose {
+  text-decoration: none !important;
+  cursor: pointer;
+  font-size: 12px;
+  color: #b7baba;
+  position: absolute;
+  top: -18px;
+  right: 0;
+}
+.technological-area-label {
+  font-size: 10px;
+  font-weight: 100;
+  position: absolute;
+  bottom: -15px;
+  left: 0;
+}
+.technological-footer {
+  margin: 35px 0 20px 0;
+}
+.technological-self-label {
+  font-size: 16px;
+}
+#technological-self {
+  margin-right: 5px;
+}
