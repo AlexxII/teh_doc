@@ -27,7 +27,7 @@ function parseIni(area) {
       }
   });
   setLogic(value);
-};
+}
 
 
 function setLogic(config) {
@@ -36,7 +36,8 @@ function setLogic(config) {
   console.log(invisible.answers.split('-'));
 
   let regex = {
-    range : /\[([0-9]{3}-[0-9]{3})/
-  }
+    range : /\[([0-9]{1,3}-[0-9]{1,3})/
+    // singe:
+  };
 
 }
