@@ -76,7 +76,6 @@ function initStatisticModule() {
 
 function intiTestsModule() {
   testIniParser();
-
 }
 
 function testIniParser() {
@@ -86,7 +85,6 @@ function testIniParser() {
   resultNode.innerHTML = '';
   let footerNode = document.getElementById('control-footer');
   footerNode.innerHTML = '';
-
 
   let wrapDiv = document.createElement('div');
   wrapDiv.style['margin-top'] = '20px';
@@ -105,6 +103,7 @@ function testIniParser() {
   saveBtn.addEventListener('click', () => { parseIni(iniArea); } , false);
 
   let loadBtn = document.createElement('button');
+  loadBtn.style['margin-left'] = '10px';
   loadBtn.classList = 'btn btn-sm btn-info';
   loadBtn.innerHTML = 'Скрипт';
   loadBtn.addEventListener('click', loadScript , false);
@@ -113,7 +112,6 @@ function testIniParser() {
   headerNode.appendChild(loadBtn);
   resultNode.appendChild(wrapDiv);
 }
-
 
 function loadScript() {
   let sScript = document.createElement('script');
