@@ -27,7 +27,7 @@ $(document).on('click', '.control-poll-info', initInfoModule)
   .on('click', '.control-statistic', initStatisticModule)
   .on('click', '.control-poll-tests', intiTestsModule);
 
-var pollCounstructor, pollBatchIn, mainPollConfig, tailIp;
+var pollCounstructor, pollBatchIn, mainPollConfig, tailIp, towns;
 
 function mainInit(config) {
   mainPollConfig = config;

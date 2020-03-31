@@ -69,7 +69,7 @@ class Polls extends \yii\db\ActiveRecord
 
   public function getResults()
   {
-    return $this->hasMany(Result::class, ['poll_id' => 'id'])->orderBy('order');
+    return $this->hasMany(Result::class, ['poll_id' => 'id'])->where(['town_id' => '914086128'])->orderBy('order');
   }
 
   public static function findModel($id)

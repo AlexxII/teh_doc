@@ -10,7 +10,7 @@ function startResultAnalyze() {
   footerNode.innerHTML = '';
 
   renderResultHeader();
-  renderResultTbl();
+  // renderResultTbl();
   footerNode.appendChild(showArrayOfCodes());
 }
 
@@ -124,11 +124,17 @@ function resultBlockOfSelectsTmpl() {
   let townSelect = document.createElement('select');
   let townLabel = document.createElement('label');
   townLabel.className = 'result-select-labels';
-  townLabel.innerText = 'ТНП:';
+  townLabel.innerText = 'ГОРОД:';
   townSelect.id = 'result-town';
   townSelect.classList = 'form-control';
   townSelect.disabled = true;
+  console.log();
+
+
   townLabel.appendChild(townSelect);
+
+
+
 
   let sexSelect = document.createElement('select');
   let sexLabel = document.createElement('label');
@@ -189,8 +195,10 @@ function prepareData(config) {
 function showArrayOfCodes() {
   let textAreaNode = document.createElement('textarea');
   textAreaNode.id = 'analytic-result-text';
-  textAreaNode.cols = '150';
-  textAreaNode.rows = '30';
+  textAreaNode.style['box-sixing'] = 'border-box';
+  textAreaNode.style.resize = 'vertical';
+  textAreaNode.style.width = '100%';
+  textAreaNode.rows = '35';
   for (let key in arrayOfRespondents) {
     let result = arrayOfRespondents[key];
     result += ',999';
