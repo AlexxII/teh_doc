@@ -1,16 +1,15 @@
 // событие клавиатуры (keyup, keydown)
 // const MAIN_INPUT_TYPE = 'keydown';
-const MAIN_INPUT_TYPE = 'keyup';
-const MAIN_CLICK_TYPE = 'click';
-
-const TYPE_COMMON_ANSWER = 1;
-const TYPE_FREE_ANSWER = 2;
-const TYPE_DIFFICULT_ANSWER = 3;
-
-const RESULTS_SAVE_URL = 'polls/drive-in/save-result';
+const MAIN_INPUT_TYPE           = 'keyup';
+const MAIN_CLICK_TYPE           = 'click';
+const TYPE_COMMON_ANSWER        = 1;
+const TYPE_FREE_ANSWER          = 2;
+const TYPE_DIFFICULT_ANSWER     = 3;
+const RESULTS_SAVE_URL          = 'polls/drive-in/save-result';
 
 // основные обработчики событий
-$(document).on('click', '.answer-p', clickOnTheAnswer)
+$(document)
+  .on('click', '.answer-p', clickOnTheAnswer)
   .on('keydown', '.previous-btn', moveToPreviousQuestion)
   .on('keydown', '.next-btn', moveToNextQuestion)
   .on('change', '.navigation-select', goToQuestion)
@@ -377,14 +376,10 @@ function saveDataToDb() {
   // console.log(poll.respondent.resultPool);
   // console.log(poll.respondent.getCodesResults());
   // console.log(poll.respondent.getResultToDb());
-
   let result = {};
   result.pollId = poll.pollId;
   result.respId = poll.respondent.id;
   let data = poll.respondent.getResultToDb();
-  console.log(poll.respondent.getResultToDb());
-  console.log(poll.respondent.getCodesResults());
-
   let url = RESULTS_SAVE_URL;
   $.ajax({
     url: url,

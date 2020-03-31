@@ -1,6 +1,5 @@
 class Answer {
-  constructor(config)
-  {
+  constructor(config) {
     this.id = config.id;
     this.title = config.title;
     this.code = config.code;
