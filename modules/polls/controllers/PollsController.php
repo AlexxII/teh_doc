@@ -26,7 +26,7 @@ class PollsController extends Controller
   {
     Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
     $pollTable = self::POLLS_TABLE;
-    $sql = "SELECT {$pollTable}.id, {$pollTable}.start_date, {$pollTable}.end_date, {$pollTable}.title, 
+    $sql = "SELECT {$pollTable}.id, {$pollTable}.start_date, {$pollTable}.end_date, {$pollTable}.title,
         {$pollTable}.code, {$pollTable}.sample, YEAR({$pollTable}.start_date) as year FROM {$pollTable}";
     $data["data"] = Polls::findBySql($sql)->asArray()->all();
     return $data;
@@ -69,7 +69,6 @@ class PollsController extends Controller
           $xmlM->title = $name;
           if ($xmlM->save()) {
             if ($xmlF->parseAndLoadToDb($model->id)) {              // XmlFile
-//              return $xmlF->parseAndLoadLogic($model->id);
               if ($xmlF->parseAndLoadLogic($model->id)){
                 $transaction->commit();
                 $resData = [
@@ -80,7 +79,7 @@ class PollsController extends Controller
                   "data" => [
                     "success" => true,
                     "data" => $resData,
-                    "message" => "Seems to be FINE",
+                    "message" => "Seem to be FINE",
                   ],
                   "code" => 1
                 ];

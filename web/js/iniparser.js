@@ -5,60 +5,86 @@ function parseIni(area) {
       param: /^\s*([^=]+?)\s*=\s*(.*?)\s*$/,
       comment: /^\s*#.*$/
   };
-  let value = {};
+  let config = {};
   let lines = configData.split(/[\r\n]+/);
   let section = null;
-  lines.forEach(function(line){
-      if(regex.comment.test(line)){
+  lines.forEach(function(line) {
+      if (regex.comment.test(line)) {
           return;
-      }else if(regex.param.test(line)){
+      } else if (regex.param.test(line)) {
           let match = line.match(regex.param);
           if(section){
-              value[section][match[1]] = match[2];
-              value[section][match[1]] = parseParams(match[2]);
-          }else{
-              value[match[1]] = match[2];
-              value[match[1]] = parseParams(match[2]);
+              config[section][match[1]] = parseParams(match[2]);
+              // config[section][match[1]] = match[2];
+              // parseParams(match[2]);
+          } else {
+              // config[match[1]] = match[2];
+              config[match[1]] = parseParams(match[2]);
+              // parseParams(match[2]);
           }
-      }else if(regex.section.test(line)){
+      } else if (regex.section.test(line)) {
           let match = line.match(regex.section);
-          value[match[1]] = {};
+          config[match[1]] = {};
           section = match[1];
-      }else if(line.length == 0 && section){
+      } else if (line.length == 0 && section) {
           section = null;
       }
   });
-  console.log(value);
+  setLogic(config);
+}
+
+
+function setLogic(config) {
+  console.log(config);
 }
 
 
 function parseParams(data) {
-  // console.log(config);
-  // let macr = config.invisible;
-  // let answers = macr.answers;
-
+  // избавляемся от пробелов
+  let trimData = data.replace(/\s*/g,'');
   let regex = {
     range : /\[(.+?)\]/gm,
-    single: /([0-9]{1,3})/gm
+    single: /([0-9]{1,3})/gm,
+    srange: /([0-9]{1,3})|\[(.+?)\]/gm
   };
 
-  let range = data.matchAll(regex.range);
-  let rangeData = Array.from(range);
-  let length = rangeData.length;
-  let multipleData = {};
-  for (let i = 0; i < length; i++) {
-    multipleData[i] = rangeData[i][1];
-  }
+  let output = [];
+  let temp;
+  do {
+    temp = regex.srange.exec(trimData);
+    if (temp) {
+      // одиночные
+      if (temp[1] !== undefined) {
+        output.push(temp[1]);
+      }
+      // диапазон
+      if (temp[2] !== undefined) {
+        let range = temp[2];
+        output = output.concat(rangeToArray(range));
+      }
+    }
+  } while (temp);
+  return output;
+}
 
-  let single = data.replace(regex.range, '');
-  let sDat = single.matchAll(regex.single);
-  let sData = Array.from(sDat);
-  let sLength = sData.length;
-  let singleData = {};
-  for (let i = 0; i < sLength; i++) {
-    singleData[i] = sData[i][1];
-  }
-  // console.log(multipleData + '|' + singleData);
-  console.log(multipleData);
-  console.log(singleData);
+function rangeToArray(data) {
+  let regex = /(\d{1,3})\s*-\s*(\d{1,3})/gm;
+  // console.log(data);
+  let result = (data.replace(regex, (...match) => {
+    let temp = [];
+    let start = match[1];
+    let end = match[2];
+    // если перепутаны места
+    if (start > end) {
+      start = match[2];
+      end = match[1];
+    }
+    let length = (end - start) + 1;
+    while (length) {
+      temp.push(start++);
+      length--;
+    }
+    return temp;
+  }));
+  return result.split(',');
 }

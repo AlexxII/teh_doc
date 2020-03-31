@@ -93,8 +93,10 @@ function testIniParser() {
   iniArea.className = 'ini-editor';
   iniArea.style.resize = 'vertical';
   iniArea.maxLength = '50000';
-  iniArea.cols = '150';
-  iniArea.rows = '20';
+  iniArea.style['box-sizing'] = 'border-box';
+  iniArea.style.width = '100%';
+  // iniArea.cols = '150';
+  iniArea.rows = '25';
   wrapDiv.appendChild(iniArea);
 
   let saveBtn = document.createElement('button');
