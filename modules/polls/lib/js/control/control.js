@@ -32,6 +32,7 @@ var pollCounstructor, pollBatchIn, mainPollConfig, tailIp, towns;
 function mainInit(config) {
   mainPollConfig = config;
   console.log(config);
+  towns = config.
   // глобальные объекты
   pollCounstructor = new PollConstructor(config);
   pollBatchIn = new Batch(config);
