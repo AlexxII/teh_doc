@@ -12,7 +12,7 @@ function startConstruct(view) {
   NProgress.done();
 }
 
-$(document)
+// $(document)
   // .on('click', '.logic', setLogic)
 
 
