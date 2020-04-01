@@ -120,17 +120,17 @@ class XmlFile extends Model
         while ($reader->read()) {
           if ($reader->nodeType == XMLReader::ELEMENT) {
             if ($reader->localName == "restrict") {
-              $code = $reader->getAttribute("otvet_cod");                                 // TODO есть вероятность атаки
-              $type = $reader->getAttribute("restrict_type");                             // TODO есть вероятность атаки
-              if ($type === "5") {
+              $code = $reader->getAttribute("otvet_cod");                     // TODO есть вероятность атаки
+              $type = $reader->getAttribute("restrict_type");                 // TODO есть вероятность атаки
+              if ($type === "5") {                                            // Уникальность !! как правило в течении вопроса
                 $answerModel = Answers::find()
                   ->where(["=", 'code', $code])
                   ->andWhere(["=", 'poll_id', $pollId])
                   ->all();
                 $answerModel[0]->unique = 1;
                 $answerModel[0]->save();
-              } else if ($type === "3") {
-                $restrictCode = $reader->getAttribute("restrict_cod");                   // TODO есть вероятность атаки
+              } else if ($type === "3") {                                     // исключает другие ответы (нелогичности)
+                $restrictCode = $reader->getAttribute("restrict_cod");        // TODO есть вероятность атаки
                 $answer = Answers::find()
                   ->where(["=", 'code', $code])
                   ->andWhere(["=", 'poll_id', $pollId])

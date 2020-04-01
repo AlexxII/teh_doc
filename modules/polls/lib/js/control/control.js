@@ -32,7 +32,7 @@ var pollCounstructor, pollBatchIn, mainPollConfig, tailIp, towns;
 function mainInit(config) {
   mainPollConfig = config;
   console.log(config);
-  towns = config.
+  towns = config;
   // глобальные объекты
   pollCounstructor = new PollConstructor(config);
   pollBatchIn = new Batch(config);
@@ -93,6 +93,7 @@ function testIniParser() {
   let iniArea = document.createElement('textarea');
   iniArea.className = 'ini-editor';
   iniArea.style.resize = 'vertical';
+  iniArea.style['font-size'] = '18px';
   iniArea.maxLength = '50000';
   iniArea.style['box-sizing'] = 'border-box';
   iniArea.style.width = '100%';

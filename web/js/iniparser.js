@@ -15,12 +15,8 @@ function parseIni(area) {
           let match = line.match(regex.param);
           if(section){
               config[section][match[1]] = parseParams(match[2]);
-              // config[section][match[1]] = match[2];
-              // parseParams(match[2]);
           } else {
-              // config[match[1]] = match[2];
               config[match[1]] = parseParams(match[2]);
-              // parseParams(match[2]);
           }
       } else if (regex.section.test(line)) {
           let match = line.match(regex.section);
@@ -30,21 +26,36 @@ function parseIni(area) {
           section = null;
       }
   });
-  setLogic(config);
+  let logic = concatLogic(config);
+  console.log(logic);
 }
 
-
-function setLogic(config) {
-  console.log(config);
+function concatLogic(config) {
+  let regex = /([0-9]{1,})/gm;
+  let result = {};
+  let property = null;
+  for (let key in config) {
+    property = key.match(/[a-zA-Z]*/gm)[0];
+    result[property] = {};
+  }
+  for (let key in config) {
+    property = key.match(/[a-zA-Z]*/gm)[0];
+    let suffix = key.match(regex);
+    if (suffix !== null) {
+      result[property][suffix] = config[key];
+    } else {
+      result[property][1] = config[key];
+    }
+  }
+  return result;
 }
-
 
 function parseParams(data) {
   // избавляемся от пробелов
   let trimData = data.replace(/\s*/g,'');
   let regex = {
-    range : /\[(.+?)\]/gm,
-    single: /([0-9]{1,3})/gm,
+    // range : /\[(.+?)\]/gm,
+    // single: /([0-9]{1,3})/gm,
     srange: /([0-9]{1,3})|\[(.+?)\]/gm
   };
 
@@ -69,7 +80,6 @@ function parseParams(data) {
 
 function rangeToArray(data) {
   let regex = /(\d{1,3})\s*-\s*(\d{1,3})/gm;
-  // console.log(data);
   let result = (data.replace(regex, (...match) => {
     let temp = [];
     let start = match[1];
