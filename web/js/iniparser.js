@@ -1,3 +1,5 @@
+var mainLogic;
+
 function parseIni(area) {
   let configData = area.value;
   let regex = {
@@ -27,7 +29,8 @@ function parseIni(area) {
       }
   });
   let logic = concatLogic(config);
-  console.log(logic);
+  mainLogic = logic;
+  // console.log(logic);
 }
 
 function concatLogic(config) {
@@ -91,7 +94,9 @@ function rangeToArray(data) {
     }
     let length = (end - start) + 1;
     while (length) {
-      temp.push(start++);
+      start = start + '';
+      temp.push(start.padStart(3, '0'));
+      start++
       length--;
     }
     return temp;

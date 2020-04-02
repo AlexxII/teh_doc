@@ -1,0 +1,39 @@
+Опросы:
+	- WebPack/babel
+	- bootstrap
+	- jquery
+ 	- noty
+	- nProgress
+	- fancytree
+	- авторизация (модулем)
+	- отображение таблицы с опросами
+	- добавление опроса
+	  - модальные окна (query-confirm)
+	  - календарики (bootstrap-datepicker)
+	  - проверка форм (formik)
+	  - парсинг XML
+	  - чтение и запись config.ini
+	- переход в панель вбития
+	  - select2
+	- добавление городов для вбития (* забирать из config???)
+	- переход в панель редактирования
+	- панель конфигурирования и анализа опросов
+	  - ПАРЧА
+	    - карты (leaflet)
+	  - Конструирование
+	    - изменение порядка (sortable)
+	  -
+
+Зависимости:
+	- WebPack/babel
+	- bootstrap		                         		 + @4.4.1                             npm install bootstrap
+	- jquery                                   + @3.4.1                             npm install jquery
+ 	- noty                                     + @3.2.0-beta                        npm install noty
+	- nProgress                                + @0.2.0                             npm install --save nprogress
+	- jquery.fancytree                         + @2.35.0                            npm install jquery.fancytree
+	- jquery-confirm                           + @3.3.4                             npm install jquery-confirm
+	- bootstrap-datepicker                     ????????
+	- Select2                                  + @4.0.13                            ? npm install select2
+	- Leaflet                                  + @1.6.0                             ? npm install leaflet
+	- LeafletCluster                           --------
+	- SortableJS                               + @1.10.2                            npm install sortablejs

@@ -67,6 +67,7 @@ function driveIn(config) {
     markColor: '#e0e0e0',
     code: 1
   };
+  console.log(mainLogic);
   pollUser = new PollUser(settings);
   poll = new Worksheet(config, driveTownId, driveTownTitle);
   initMainEventListener();

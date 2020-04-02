@@ -168,6 +168,9 @@ class Worksheet {
   }
 
   renderQuestion(questionNumber) {
+
+    let skipAnswers = mainLogic.invisible[1].answers;
+
     let Obj = this;
     let template = this.template.cloneNode(true);
     let question = this.questions[questionNumber];
@@ -178,16 +181,17 @@ class Worksheet {
     let questionBody = template.querySelector('#drive-body');
     let answers = question.answers;
     let answersCounter = 1;
-    let maxCodesLength = codes.length;                                          // максимальное кол-во кодов клавиатуры!!
+    let maxCodesLength = codes.length;                                              // максимальное кол-во кодов клавиатуры!!
     let result = this.respondent.getRespondentResultsOfQuestion(question.id);
     let logic = this.respondent.logic;
     if (question.numberOfAnswers < maxCodesLength) {
       let count = 0, index = 0;
       for (let key in answers) {
         let answer = answers[key];
-        if (logic && logic.includes(answer.id)) {
+        if (skipAnswers && skipAnswers.includes(answer.code)) {
           count++;
           if (count === question.numberOfAnswers) {
+            console.log(answer.code);
             let qNum = this.currentQuestionNum;
             Obj.skipQuestion(result, qNum);
             return;
@@ -211,7 +215,7 @@ class Worksheet {
     let mainContent = document.getElementById('drive-in');
     mainContent.innerHTML = '';
     mainContent.appendChild(template);
-    result.startCount;
+    // result.startCount();
   }
 
   skipQuestion(result, num) {
